@@ -1,0 +1,61 @@
+#!/bin/bash
+set -euo pipefail
+
+# Usage:
+#   test.sh                                → tests current dir module
+#   test.sh mono-quarkus                   → tests named module
+#   test.sh mono-quarkus UserServiceTest   → specific test class in module
+
+LOG=/tmp/mvn-test.log
+START=$(date +%s)
+
+cd "${CLAUDE_PROJECT_DIR:-.}"
+
+IS_REACTOR=false
+if grep -q "<modules>" pom.xml 2>/dev/null; then
+  IS_REACTOR=true
+fi
+
+MODULE=""
+PATTERN=""
+
+case $# in
+  0) ;;
+  1) MODULE="$1" ;;
+  2) MODULE="$1"; PATTERN="$2" ;;
+  *) MODULE="$1"; PATTERN="$2" ;;
+esac
+
+# Build command
+if [ -n "$MODULE" ] && [ -n "$PATTERN" ]; then
+  CMD="mvn verify -pl $MODULE -Dtest=$PATTERN -DfailIfNoTests=false"
+elif [ -n "$MODULE" ]; then
+  CMD="mvn verify -pl $MODULE"
+elif [ "$IS_REACTOR" = true ]; then
+  echo "ERROR: At reactor root. Specify a module: test.sh <module> [TestClass]"
+  exit 1
+else
+  CMD="mvn verify"
+fi
+
+echo "Running: $CMD"
+eval "$CMD" 2>&1 | tee "$LOG"
+EXIT=${PIPESTATUS[0]}
+
+END=$(date +%s)
+DURATION=$((END - START))
+
+echo ""
+echo "--- TESTS $([ $EXIT -eq 0 ] && echo 'PASSED' || echo 'FAILED') in ${DURATION}s ---"
+echo ""
+
+grep -E "Tests run:" "$LOG" | tail -5 || true
+
+FAILURES=$(grep -E "FAILED|<<< ERROR" "$LOG" || true)
+if [ -n "$FAILURES" ]; then
+  echo ""
+  echo "Failed:"
+  echo "$FAILURES"
+fi
+
+exit $EXIT

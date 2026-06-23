@@ -1,0 +1,20 @@
+# claude-config/ — only these are tracked:
+#   settings.json, CLAUDE.md, skills/, agents/, memory/
+# Everything else under claude-config/ is ignored.
+claude-config/*
+!claude-config/settings.json
+!claude-config/CLAUDE.md
+!claude-config/skills/
+!claude-config/agents/
+!claude-config/memory/
+!claude-config/sync-claude-config.sh
+!claude-config/save-claude-config.sh
+
+# OS junk
+.DS_Store
+**/.DS_Store
+
+# Claude Code local/secret files (in case they ever land under claude-config/)
+**/settings.local.json
+**/.credentials.json
+
