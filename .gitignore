@@ -18,3 +18,4 @@ claude-config/*
 **/settings.local.json
 **/.credentials.json
 
+.local/
