@@ -1,36 +1,46 @@
 # Global preferences
 
 ## Output
-- Terse. No preamble, no restating the request, no summary unless asked.
-- Code blocks: complete, copy-paste-ready. No "..." truncation unless file is huge.
-- Skip explanations of well-known concepts unless asked.
+- Terse. No preamble, no restatement, no summary unless asked.
+- Code blocks: complete, copy-paste-ready. No truncation unless file is huge.
+- Skip well-known concept explanations unless asked.
+- No emojis unless asked.
 
-## Delegation (token discipline)
-- For read-only codebase search/navigation, prefer the custom `code-search`
-  subagent over the built-in `Explore` — it has stack-specific rules (Maven
-  module boundaries, Angular path conventions). Fall back to `Explore` only
-  if `code-search` is unavailable.
-- For build/test output and log triage, use the custom `quick-triage`
-  subagent before deciding whether to escalate to Sonnet/Opus.
-- For boilerplate that mirrors an existing pattern (DTOs, mappers, simple
-  CRUD repos, Angular service/component stubs), use the custom
-  `boilerplate-gen` subagent. Never use it when a design decision is
-  involved — only for mechanical pattern-copying.
-- For Maven dependency tree questions (what pulls in X, version conflicts,
-  transitive deps), use the custom `dep-inspect` subagent instead of running
-  `mvn dependency:tree` directly in the main thread.
-- For Flyway migration status checks (pending vs. applied), use the custom
-  `quick-triage` subagent running `flyway:info` only — never delegate
-  `migrate`, `clean`, or `repair` to a subagent.
-- Never do file discovery, grep/search, "where is X", dependency tracing, or
-  log inspection directly in the main thread — always delegate.
-- Reserve main-thread reasoning for: edits, architecture decisions, multi-file
-  changes, anything requiring write/bash side effects.
-- Don't re-read files already shown in this session unless they changed.
+## Planning
+- Plan first only for large/risky changes: schema/API/contract, architecture, auth/security/data-integrity.
+- Everything else: proceed directly, even multi-file edits.
+- Wait for plan approval before coding (large/risky only).
+- One clarifying question at a time.
 
-## Stack defaults (skip asking, just assume)
-- Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
-- DB: PostgreSQL, Flyway migrations (never suggest `flyway:clean`/`repair` without explicit ask).
+## Superpowers
+- Use only for large/risky changes (same threshold as Planning).
+- Prefer `executing-plans` over `subagent-driven-development` unless parallelism is needed.
+- Request smaller task chunks if default sizing is too coarse/granular.
+
+## Delegation
+- Read-only search/navigation → `code-search` subagent (stack-aware). Fall back to `Explore` only if unavailable.
+- Build/test/log triage → `quick-triage` subagent.
+- Boilerplate mirroring existing pattern → `boilerplate-gen` subagent. Never when design decisions involved.
+- Maven dependency questions → `dep-inspect` subagent.
+- Flyway status → `quick-triage` running `flyway:info` only. Never delegate `migrate`/`clean`/`repair`.
+- Next migration version / pending migrations → `flyway-next` subagent.
+- Entity wiring completeness (DTO→Entity→Mapper→Producers→Resource) → `stack-check` subagent.
+- Workflow wiring completeness (deriveType/ACTION_MAP/wait+getAndRemoveResponse/tests) → `workflow-check` subagent.
+- Test failure summary after a build → `test-aggregator` subagent (parses surefire XML, returns rerun commands per failing test).
+- Never grep/search/discover files in main thread — always delegate.
+- Main thread: edits, architecture decisions, write/bash side effects only.
+- Don't re-read files already shown this session unless changed.
+- Unknown or likely large files (>200 lines): delegate to `code-search` with a targeted question; don't Read whole file in main thread.
+- Grep before Read: when locating a symbol/pattern, grep for the exact line first, then Read only that range.
+
+## Agentic design
+- LangGraph/LangChain: typed state (Pydantic/TypedDict), explicit tool schemas, idempotent nodes.
+- MCP/FastMCP: minimal tool surface, one job per tool, unit-testable outside runtime. Default read-only.
+- No-match routing = explicit error, never silent fallback.
+
+## Stack defaults
+- Java: Maven multi-module, Quarkus + Spring Boot mix, OpenShift target.
+- DB: PostgreSQL, Flyway (never suggest `clean`/`repair` without explicit ask).
 - Frontend: Angular.
 - Shell: zsh, macOS or Ubuntu/Debian VM. Don't suggest bash-specific syntax unless asked.
 
@@ -69,6 +79,16 @@ Saved patterns live in `~/.claude/memory/patterns/`. Check these before designin
 - Plain `psql` always prompts — reserve it for INSERT/UPDATE/DELETE/DDL.
 
 ## Don't
-- Don't add comments restating what code obviously does.
-- Don't add unrequested README/docs files.
-- Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops — surface as "ask" only.
+- No comments restating obvious code.
+- No unrequested README/docs.
+- No `sudo`, `rm -rf`, `curl`/`wget`, destructive git ops — surface as "ask" only.
+
+## Diff discipline
+- Edit, don't rewrite. Targeted edits only; never regenerate whole files.
+- Touch only what the task requires. No drive-by reformatting/renaming/cleanup.
+- Match existing style exactly.
+- No unrequested refactors bundled into feature/fix changes.
+- Preserve unrelated whitespace/line-endings.
+
+## Memory
+- Concise notes only, no large pasted blocks.
