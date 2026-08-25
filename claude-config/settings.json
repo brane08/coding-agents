@@ -2,6 +2,45 @@
   "agentPushNotifEnabled": false,
   "autoCompact": true,
   "autoMemoryEnabled": false,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(mvn flyway:info:*)",
+      "Bash(mvn flyway:migrate -pl data-ebean)",
+      "Bash(mvn test -pl mono-quarkus:*)"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: Private (brane08/academy, confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: Default branch `main`; no protected branches listed and rulesets not queryable here — do not assume unprotected",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Source control**: The trusted repo (brane08/academy) and its remote(s) only (no additional orgs configured)",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (Java/Quarkus + Angular school-management monorepo, academy repo)",
+      "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
+      "**Org-specific CLIs**: None configured",
+      "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(mvn flyway:clean:*)",
+      "Bash(mvn flyway:repair:*)"
+    ]
+  },
   "cleanupPeriodDays": 5,
   "effortLevel": "medium",
   "enabledPlugins": {
@@ -51,13 +90,12 @@
     "**/build/**"
   ],
   "includeCoAuthoredBy": false,
-  "model": "opus",
+  "model": "opusplan",
   "notifyOnAgentStop": true,
   "permissions": {
     "allow": [
       "Read(./**)",
       "Edit(./**)",
-      "Write(./**)",
       "Bash(java *)",
       "Bash(javac *)",
       "Bash(javap *)",
@@ -136,11 +174,8 @@
       "Bash(npx playwright codegen*)",
       "Bash(npx playwright show-report*)",
       "Bash(npm install)",
-      "Bash(npm run:*)",
-      "Bash(npm run *)",
       "Bash(ng serve:*)",
       "Bash(ng build:*)",
-      "Bash(npx *)",
       "Bash(bash ~/.claude/skills/psql-select/select.sh *)",
       "Bash(bash ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(bash ~/.claude/skills/mvn-test/test.sh*)",
@@ -187,7 +222,6 @@
       "Bash(which *)",
       "Bash(pwd*)",
       "Bash(date*)",
-      "Bash(env*)",
       "Bash(uv *)",
       "Bash(CLAUDE_CODE_TMPDIR=* grep *)",
       "Bash(CLAUDE_CODE_TMPDIR=* cat *)",
@@ -224,7 +258,7 @@
       "Bash(docker *)",
       "mcp__*"
     ],
-    "defaultMode": "acceptEdits",
+    "defaultMode": "auto",
     "deny": [
       "Read(../**)",
       "Edit(../**)",
