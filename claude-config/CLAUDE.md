@@ -42,21 +42,20 @@
 - Java: Maven multi-module, Quarkus + Spring Boot mix, OpenShift target.
 - DB: PostgreSQL, Flyway (never suggest `clean`/`repair` without explicit ask).
 - Frontend: Angular.
-- Shell: zsh, macOS or Ubuntu/Debian VM. Don't suggest bash-specific syntax unless asked.
+- Shell: zsh, macOS or Ubuntu/Debian VM — no bash-only syntax unless asked.
 
 ## Memory
-Before analyzing any library, JAR, framework class, or internal implementation detail:
-1. Check `~/.claude/memory/libs/` (below) for cross-project library/framework notes.
-2. Check `.claude/memory/` in the current repo for project-specific notes.
-3. Only open JARs, decompile, or fetch docs if neither has the answer.
+Before analyzing a library/JAR/framework/internal detail: check `~/.claude/memory/libs/`,
+then repo `.claude/memory/`, then decompile/fetch docs only if neither answers it.
 
-After learning something new, file it by reuse, not by where it was learned:
-- Library, framework, version quirk, JPMS rule, working config → `~/.claude/memory/libs/<lib-version>.md`
+File new learnings by reuse, not by where learned:
+- Library, framework, version quirk, JPMS rule → `~/.claude/memory/libs/<lib-version>.md`
 - Reusable design pattern → `~/.claude/memory/patterns/<name>.md`
-- Only repo-specific facts (that project's names, paths, wiring) → repo `.claude/memory/<topic>.md`,
-  linking out to the global note instead of restating it.
+- Repo-only facts (names/paths/wiring) → repo `.claude/memory/<topic>.md`, linking to the
+  global note instead of restating it.
 
-Keep entries concise and copy-pasteable; no local paths or credentials; never dump raw decompiled output.
+Keep entries concise and copy-pasteable; no local paths or credentials; never dump raw
+decompiled output.
 
 | File | Covers |
 |------|--------|
@@ -73,10 +72,20 @@ Saved patterns live in `~/.claude/memory/patterns/`. Check these before designin
 | `workflow-mybatis-layer.md` | Workflow data layer — plain mybatis jar (not quarkus-mybatis), CDI SqlSessionFactory producer from Agroal DataSource, mapper interfaces registered programmatically; result_payload column for replay identification |
 | `workflow-async-events.md` | Workflow outcome delivery — workflow publishes WorkflowOutcomeEvent via SPI, CDI fireAsync() in monolith, @ObservesAsync @Transactional consumer does domain writes; swap path to Kafka = one file change |
 | `deterministic-agent-platform.md` | Meta-agent / catalog-platform — seam+deterministic stub for credential-free CI, stub can't spoof its own gate, verify artifacts not agent claims, publish-only-on-success, tier ledger latest-per-key (not min()), recall≠no-record, length-prefixed hashing, role separation as anti-drift |
+| `declarative-ai-agent-quarkus.md` | LLM chat/tool-calling agent as its own Quarkus service — LangChain4j `@RegisterAiService` declarative interface, tools as plain CDI `@Tool` beans, `@RequestScoped` context bean for threading userId/role into tools, swappable session-keyed `ChatMemoryProvider`, fail-soft fallback at both service and bridge layers, `@InjectMock` the generated AI service + WireMock the HTTP bridge for tests |
+| `boundary-control-layering.md` | Per-feature web-layer package split — `.boundary` (Controller/Resource/ExceptionMapper/Filter), `.control` (Service/Job), `.entity` (request-scoped context, not JPA); apply selectively (CRUD-only features get `.boundary` only), don't force onto non-HTTP modules (workflow engines, agent services keep their own layout) |
 
 ## psql
-- For SELECT/EXPLAIN/SHOW queries use `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
-- Plain `psql` always prompts — reserve it for INSERT/UPDATE/DELETE/DDL.
+- SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
+- Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL.
+
+## PRs
+- Before opening a PR, squash to 1-5 logical commits since the base-branch divergence
+  (soft-reset to merge-base + recommit, or `rebase -i`) — don't ask first.
+- Squashing an unpushed/unshared branch isn't amending published work — the
+  never-amend rule protects pushed history, not commit count on a fresh branch.
+- Branch already pushed and possibly shared → ask before rewriting; never force-push
+  silently.
 
 ## Don't
 - No comments restating obvious code.

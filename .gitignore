@@ -4,7 +4,12 @@
 claude-config/*
 !claude-config/settings.json
 !claude-config/CLAUDE.md
-!claude-config/skills/
+!claude-config/skills/caveman/
+!claude-config/skills/flyway-check/
+!claude-config/skills/mvn-build/
+!claude-config/skills/mvn-test/
+!claude-config/skills/psql-select/
+!claude-config/skills/quarkus-dev/
 !claude-config/agents/
 !claude-config/memory/
 !claude-config/sync-claude-config.sh
