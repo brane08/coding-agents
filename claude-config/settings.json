@@ -76,19 +76,6 @@
       }
     ]
   },
-  "ignorePatterns": [
-    "**/target/**",
-    "**/node_modules/**",
-    "**/.git/**",
-    "**/__pycache__/**",
-    "**/*.class",
-    "**/*.jar",
-    "**/*.war",
-    "**/dist/**",
-    "**/.venv/**",
-    "**/.gradle/**",
-    "**/build/**"
-  ],
   "includeCoAuthoredBy": false,
   "model": "opusplan",
   "notifyOnAgentStop": true,
@@ -309,7 +296,29 @@
       "Bash(mvn -q flyway:clean)",
       "Bash(mvn -q flyway:repair)",
       "Bash(mvn flyway:clean*)",
-      "Bash(mvn flyway:repair*)"
+      "Bash(mvn flyway:repair*)",
+      "Read(**/target/**)",
+      "Edit(**/target/**)",
+      "Read(**/node_modules/**)",
+      "Edit(**/node_modules/**)",
+      "Read(**/.git/**)",
+      "Edit(**/.git/**)",
+      "Read(**/__pycache__/**)",
+      "Edit(**/__pycache__/**)",
+      "Read(**/*.class)",
+      "Edit(**/*.class)",
+      "Read(**/*.jar)",
+      "Edit(**/*.jar)",
+      "Read(**/*.war)",
+      "Edit(**/*.war)",
+      "Read(**/dist/**)",
+      "Edit(**/dist/**)",
+      "Read(**/.venv/**)",
+      "Edit(**/.venv/**)",
+      "Read(**/.gradle/**)",
+      "Edit(**/.gradle/**)",
+      "Read(**/build/**)",
+      "Edit(**/build/**)"
     ]
   },
   "skillOverrides": {

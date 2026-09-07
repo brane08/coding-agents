@@ -32,6 +32,10 @@ own `.claude/memory/`.
   mutation from a content hash, don't trust the self-report.
 - Test conformance suites **in both directions**: a conforming double passes, and one
   cheating double per rule fails. A suite that only ever sees good input proves nothing.
+- A nonzero/crash exit code from a dispatch harness is not itself proof of failure — read
+  the artifacts/manifest the harness wrote to disk before trusting the exit code,
+  especially for budget-exhaustion cases (e.g. `claude -p --max-turns`) that a
+  well-behaved harness reports honestly via files, not via exit status.
 
 ## Publish only on success (atomic, no half-artifacts)
 
@@ -40,6 +44,9 @@ own `.claude/memory/`.
   stage to trip over.
 - Promotion is one atomic commit: move + generated manifest + ledger record + trace,
   all together, or nothing.
+- The promotion commit stages only the paths it explicitly names — never `git add -A`.
+  Relying on a broad add to sweep in a sibling generated artifact means an uncommitted
+  stray file either silently rides along or breaks the "clean tree" post-condition.
 
 ## Trust/tier ledger: latest-record-per-key, not min()
 
@@ -77,3 +84,7 @@ own `.claude/memory/`.
   it. Keep the read *and* write of the conformance list in **one module** so the format
   cannot drift, and let it be written **only** by the tool that ran the suite —
   hand-adding an entry asserts conformance nobody measured.
+- Decouple a harness's practical turn/step ceiling from the budget a conformance suite
+  measures — collapsing the dispatch-side cap and the playbook's measured budget into one
+  constant lets a rule-following harness silently overrun the measured budget while
+  conformance still reports a pass.

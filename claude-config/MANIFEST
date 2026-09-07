@@ -1,0 +1,48 @@
+# Explicit list of files shared between this repo's claude-config/ and
+# ~/.claude/. One path per line, relative to claude-config/.
+#
+# This is the single source of truth for sync-claude-config.sh and
+# save-claude-config.sh — they copy exactly these paths, nothing else,
+# regardless of git state. To add a file to the shared config: add a line
+# here AND `git add` the file itself. To stop sharing a file: remove its
+# line here (the file itself is left alone on both sides).
+#
+# Blank lines and lines starting with # are ignored.
+
+settings.json
+CLAUDE.md
+
+agents/boilerplate-gen.md
+agents/code-search.md
+agents/dep-inspect.md
+agents/flyway-next.md
+agents/jar-inspect.md
+agents/quick-triage.md
+agents/stack-check.md
+agents/test-aggregator.md
+agents/workflow-check.md
+
+memory/libs/esbuild-esm.md
+memory/libs/javafx-21-fat-jar-packaging.md
+memory/libs/javafx-21.md
+memory/libs/keepassjava2-2.2.4.md
+memory/patterns/boundary-control-layering.md
+memory/patterns/declarative-ai-agent-quarkus.md
+memory/patterns/deterministic-agent-platform.md
+memory/patterns/quarkus-postgres-schema-multitenancy.md
+memory/patterns/self-contained-data-module.md
+memory/patterns/workflow-async-events.md
+memory/patterns/workflow-mybatis-layer.md
+
+skills/caveman/SKILL.md
+skills/flyway-check/flyway-check.sh
+skills/flyway-check/SKILL.md
+skills/mvn-build/build.sh
+skills/mvn-build/SKILL.md
+skills/mvn-test/SKILL.md
+skills/mvn-test/test.sh
+skills/ng-verify/SKILL.md
+skills/ng-verify/verify.sh
+skills/psql-select/select.sh
+skills/quarkus-dev/dev.sh
+skills/quarkus-dev/SKILL.md

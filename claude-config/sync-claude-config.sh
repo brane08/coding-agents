@@ -2,9 +2,13 @@
 #
 # sync-claude-config.sh
 # Copies Claude Code config from repo's claude-config/ into ~/.claude/
-# Copies ONLY: settings.json, CLAUDE.md, skills/, agents/, memory/
-# Nothing else is touched. Always overwrites (merges into existing dirs).
-# Uses plain cp (no rsync). No rm -rf — never deletes anything in ~/.claude/.
+# Copies ONLY the paths listed in claude-config/MANIFEST — an explicit,
+# hand-maintained list, not derived from git state at run time. A file only
+# moves if it's a line in MANIFEST, regardless of whether it happens to be
+# git-tracked, staged, or dirty.
+# Always overwrites. Uses plain cp (no rsync). No rm -rf — never deletes
+# anything in ~/.claude/, including files ~/.claude/ has that MANIFEST
+# doesn't list.
 #
 # This script lives inside claude-config/, so repo root = parent dir.
 #
@@ -18,35 +22,46 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${1:-$(dirname "$SCRIPT_DIR")}"
 SRC_DIR="${REPO_DIR}/claude-config"
 DEST_DIR="${HOME}/.claude"
+MANIFEST="${SRC_DIR}/MANIFEST"
 
 if [[ ! -d "$SRC_DIR" ]]; then
   echo "Error: source dir not found: $SRC_DIR" >&2
   exit 1
 fi
+if [[ ! -f "$MANIFEST" ]]; then
+  echo "Error: manifest not found: $MANIFEST" >&2
+  exit 1
+fi
 
 mkdir -p "$DEST_DIR"
 
-echo "Syncing: $SRC_DIR  ->  $DEST_DIR"
+echo "Syncing (per MANIFEST): $SRC_DIR  ->  $DEST_DIR"
 
-# Files: plain cp, overwrite
-for f in settings.json CLAUDE.md; do
-  if [[ -f "${SRC_DIR}/${f}" ]]; then
-    cp -p "${SRC_DIR}/${f}" "${DEST_DIR}/${f}"
-    echo "  synced file: $f"
+COUNT=0
+MISSING=0
+while IFS= read -r rel; do
+  [[ -z "$rel" || "$rel" == \#* ]] && continue
+  if [[ -f "${SRC_DIR}/${rel}" ]]; then
+    mkdir -p "${DEST_DIR}/$(dirname "$rel")"
+    cp -p "${SRC_DIR}/${rel}" "${DEST_DIR}/${rel}"
+    COUNT=$((COUNT + 1))
   else
-    echo "  skip (not in repo): $f"
+    echo "  skip (in MANIFEST but missing from repo): $rel"
+    MISSING=$((MISSING + 1))
   fi
-done
+done < "$MANIFEST"
 
-# Folders: copy contents in, overwriting matching files, without deleting destination first
-for d in skills agents memory; do
-  if [[ -d "${SRC_DIR}/${d}" ]]; then
-    mkdir -p "${DEST_DIR}/${d}"
-    cp -rp "${SRC_DIR}/${d}/." "${DEST_DIR}/${d}/"
-    echo "  synced dir:  $d/"
-  else
-    echo "  skip (not in repo): $d/"
-  fi
-done
+echo "Synced ${COUNT} file(s), ${MISSING} listed-but-missing."
+
+# Informational only: local skill/agent dirs not covered by MANIFEST.
+# Never touched — just surfaced so they're not silently invisible.
+MANIFEST_SKILL_DIRS=$(grep -E '^skills/' "$MANIFEST" | sed -E 's|^skills/([^/]+)/.*|\1|' | sort -u)
+MANIFEST_AGENT_NAMES=$(grep -E '^agents/' "$MANIFEST" | sed -E 's|^agents/(.+)\.md$|\1|' | sort -u)
+
+LOCAL_ONLY_SKILLS=$(comm -23 <(ls "${DEST_DIR}/skills" 2>/dev/null | sort -u) <(echo "$MANIFEST_SKILL_DIRS"))
+LOCAL_ONLY_AGENTS=$(comm -23 <(ls "${DEST_DIR}/agents" 2>/dev/null | sed 's|\.md$||' | sort -u) <(echo "$MANIFEST_AGENT_NAMES"))
+
+[[ -n "$LOCAL_ONLY_SKILLS" ]] && echo "Local-only skills (not in MANIFEST, untouched): $(echo "$LOCAL_ONLY_SKILLS" | tr '\n' ' ')"
+[[ -n "$LOCAL_ONLY_AGENTS" ]] && echo "Local-only agents (not in MANIFEST, untouched): $(echo "$LOCAL_ONLY_AGENTS" | tr '\n' ' ')"
 
 echo "Done."
