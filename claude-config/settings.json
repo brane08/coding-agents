@@ -180,6 +180,7 @@
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/ng-verify/verify.sh*)",
       "Bash(git add *)",
       "Bash(git add:*)",
+      "Bash(git fetch*)",
       "Bash(git commit *)",
       "Bash(git commit:*)",
       "Bash(git status*)",
@@ -193,6 +194,7 @@
       "Bash(git mv *)",
       "Bash(git branch -d *)",
       "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
       "Bash(gh pr diff*)",
       "Bash(gh pr checks*)",
       "Bash(gh issue view*)",
@@ -333,6 +335,7 @@
     ]
   },
   "skillOverrides": {
+    "superpowers:brainstorming": "off",
     "superpowers:dispatching-parallel-agents": "off",
     "superpowers:finishing-a-development-branch": "off",
     "superpowers:receiving-code-review": "off",
