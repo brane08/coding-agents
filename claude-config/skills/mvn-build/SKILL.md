@@ -9,11 +9,11 @@ description: >
 
 Run one of:
   bash ~/.claude/skills/mvn-build/build.sh                   # current dir module
-  bash ~/.claude/skills/mvn-build/build.sh htmx-quarkus      # main app module
+  bash ~/.claude/skills/mvn-build/build.sh mono-quarkus      # main app module
   bash ~/.claude/skills/mvn-build/build.sh data-ebean        # data module
   bash ~/.claude/skills/mvn-build/build.sh --reactor         # full reactor (explicit only)
 
-Module names: core-api, data-ebean, data-hibernate, htmx-quarkus, workflow-core
+Module names: core-api, data-ebean, data-hibernate, mono-quarkus, workflow-core
 
 After module changes (data-ebean, workflow-core) always do a full install:
   bash ~/.claude/skills/mvn-build/build.sh --reactor

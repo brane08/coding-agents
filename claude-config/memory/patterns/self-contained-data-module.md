@@ -81,6 +81,14 @@ public class HibernateProducers {
 3. Once all entities ported, drop data-ebean from pom.xml
 
 ## Watch-outs
+- `HibernateGenericRepository<T extends EntityMarker>` only requires the narrow
+  `EntityMarker` interface (`getId/setId/getVersion/setVersion`) — an entity does NOT need
+  to extend `AbstractModel` (the `@MappedSuperclass` + `AuditListener` combo that mandates
+  `version`/`creator`/`created_date`/`modifier`/`modified_date` columns). An entity whose
+  table lacks those audit columns must implement `EntityMarker` directly (add a
+  `@Transient` no-op `version` if needed, mark DB-defaulted timestamp columns
+  `insertable=false,updatable=false`) — extending `AbstractModel` anyway causes every
+  INSERT to fail with `PSQLException: column "created_date" does not exist`.
 - During dual-ORM transition: two connection pools share one datasource — cap both pool sizes
 - Services with raw Database (not GenericRepository) need ORM-specific impls in each module
   (e.g. AcademicYearServiceImpl using Database → HibernateAcademicYearServiceImpl using EntityManager)

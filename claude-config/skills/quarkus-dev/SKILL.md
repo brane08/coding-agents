@@ -11,7 +11,7 @@ Run: QUARKUS_PORT=8102 bash ~/.claude/skills/quarkus-dev/dev.sh
 App runs at: http://localhost:8102
 Dev UI at:   http://localhost:8102/q/dev
 
-Note: Must be run from htmx-quarkus/ dir or set CLAUDE_PROJECT_DIR.
+Note: Must be run from mono-quarkus/ dir or set CLAUDE_PROJECT_DIR.
 Stale JARs → NoSuchMethodError — always full rebuild after module changes.
 
 Report:

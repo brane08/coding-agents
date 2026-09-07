@@ -34,6 +34,11 @@ larger Quarkus system without embedding LLM concerns in the main app.
 - Backend model (Ollama, OpenAI, etc.) is pure config
   (`quarkus.langchain4j.<provider>.*`) — model id, base URL, timeout. Swap
   providers by changing config + one extension dependency, not code.
+- For local Ollama, prefer the `quarkus-langchain4j-openai` extension pointed at
+  Ollama's OpenAI-compatible endpoint (`http://localhost:11434/v1`), not
+  `quarkus-langchain4j-ollama`'s native `/api/*` endpoint — use a dummy (non-empty)
+  API key. Same extension then works unchanged for local Ollama, OpenAI, or
+  OpenRouter; swapping providers is just `base-url`/`api-key` config.
 
 ## Tools are ordinary CDI beans with `@Tool` methods
 
