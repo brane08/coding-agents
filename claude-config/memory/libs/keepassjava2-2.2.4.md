@@ -185,3 +185,108 @@ Do NOT add `requires KeePassJava2;` to `module-info.java` — it will fail.
 <option>--add-opens</option>
 <option>java.base/java.lang=ALL-UNNAMED</option>
 ```
+
+## Entry history field — access via reflection only
+
+**The `history` field** (`protected List<SimpleEntry> history`) is present on `SimpleEntry` as a
+JAXB-annotated field for KDBX round-tripping, but **has no public getter, setter, or adder method**.
+
+### UUID — getter only
+
+```java
+public java.util.UUID getUuid()           // exists
+public void setUuid(UUID)                 // does NOT exist
+
+// But the field is protected:
+protected java.util.UUID uuid;
+// So it can be set via reflection if needed
+```
+
+UUID is initialized to `UUID.randomUUID()` in the no-arg constructor. Real KeePass history
+entries share the same UUID as their live parent entry — to replicate this, either:
+1. Copy the live entry's UUID via reflection to a freshly created history entry.
+2. Directly manipulate the `uuid` field via reflection: `Field f = SimpleEntry.class.getDeclaredField("uuid"); f.setAccessible(true); f.set(historyEntry, liveEntry.getUuid());`
+
+### Copy / clone — not supported
+
+- `SimpleEntry` does NOT implement `Cloneable` (bytecode: only extends `AbstractEntry`, no additional interfaces)
+- No `clone()` method exists
+- No copy constructor
+- `SimpleDatabase.newEntry()` is the only creation path — there is no `newEntry(Entry)` overload that copies fields
+
+Building a history snapshot requires:
+1. Create a fresh entry: `SimpleEntry snapshot = db.newEntry()`
+2. Copy all fields manually: `snapshot.setTitle(live.getTitle()), snapshot.setUsername(live.getUsername()), …`
+3. Copy the UUID via reflection: `uuidField.set(snapshot, live.getUuid())`
+4. Access the history list via reflection and add the snapshot
+
+### All public setter methods on SimpleEntry (including inherited)
+
+From `AbstractEntry` contract:
+```java
+setTitle(String)
+setUsername(String)
+setPassword(String)
+setUrl(String)
+setNotes(String)
+setExpires(boolean)
+setExpiryTime(Date)
+setIcon(SimpleIcon) / setIcon(Icon)     // two overloads
+```
+
+From `SimpleEntry` itself:
+```java
+setProperty(String key, String value)      // for custom properties
+setBinaryProperty(String key, byte[] value)
+removeProperty(String key)
+removeBinaryProperty(String key)
+```
+
+`touch()` is `protected` (not public) — auto-invoked by any field setter, updates `LastModificationTime`.
+
+### Timestamps (read-only in public API)
+
+```java
+entry.getCreationTime()           // public
+entry.getLastModificationTime()   // public (auto-updated on field writes)
+entry.getLastAccessTime()         // public
+```
+
+All returned as `java.util.Date`; truncated to seconds by `Times` constructor.
+
+### `<History>` round-trips but has no public API — reflection required
+
+`SimpleEntry` declares (directly, not inherited — confirmed via `javap` on the
+jar, not just source): `protected UUID uuid` and `protected List<SimpleEntry>
+history` (`@ElementList(name="History", required=false)`, SimpleXML not JAXB).
+The XML **does** serialize/deserialize on save/load — a KDBX file with
+pre-existing `<History>` from real KeePass round-trips correctly — but there
+is no getter/setter/adder for either field, no `setUuid`, no `clone()`, no
+copy constructor, and `SimpleDatabase.newEntry()` has only a no-arg signature.
+
+To build and append a history snapshot from application code:
+```java
+Field uuidF = SimpleEntry.class.getDeclaredField("uuid");
+uuidF.setAccessible(true);
+uuidF.set(snapshotEntry, liveEntry.getUuid());   // real KeePass history shares the parent's UUID
+
+Field histF = SimpleEntry.class.getDeclaredField("history");
+histF.setAccessible(true);
+@SuppressWarnings("unchecked")
+List<SimpleEntry> hist = (List<SimpleEntry>) histF.get(liveEntry);
+if (hist == null) { hist = new ArrayList<>(); histF.set(liveEntry, hist); }
+hist.add(snapshotEntry);   // build snapshotEntry via db.newEntry() + the public setters
+```
+No `--add-opens` needed beyond the existing `--add-reads
+<your-module>=ALL-UNNAMED` — KeePassJava2 is classpath/unnamed-module, which
+already grants full reflective access. Wrap in try/catch
+`ReflectiveOperationException` and degrade to a no-op; don't let a future
+library version renaming these fields break the save/edit path.
+
+Internal storage order is whatever you append in (oldest-first is the natural
+choice, matching real KeePass); present newest-first to callers by reversing
+a copy, not the live list. Historical entries' `getLastModificationTime()`
+reads as snapshot-capture time, not the entry's true original timestamp —
+the real per-revision timestamp lives on an internal `Times` object reachable
+only via package-protected accessors with no confirmed field shape; not worth
+another speculative reflection layer unless a real need shows up.
