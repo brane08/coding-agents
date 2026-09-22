@@ -234,3 +234,15 @@ module com.example.app {
 - `opens … to javafx.base` is required for model packages read via `PropertyValueFactory`
   or any property-name reflection.
 - Adding a new package with controllers or models means adding a matching `opens`.
+
+## Dialog: a disabled Cancel button does not block the window X (verified on JavaFX 25.0.1)
+
+`FXDialog.requestPermissionToClose` only checks whether any `ButtonType` in
+`dialogPane.getButtonTypes()` has cancel `ButtonData` (or the pane has exactly one button).
+It never looks at the button `Node`, so `lookupButton(CANCEL).setDisable(true)` still lets
+the X close the dialog, and `Dialog.close()` then sets the result to that CANCEL `ButtonType`.
+To make a dialog truly non-dismissable, veto the close request instead:
+
+```java
+dialog.setOnCloseRequest(ev -> { if (dialog.getResult() != ButtonType.OK) ev.consume(); });
+```
