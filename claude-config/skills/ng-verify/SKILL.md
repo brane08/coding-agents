@@ -6,6 +6,9 @@ description: >
 ---
 # Angular Verify
 
+**Dispatch, don't run inline.** Hand the chosen command below to the `quick-triage`
+agent (pinned to haiku; no `model:` override) and have it return the Report section.
+
 Run one of:
   bash ~/.claude/skills/ng-verify/verify.sh                              # current dir
   bash ~/.claude/skills/ng-verify/verify.sh ui-angular                   # named app dir

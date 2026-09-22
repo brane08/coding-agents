@@ -7,6 +7,11 @@ description: >
 ---
 # Maven Test
 
+**Dispatch, don't run inline.** Hand the chosen command below to the `quick-triage`
+agent (pinned to haiku; no `model:` override) and have it return the Report section.
+If anything failed, follow up with `test-aggregator` for the `-Dtest=` rerun commands.
+The only inline exception is a single-class `-Dtest=` rerun right after a fix.
+
 Run one of:
   bash ~/.claude/skills/mvn-test/test.sh mono-quarkus                       # all tests
   bash ~/.claude/skills/mvn-test/test.sh mono-quarkus CartControllerTest    # specific class

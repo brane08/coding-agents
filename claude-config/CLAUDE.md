@@ -30,6 +30,27 @@
 - To resume a previously-dispatched subagent, use `SendMessage` with its agent id/name —
   never the `Agent` tool again, which silently spawns a fresh one instead of continuing it.
 
+## Model routing (from transcript audit — keep these)
+- `mvn test` / `pytest` / `ng test` never run inline in the main thread. Dispatch the
+  exact command to `quick-triage` (haiku) and, on failure, `test-aggregator` for the
+  rerun list. Exception: a single `-Dtest=OneClass` rerun after a fix you just made.
+- Read-only git queries (`log`/`diff`/`show`/`blame`) — batch into one `code-search`
+  dispatch when you need more than one; a single `git status` inline is fine.
+- Never pass `model:` to `code-search`, `quick-triage`, `test-aggregator`, `jar-inspect`,
+  `dep-inspect`, `flyway-next`, `stack-check`, `workflow-check` — their definitions
+  already pin haiku; an override only makes them more expensive.
+- Any ad hoc read-only agent (`general-purpose`/`Explore` for "scan X", "list Y",
+  "check whether Z exists") gets `model: haiku`. Use `sonnet` only when the agent must
+  reason about *why*, not *where*.
+- Review waves (superpowers SDD or any per-task review): spec-compliance review → haiku;
+  code-quality review → sonnet; final branch review → sonnet. Opus only when the diff
+  touches auth, crypto, concurrency, or data migration — say so when dispatching.
+- Don't inline secrets in Bash commands (`TOKEN="..."`, `Bearer ...`, raw JWTs) — they
+  are persisted verbatim in the session transcript. Read from an env var or a file.
+- A PreToolUse hook (`hooks/nudge-delegate.sh`) injects a one-line reminder when a
+  main-thread Bash call breaks one of these. It never blocks; treat it as a prompt to
+  re-route, not noise.
+
 ## Stack defaults (assume, don't ask)
 - Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
 - DB: PostgreSQL + Flyway (never `clean`/`repair` without explicit ask).
@@ -50,7 +71,10 @@
   `dispatching-parallel-agents`, `test-driven-development`, `systematic-debugging`,
   `requesting-code-review`, `receiving-code-review`, `finishing-a-development-branch`,
   `using-git-worktrees`, `writing-skills`) are available but not auto-invoked — use only
-  if explicitly asked by name.
+  if explicitly asked by name. Transcript audit found SDD invoked 7× and
+  `requesting-code-review` 25× without being asked — that is a violation, not a judgment
+  call. If SDD *is* explicitly requested, apply the review-wave model split under
+  `## Model routing`.
 - This overrides the plugin's own "if a skill might apply, you must invoke it" default —
   that default does not apply outside the large-scope + core-3 case above.
 
