@@ -6,8 +6,10 @@
 - Skip well-known-concept explanations unless asked.
 
 ## Delegation (token discipline)
-- Read-only search/nav (file discovery, grep, "where is X", log inspection) →
-  `code-search`; `Explore` only as fallback. Never do this in the main thread.
+- Read-only search/nav (file discovery, grep, "where is X", log inspection,
+  including `cat`/`ls`/`tail`/`head`/`wc`/`sed`/`awk` on files you didn't just
+  create/edit this turn) → `code-search`; `Explore` only as fallback. Never do
+  this in the main thread.
 - Build/test/log triage → `quick-triage` before escalating to Sonnet/Opus.
 - Pattern-mirroring boilerplate (DTOs, mappers, CRUD repos, Angular stubs) →
   `boilerplate-gen`. Never for anything involving a design decision.
