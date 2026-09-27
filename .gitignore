@@ -9,6 +9,7 @@ claude-config/*
 claude-config/skills/*
 !claude-config/skills/caveman/
 !claude-config/skills/flyway-check/
+!claude-config/skills/guarded-fs/
 !claude-config/skills/mvn-build/
 !claude-config/skills/mvn-test/
 !claude-config/skills/ng-verify/

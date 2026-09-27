@@ -1,7 +1,7 @@
 {
   "cleanupPeriodDays": 5,
   "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5",
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
     "CLAUDE_CODE_EFFORT_LEVEL": "medium",
@@ -100,12 +100,14 @@
       "Bash(bash ~/.claude/skills/quarkus-dev/dev.sh*)",
       "Bash(bash ~/.claude/skills/flyway-check/flyway-check.sh*)",
       "Bash(bash ~/.claude/skills/ng-verify/verify.sh*)",
+      "Bash(bash ~/.claude/skills/guarded-fs/guarded-fs.sh *)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/psql-select/select.sh *)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/mvn-build/build.sh*)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/mvn-test/test.sh*)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/quarkus-dev/dev.sh*)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/flyway-check/flyway-check.sh*)",
       "Bash(bash $CLAUDE_CONFIG_DIR/skills/ng-verify/verify.sh*)",
+      "Bash(bash $CLAUDE_CONFIG_DIR/skills/guarded-fs/guarded-fs.sh *)",
       "Bash(git add *)",
       "Bash(git add:*)",
       "Bash(git fetch*)",
@@ -262,7 +264,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opusplan",
   "skillOverrides": {
     "superpowers:brainstorming": "off",
     "superpowers:dispatching-parallel-agents": "off",
@@ -314,6 +316,12 @@
     }
   },
   "effortLevel": "medium",
+  "modelSettings": {
+    "claude-sonnet-5": {
+      "effortLevel": "high"
+    }
+  },
+  "autoCompactWindow": 150000,
   "autoMemoryEnabled": false,
   "theme": "light",
   "agentPushNotifEnabled": false,
@@ -357,6 +365,5 @@
     ]
   },
   "autoCompact": true,
-  "autoCompactWindow": 150000,
   "notifyOnAgentStop": true
 }
