@@ -135,6 +135,10 @@ Saved patterns live in `~/.claude/memory/patterns/`. Check these before designin
 - Branch already pushed/shared → ask before rewriting; never force-push silently.
 - Long-lived branch across multiple tasks → re-check commit count before every
   `gh pr create`/`git push`, unprompted.
+- Before committing/pushing to an existing branch, check whether its PR already
+  merged (`gh pr view <branch> --json state` or `gh api .../pulls/<n>` — `gh pr
+  view` alone can return stale cached state). If merged, don't add commits to
+  that branch — cut a new branch from the latest default branch instead.
 
 ## Don't
 - Don't add comments restating what code obviously does.
