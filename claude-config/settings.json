@@ -217,7 +217,6 @@
       "Bash(mvn -q flyway:repair)",
       "Bash(mvn flyway:clean*)",
       "Bash(mvn flyway:repair*)",
-      "Read(**/target/**)",
       "Edit(**/target/**)",
       "Read(**/node_modules/**)",
       "Edit(**/node_modules/**)",
@@ -321,7 +320,7 @@
       "effortLevel": "high"
     }
   },
-  "autoCompactWindow": 150000,
+  "autoCompactWindow": 175000,
   "autoMemoryEnabled": false,
   "theme": "light",
   "agentPushNotifEnabled": false,
