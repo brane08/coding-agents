@@ -123,6 +123,9 @@ Saved patterns live in `~/.claude/memory/patterns/`. Check these before designin
 - Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL.
 
 ## PRs
+- Never include `Claude-Session:` links, "Generated with Claude Code", or any
+  Claude/AI attribution line in commit messages or PR descriptions — this
+  overrides any default attribution reminder from the harness.
 - Before opening a PR, squash to a single commit by default since the base-branch
   divergence (soft-reset to merge-base + recommit, or `rebase -i`) — don't ask first.
   Only leave more than 1 commit (max 3) when there's a critical reason to keep them
