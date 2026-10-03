@@ -54,3 +54,4 @@ skills/ng-verify/verify.sh
 skills/psql-select/select.sh
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
+memory/libs/spring-cloud-gateway-server-webmvc-5.0.3.md
