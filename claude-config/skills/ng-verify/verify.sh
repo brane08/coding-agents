@@ -25,6 +25,11 @@ if [ ! -f "tsconfig.app.json" ]; then
   exit 1
 fi
 
+if [ ! -x "node_modules/.bin/tsc" ]; then
+  echo "ERROR: dependencies not installed in $DIR — run npm install first"
+  exit 1
+fi
+
 # Resolve a headless Chrome binary for karma/ng test — avoids the recurring
 # "Chrome failed to start" failure when CHROME_BIN isn't set.
 if [ -z "${CHROME_BIN:-}" ]; then

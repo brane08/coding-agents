@@ -188,38 +188,6 @@ Do NOT add `requires KeePassJava2;` to `module-info.java` — it will fail.
 
 ## Entry history field — access via reflection only
 
-**The `history` field** (`protected List<SimpleEntry> history`) is present on `SimpleEntry` as a
-JAXB-annotated field for KDBX round-tripping, but **has no public getter, setter, or adder method**.
-
-### UUID — getter only
-
-```java
-public java.util.UUID getUuid()           // exists
-public void setUuid(UUID)                 // does NOT exist
-
-// But the field is protected:
-protected java.util.UUID uuid;
-// So it can be set via reflection if needed
-```
-
-UUID is initialized to `UUID.randomUUID()` in the no-arg constructor. Real KeePass history
-entries share the same UUID as their live parent entry — to replicate this, either:
-1. Copy the live entry's UUID via reflection to a freshly created history entry.
-2. Directly manipulate the `uuid` field via reflection: `Field f = SimpleEntry.class.getDeclaredField("uuid"); f.setAccessible(true); f.set(historyEntry, liveEntry.getUuid());`
-
-### Copy / clone — not supported
-
-- `SimpleEntry` does NOT implement `Cloneable` (bytecode: only extends `AbstractEntry`, no additional interfaces)
-- No `clone()` method exists
-- No copy constructor
-- `SimpleDatabase.newEntry()` is the only creation path — there is no `newEntry(Entry)` overload that copies fields
-
-Building a history snapshot requires:
-1. Create a fresh entry: `SimpleEntry snapshot = db.newEntry()`
-2. Copy all fields manually: `snapshot.setTitle(live.getTitle()), snapshot.setUsername(live.getUsername()), …`
-3. Copy the UUID via reflection: `uuidField.set(snapshot, live.getUuid())`
-4. Access the history list via reflection and add the snapshot
-
 ### All public setter methods on SimpleEntry (including inherited)
 
 From `AbstractEntry` contract:
@@ -244,21 +212,10 @@ removeBinaryProperty(String key)
 
 `touch()` is `protected` (not public) — auto-invoked by any field setter, updates `LastModificationTime`.
 
-### Timestamps (read-only in public API)
-
-```java
-entry.getCreationTime()           // public
-entry.getLastModificationTime()   // public (auto-updated on field writes)
-entry.getLastAccessTime()         // public
-```
-
-All returned as `java.util.Date`; truncated to seconds by `Times` constructor.
-
 ### `<History>` round-trips but has no public API — reflection required
 
-`SimpleEntry` declares (directly, not inherited — confirmed via `javap` on the
-jar, not just source): `protected UUID uuid` and `protected List<SimpleEntry>
-history` (`@ElementList(name="History", required=false)`, SimpleXML not JAXB).
+`SimpleEntry` declares directly (confirmed via `javap`): `protected UUID uuid` and
+`protected List<SimpleEntry> history` (`@ElementList(name="History", required=false)`, SimpleXML).
 The XML **does** serialize/deserialize on save/load — a KDBX file with
 pre-existing `<History>` from real KeePass round-trips correctly — but there
 is no getter/setter/adder for either field, no `setUuid`, no `clone()`, no

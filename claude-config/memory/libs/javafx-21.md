@@ -235,7 +235,7 @@ module com.example.app {
   or any property-name reflection.
 - Adding a new package with controllers or models means adding a matching `opens`.
 
-## Dialog: a disabled Cancel button does not block the window X (verified on JavaFX 25.0.1)
+## Dialog: a disabled Cancel button does not block the window X (observed on JavaFX 25.0.1; not re-checked on 21)
 
 `FXDialog.requestPermissionToClose` only checks whether any `ButtonType` in
 `dialogPane.getButtonTypes()` has cancel `ButtonData` (or the pane has exactly one button).

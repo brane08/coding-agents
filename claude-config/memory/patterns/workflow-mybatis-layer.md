@@ -31,7 +31,7 @@ workflow-core/
       WorkflowEventPublisher.java ← publish(WorkflowOutcomeEvent)
 
 mono-quarkus/
-  pom.xml          ← org.mybatis:mybatis:3.5.16 (plain jar, NOT quarkus-mybatis)
+  pom.xml          ← org.mybatis:mybatis (plain jar, NOT quarkus-mybatis)
   src/main/java/.../workflow/
     mappers/
       WorkflowStateMapper.java    ← @Select/@Insert/@Update annotated interface
@@ -44,7 +44,7 @@ mono-quarkus/
 
 ## Why plain mybatis jar, NOT quarkus-mybatis
 
-`quarkus-mybatis 2.2.1` uses class-based `MyBatisRuntimeConfig`, but Quarkus 3.x requires `@ConfigMapping` on an interface. The extension fails to start. Use `org.mybatis:mybatis:3.5.16` + manual CDI producer instead — same functionality, zero extension version coupling.
+`quarkus-mybatis 2.2.1` uses class-based `MyBatisRuntimeConfig`, but Quarkus 3.x requires `@ConfigMapping` on an interface. The extension fails to start. Use plain `org.mybatis:mybatis` + manual CDI producer instead — same functionality, zero extension version coupling.
 
 ```xml
 <!-- mono-quarkus/pom.xml — use plain jar -->
@@ -81,7 +81,7 @@ public class MyBatisProducer {
 
 ```java
 public interface WorkflowStateMapper {
-    @Select("SELECT id, workflow_id, step_name, corr_id, status, created_at, updated_at " +
+    @Select("SELECT id, workflow_id, step_name, corr_id, status, result_payload, created_at, updated_at " +
             "FROM workflow_state WHERE workflow_id = #{workflowId} AND step_name = #{stepName}")
     @Results(id = "workflowStateMap", value = {
         @Result(property = "workflowId", column = "workflow_id"),
@@ -131,7 +131,7 @@ public class WorkflowStateServiceImpl implements WorkflowStateService {
 
 `workflow_state.result_payload TEXT` stores the outcome type constant (e.g. `"ADMISSION_COMPLETED"`). Enables manual replay identification — query `result_payload IS NOT NULL` to find completed steps that may need domain reprocessing on crash recovery.
 
-Migration: `V1.0_22__workflow_state_payload.sql` → `ALTER TABLE workflow_state ADD COLUMN IF NOT EXISTS result_payload TEXT;`
+Migration: `ALTER TABLE workflow_state ADD COLUMN IF NOT EXISTS result_payload TEXT;`
 
 ## Portability checklist when extracting workflow service
 

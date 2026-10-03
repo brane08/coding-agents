@@ -60,7 +60,7 @@ JARs into one — colliding `module-info.class` files break the build.
 --add-opens java.base/java.util=ALL-UNNAMED   # if a dep reflects on UUID fields (e.g. simple-xml)
 --add-opens java.base/java.lang=ALL-UNNAMED
 --enable-native-access=ALL-UNNAMED            # JavaFX loads natives via System::load;
-                                              # warning today, hard error in future JDK
+                                              # the JDK warns without it and plans to make that an error
 ```
 
 ### Expected warning (harmless)
@@ -136,7 +136,7 @@ plugins in declaration order — **shade must be declared before assembly** in
 
 Trigger on `v*` tags. Matrix: `macos-latest` (arm64), `ubuntu-latest`,
 `windows-latest` — each runner auto-activates the matching Maven OS profile and
-runs `mvn -B package`. Upload platform zips via `actions/upload-artifact@v4`;
+runs `mvn -B package`. Upload platform zips via `actions/upload-artifact` (current major);
 a final `release` job downloads all artifacts and attaches them with
 `gh release create`.
 

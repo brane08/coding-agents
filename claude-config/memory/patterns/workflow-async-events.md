@@ -92,8 +92,8 @@ private transient WorkflowEventPublisher eventPublisher;
 public void setEventPublisher(WorkflowEventPublisher e) { this.eventPublisher = e; }
 
 // In main():
-eventPublisher.publish(new WorkflowOutcomeEvent(wfId, WorkflowOutcomeEvent.LEAVE_APPROVED, data));
 workflowStateService.completeStep(wfId, STEP_APPROVED, "COMPLETED", WorkflowOutcomeEvent.LEAVE_APPROVED);
+eventPublisher.publish(new WorkflowOutcomeEvent(wfId, WorkflowOutcomeEvent.LEAVE_APPROVED, data));  // after completeStep: consumer must see the persisted result_payload
 ```
 
 `CdiDependencyInjector` uses `CDI.current().select(type)` generically — automatically picks up `WorkflowEventPublisherImpl` for the `WorkflowEventPublisher` type. No explicit registration needed.
