@@ -54,8 +54,7 @@ own `.claude/memory/`.
   append-only ledger — *not* `min()` across all its records. `min()` makes promotion
   (e.g. `quarantined → validated`) impossible: the old low record permanently wins.
 - Keep **one** implementation of tier resolution and import it everywhere. Duplicated
-  copies drift silently (they had already diverged on profile matching before this was
-  caught).
+  copies drift silently.
 - A **recall/revocation must be distinguishable from "no record"**. Derive a tier only
   when there is genuinely no explicit record; otherwise the explicit record (including a
   recall) wins. Otherwise a recalled item reads as un-recorded and keeps routing.

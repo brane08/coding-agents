@@ -1,5 +1,5 @@
 # claude-config/ — only these are tracked:
-#   settings.json, CLAUDE.md, skills/, agents/, memory/
+#   settings.json, CLAUDE.md, skills/, agents/, memory/, hooks/
 # Everything else under claude-config/ is ignored.
 claude-config/*
 !claude-config/settings.json
@@ -17,6 +17,7 @@ claude-config/skills/*
 !claude-config/skills/quarkus-dev/
 !claude-config/agents/
 !claude-config/memory/
+!claude-config/hooks/
 !claude-config/sync-claude-config.sh
 !claude-config/save-claude-config.sh
 

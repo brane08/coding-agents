@@ -22,14 +22,20 @@ agents/stack-check.md
 agents/test-aggregator.md
 agents/workflow-check.md
 
+hooks/guard-git-push.sh
+hooks/guard-writes.sh
+hooks/nudge-delegate.sh
+
 memory/libs/esbuild-esm.md
 memory/libs/javafx-21-fat-jar-packaging.md
 memory/libs/javafx-21.md
 memory/libs/keepassjava2-2.2.4.md
 memory/patterns/boundary-control-layering.md
 memory/patterns/declarative-ai-agent-quarkus.md
+memory/patterns/jmeter-load-smoke.md
 memory/patterns/deterministic-agent-platform.md
 memory/patterns/quarkus-postgres-schema-multitenancy.md
+memory/patterns/rest-assured-csv-role-matrix.md
 memory/patterns/self-contained-data-module.md
 memory/patterns/workflow-async-events.md
 memory/patterns/workflow-mybatis-layer.md
@@ -37,6 +43,8 @@ memory/patterns/workflow-mybatis-layer.md
 skills/caveman/SKILL.md
 skills/flyway-check/flyway-check.sh
 skills/flyway-check/SKILL.md
+skills/guarded-fs/SKILL.md
+skills/guarded-fs/guarded-fs.sh
 skills/mvn-build/build.sh
 skills/mvn-build/SKILL.md
 skills/mvn-test/SKILL.md

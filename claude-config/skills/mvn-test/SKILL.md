@@ -27,7 +27,6 @@ Notes:
 - Product IDs don't start at 1 — fetch from GET /rest/products dynamically in tests
 - REST responses: {success: true, data: [...]} — assert .body("success", is(true))
 - WELCOME10 promo must stay active (needed by CheckoutControllerTest)
-- DeliveryActionsTest has 2 pre-existing failures — unrelated to app changes
 
 Report:
 - Pass / fail / error counts

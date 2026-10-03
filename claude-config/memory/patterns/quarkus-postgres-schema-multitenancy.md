@@ -121,7 +121,7 @@ acquisition) — don't assume enabling Hibernate SCHEMA multitenancy silently co
 ### 6a. Workflow/orchestration engines (Copper, Camunda, Flowable, ...) are the sharpest instance of gap 6
 These engines almost always run their own persistence underneath the app's ORM — a separate
 named datasource, a separate connection pool, often a different data-access framework entirely
-(e.g. Copper 6 uses a plain MyBatis `SqlSessionFactory` over Agroal, not Hibernate). Concretely,
+(e.g. a Copper app's workflow-state layer uses a plain MyBatis `SqlSessionFactory` over Agroal, not Hibernate, beside Copper's own `COPPER_*` tables). Concretely,
 for a Copper-shaped engine:
 - **The engine's datasource needs its own schema-switching**, independent of the Hibernate
   `TenantResolver` above. Hibernate SCHEMA multitenancy has zero visibility into a MyBatis

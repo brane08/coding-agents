@@ -5,8 +5,11 @@ description: >
 ---
 # Flyway Status Check
 
-Run: DB_URL=jdbc:postgresql://127.0.0.1:5432/prore DB_USER=postgres DB_PASS=postgres \
-     bash ~/.claude/skills/flyway-check/flyway-check.sh
+Run: bash ~/.claude/skills/flyway-check/flyway-check.sh [database]
+
+The database argument defaults to `$DB_NAME`, then `dev`. Host and port come from
+`DB_HOST`/`DB_PORT` (default localhost:5432); `DB_URL` overrides all of them when no argument is given.
+`DB_USER` defaults to `dev`. No password is sent unless `DB_PASS` is set (local DBs normally need none); set it via the environment or the project's `.env`, never inline in the command.
 
 Must be run from mono-quarkus/ (where pom.xml has flyway config).
 
