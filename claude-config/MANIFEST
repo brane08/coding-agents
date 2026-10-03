@@ -9,6 +9,11 @@
 #
 # Blank lines and lines starting with # are ignored.
 
+# Hooks first: settings.json references them, so they must exist before it lands.
+hooks/guard-git-push.sh
+hooks/guard-writes.sh
+hooks/nudge-delegate.sh
+
 settings.json
 CLAUDE.md
 
@@ -21,10 +26,6 @@ agents/quick-triage.md
 agents/stack-check.md
 agents/test-aggregator.md
 agents/workflow-check.md
-
-hooks/guard-git-push.sh
-hooks/guard-writes.sh
-hooks/nudge-delegate.sh
 
 memory/libs/esbuild-esm.md
 memory/libs/javafx-21-fat-jar-packaging.md
