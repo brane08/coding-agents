@@ -9,7 +9,8 @@
 - Read-only search/nav (file discovery, grep, "where is X", log inspection,
   including `cat`/`ls`/`tail`/`head`/`wc`/`sed`/`awk` on files you didn't just
   create/edit this turn) → `code-search`; `Explore` only as fallback. Never do
-  this in the main thread.
+  this in the main thread. Exception: one `grep`/`cat` on a single known path inline;
+  chain of 2+ calls → dispatch.
 - Read-only git queries (`log`/`diff`/`show`/`blame`) — batch into one `code-search`
   dispatch when you need more than one; a single `git status` inline is fine.
 - `mvn test` / `pytest` / `ng test` never run inline. Dispatch the exact command to
