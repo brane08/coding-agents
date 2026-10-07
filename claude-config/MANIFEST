@@ -42,6 +42,8 @@ memory/patterns/workflow-async-events.md
 memory/patterns/workflow-mybatis-layer.md
 
 skills/caveman/SKILL.md
+skills/delegation-audit/SKILL.md
+skills/delegation-audit/audit.py
 skills/flyway-check/flyway-check.sh
 skills/flyway-check/SKILL.md
 skills/guarded-fs/SKILL.md
