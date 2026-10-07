@@ -26,6 +26,17 @@ case "$f" in
   *)  abs="$PWD/$f" ;;
 esac
 
+# An existing symlink is judged by its target, not its own location.
+n=0
+while [ -L "$abs" ] && [ "$n" -lt 10 ]; do
+  t=$(readlink "$abs")
+  case "$t" in
+    /*) abs="$t" ;;
+    *)  abs="$(dirname "$abs")/$t" ;;
+  esac
+  n=$((n + 1))
+done
+
 rest=""
 p="$abs"
 while [ ! -d "$p" ] && [ "$p" != "/" ] && [ "$p" != "." ]; do
