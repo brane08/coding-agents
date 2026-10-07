@@ -21,6 +21,7 @@ cat_=""
 
 chain() {
   mkdir -p "$STATE/chain" 2>/dev/null || return 1
+  [ $((now % 50)) -eq 0 ] && find "$STATE/chain" -type f -mtime +1 -delete 2>/dev/null
   f="$STATE/chain/$sid"
   prev=$(cat "$f" 2>/dev/null || echo 0)
   printf '%s' "$now" > "$f" 2>/dev/null
