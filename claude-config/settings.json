@@ -314,7 +314,6 @@
       }
     }
   },
-  "effortLevel": "medium",
   "autoCompactWindow": 190000,
   "autoMemoryEnabled": false,
   "theme": "light",
