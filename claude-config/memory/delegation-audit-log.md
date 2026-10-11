@@ -5,7 +5,7 @@ future audits don't re-flag the same already-fixed gaps.
 
 ## 2026-09-23
 - Audited local session history for haiku-delegable work run inline on sonnet/opus
-  (per CLAUDE.md `## Delegation` / `## Model routing`). Found 1,753 violations across
+  (per CLAUDE.md `## Delegation (token discipline)`). Found 1,753 violations across
   8 local projects; worst offenders grocery-shop, academy, oauth2-samples (~100%
   sonnet, 0% delegation). Breakdown of read-only command violations: tail (85),
   cat (58), ls (30), head (12) — not explicitly covered by the CLAUDE.md rule text
