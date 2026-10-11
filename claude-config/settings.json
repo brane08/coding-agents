@@ -261,7 +261,8 @@
       "Bash(docker *)",
       "mcp__*"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "blockReadsOutsideWorkingDirectories": true
   },
   "model": "opusplan",
   "skillOverrides": {
