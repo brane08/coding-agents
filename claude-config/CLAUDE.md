@@ -96,8 +96,8 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 ## psql
 - SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
 - Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL. Never run a read-only
-  query (incl. in subagents, scripts, or `PGPASSWORD=… psql -c "SELECT…"`) via plain `psql`;
-  keep the same args (`-h/-U/-d/-c`), just swap the command for `select.sh`.
+  query (incl. in subagents or scripts) via plain `psql`; keep the same args (`-h/-U/-d/-c`),
+  just swap the command for `select.sh`. Local DB has no password — never set `PGPASSWORD`.
 
 ## Git sync before scans / new work
 - Before a codebase scan or starting new work: `git fetch origin <default>` and compare
@@ -127,6 +127,12 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 - No `cd x &&` prefixes in Bash — the cwd persists; use absolute paths or `git -C <dir>`.
   Compound commands defeat allow rules and prompt even for read-only calls. Maven: `mvn -f
   <abs>/pom.xml …` (or `-pl <module>` from the root), never `cd <module> && mvn`.
+- One command per Bash call (parallel calls when independent) — no `;`/`&&`/`|` chains or
+  `cmd; rm …` tails; a deny/ask match anywhere in a chain prompts the whole thing. Prefer
+  `Grep`/`Read`/`Glob` over shell pipelines.
+- No `sed -i` / `cat > f` / heredoc writes — use `Edit`/`Write`. No inline `python3` heredocs:
+  write the script to the scratchpad and run `python3 -I <script>`, or use `jq`.
+- Exclude `node_modules` from `find`/`grep` (`--exclude-dir`, `-not -path`) — deny rules block it.
 - Don't add comments restating what code obviously does.
 - Don't add unrequested README/docs files.
 - Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops — surface as "ask" only.
