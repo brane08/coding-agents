@@ -124,9 +124,12 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
   stale). If merged, cut a new branch from the latest default branch.
 
 ## Don't
-- No `cd x &&` prefixes in Bash — the cwd persists; use absolute paths or `git -C <dir>`.
-  Compound commands defeat allow rules and prompt even for read-only calls. Maven: `mvn -f
-  <abs>/pom.xml …` (or `-pl <module>` from the root), never `cd <module> && mvn`.
+- No `cd x &&` prefixes in Bash — the cwd persists; run plain `git …` — works from any
+  subdirectory of the repo, so never `git -C` for the current repo or a subdir of it. For a
+  different repo, `git -C <abs repo>` (will prompt) or dispatch to `code-search`.
+  Compound commands defeat allow rules and prompt even for read-only calls. Maven: plain `mvn … -pl
+  <module> -am` from the repo root (`-f <abs>/pom.xml` only for a project outside cwd), never
+  `cd <module> && mvn`. Same for `npm --prefix`, `ng`, `pytest <pkg dir>`: pass a path, don't `cd`.
 - One command per Bash call (parallel calls when independent) — no `;`/`&&`/`|` chains or
   `cmd; rm …` tails; a deny/ask match anywhere in a chain prompts the whole thing. Prefer
   `Grep`/`Read`/`Glob` over shell pipelines.
