@@ -118,6 +118,7 @@
       "Bash(git diff:*)",
       "Bash(git log *)",
       "Bash(git log:*)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh)",
       "Bash(git show *)",
       "Bash(git ls-files*)",
       "Bash(git rev-parse *)",
