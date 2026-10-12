@@ -38,7 +38,9 @@
 - No secrets inline in Bash (`TOKEN="..."`, `Bearer ...`, raw JWTs) — they persist in the
   transcript. Read from an env var or file.
 - `hooks/nudge-delegate.sh` injects a one-line reminder when a main-thread Bash call breaks
-  these rules. It never blocks; re-route.
+  these rules; it only blocks a `cd <dir> &&` prefix. Re-route.
+- `hooks/guard-merged-pr.sh` blocks `git push` / `gh pr create` from a branch whose PR is
+  merged → use the `pr-squash-sync` skill (new branch from `origin/<default>`).
 
 ## Session length
 - On a compaction summary at the start of context, or a shift to unrelated work: at the next
@@ -132,7 +134,8 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
   `cd <module> && mvn`. Same for `npm --prefix`, `ng`, `pytest <pkg dir>`: pass a path, don't `cd`.
 - One command per Bash call (parallel calls when independent) — no `;`/`&&`/`|` chains or
   `cmd; rm …` tails; a deny/ask match anywhere in a chain prompts the whole thing. Prefer
-  `Grep`/`Read`/`Glob` over shell pipelines.
+  `Grep`/`Glob` over shell pipelines when those tools exist in the session; otherwise
+  `rg`/`grep` via `code-search`.
 - No `sed -i` / `cat > f` / heredoc writes — use `Edit`/`Write`. No inline `python3` heredocs:
   write the script to the scratchpad and run `python3 -I <script>`, or use `jq`.
 - Exclude `node_modules` from `find`/`grep` (`--exclude-dir`, `-not -path`) — deny rules block it.
