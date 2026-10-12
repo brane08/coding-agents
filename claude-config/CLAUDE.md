@@ -95,7 +95,9 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 
 ## psql
 - SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
-- Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL.
+- Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL. Never run a read-only
+  query (incl. in subagents, scripts, or `PGPASSWORD=… psql -c "SELECT…"`) via plain `psql`;
+  keep the same args (`-h/-U/-d/-c`), just swap the command for `select.sh`.
 
 ## Git sync before scans / new work
 - Before a codebase scan or starting new work: `git fetch origin <default>` and compare
@@ -122,6 +124,9 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
   stale). If merged, cut a new branch from the latest default branch.
 
 ## Don't
+- No `cd x &&` prefixes in Bash — the cwd persists; use absolute paths or `git -C <dir>`.
+  Compound commands defeat allow rules and prompt even for read-only calls. Maven: `mvn -f
+  <abs>/pom.xml …` (or `-pl <module>` from the root), never `cd <module> && mvn`.
 - Don't add comments restating what code obviously does.
 - Don't add unrequested README/docs files.
 - Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops — surface as "ask" only.
