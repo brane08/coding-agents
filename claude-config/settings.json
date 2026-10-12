@@ -13,6 +13,8 @@
       "Read(./**)",
       "Edit(./**)",
       "Bash(java *)",
+      "Bash(java -jar */data-loader/target/*.jar*)",
+      "Bash(java -jar data-loader/target/*.jar*)",
       "Bash(javac *)",
       "Bash(javap *)",
       "Bash(jar -tf *)",
