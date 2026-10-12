@@ -63,6 +63,15 @@ case "$first" in
     ;;
 esac
 
+# Prompt hygiene: `cd x &&` prefixes and `git -C` defeat allow rules; cwd already persists.
+if printf '%s' "$cmd" | grep -Eq '^cd [^&;|]+(&&|;)'; then
+  cat_="${cat_:-cd-prefix}"
+  msg="${msg:+$msg }approvals: drop the 'cd <dir> &&' prefix (cwd persists); use an absolute path or 'mvn -pl <module> -am' from the repo root."
+elif printf '%s' "$cmd" | grep -Eq '^([A-Za-z_][A-Za-z0-9_]*=[^ ]* +)*git +-C '; then
+  cat_="${cat_:-git-C}"
+  msg="${msg:+$msg }approvals: run plain 'git ...' in the current repo (it works from any subdirectory); -C defeats allow rules."
+fi
+
 # Secret hygiene: inline bearer/JWT/token literals in a command.
 if printf '%s' "$cmd" | grep -Eq '(TOKEN|SECRET|PASSWORD|API_KEY|APIKEY)=["'"'"']?[A-Za-z0-9._-]{20,}|Bearer [A-Za-z0-9._-]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.'; then
   msg="${msg:+$msg }hygiene: a token/secret literal is inlined in this command; read it from an env var or file instead (it is persisted in the session transcript)."
