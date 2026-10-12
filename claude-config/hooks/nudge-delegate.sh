@@ -48,6 +48,12 @@ case "$first" in
         ;;
     esac
     ;;
+  psql)
+    if printf '%s' "$cmd" | grep -Eiq -- "-c +[\"']? *(select|explain|show|with)[ (]"; then
+      cat_="psql-readonly"
+      msg="psql: read-only query via plain psql prompts for permission; use 'bash ~/.claude/skills/psql-select/select.sh <same psql args>' (auto-approved)."
+    fi
+    ;;
   mvn|./mvnw|gradle|./gradlew|pytest|uv|python|python3|npm|npx|ng)
     if printf '%s' "$cmd" | grep -Eq '(^| )(test|verify|pytest|surefire:test|failsafe:integration-test|ng test|playwright test)( |$)' \
        && ! printf '%s' "$cmd" | grep -Eq -- '-Dtest='; then
