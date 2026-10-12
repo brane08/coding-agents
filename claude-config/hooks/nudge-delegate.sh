@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PreToolUse nudge for Bash. Never blocks. Injects a one-line reminder into the
+# PreToolUse nudge for Bash. Only blocks a main-thread `cd <dir> &&` prefix; everything else
+# just injects a one-line reminder into the
 # model's context when a main-thread Bash call looks like:
 #   - a read-only search/nav command   -> should go to the `code-search` agent (haiku)
 #   - a test run                       -> should go to `quick-triage` / `test-aggregator`
@@ -65,8 +66,9 @@ esac
 
 # Prompt hygiene: `cd x &&` prefixes and `git -C` defeat allow rules; cwd already persists.
 if printf '%s' "$cmd" | grep -Eq '^cd [^&;|]+(&&|;)'; then
-  cat_="${cat_:-cd-prefix}"
-  msg="${msg:+$msg }approvals: drop the 'cd <dir> &&' prefix (cwd persists); use an absolute path or 'mvn -pl <module> -am' from the repo root."
+  mkdir -p "$STATE" 2>/dev/null && printf '%s\t%s\t%s\t%s\n' "$now" "$sid" "cd-prefix-deny" "$(basename "$PWD")" >> "$STATE/delegation-nudges.tsv" 2>/dev/null
+  jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"Blocked: drop the \"cd <dir> &&\" prefix (cwd persists; compound commands prompt). Use an absolute path, plain git in the current repo, mvn ... -pl <module> -am from the repo root, or npm --prefix / pytest <pkg dir>."}}'
+  exit 0
 elif printf '%s' "$cmd" | grep -Eq '^([A-Za-z_][A-Za-z0-9_]*=[^ ]* +)*git +-C '; then
   cat_="${cat_:-git-C}"
   msg="${msg:+$msg }approvals: run plain 'git ...' in the current repo (it works from any subdirectory); -C defeats allow rules."

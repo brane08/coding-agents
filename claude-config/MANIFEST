@@ -11,6 +11,7 @@
 
 # Hooks first: settings.json references them, so they must exist before it lands.
 hooks/guard-git-push.sh
+hooks/guard-merged-pr.sh
 hooks/guard-writes.sh
 hooks/nudge-delegate.sh
 
@@ -54,6 +55,7 @@ skills/mvn-test/SKILL.md
 skills/mvn-test/test.sh
 skills/ng-verify/SKILL.md
 skills/ng-verify/verify.sh
+skills/pr-squash-sync/SKILL.md
 skills/psql-select/select.sh
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
