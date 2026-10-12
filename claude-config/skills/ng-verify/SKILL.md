@@ -13,6 +13,12 @@ Run one of:
   bash ~/.claude/skills/ng-verify/verify.sh                              # current dir
   bash ~/.claude/skills/ng-verify/verify.sh ui-angular                   # named app dir
   bash ~/.claude/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
+  bash ~/.claude/skills/ng-verify/verify.sh ui-angular --summary         # digest only
+
+Prefer `--summary` when dispatching: it prints just the verdict line, `error TS` lines and
+failing specs with their first error line. Never pipe the script through `grep`/`tail` — a
+piped command prompts for approval; the bare script call is allowlisted. The full log is
+always in `/tmp/ng-verify.log`.
 
 Notes:
 - Requires `tsconfig.app.json` in the target dir — errors out early if missing
