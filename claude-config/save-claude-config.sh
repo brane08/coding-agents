@@ -13,14 +13,24 @@
 #
 # This script lives inside claude-config/, so repo root = parent dir.
 #
-# Usage: ./save-claude-config.sh [path-to-repo]
-#   If path-to-repo is omitted, repo root is inferred as one level up
-#   from this script's own location (i.e. claude-config/..).
+# settings.json is profile-specific: ~/.claude/settings.json -> settings.<profile>.json.
+#
+# Usage: ./save-claude-config.sh [admin|sandbox]
+#   admin   (default) regular user with admin rights
+#   sandbox           low-privilege / sandboxed user
+#   Repo root is inferred as one level up from this script (claude-config/..);
+#   override with REPO_DIR=<path>.
 
 set -euo pipefail
 
+PROFILE="${1:-admin}"
+case "$PROFILE" in
+  admin|sandbox) ;;
+  *) echo "Error: profile must be 'admin' or 'sandbox', got: $PROFILE" >&2; exit 1 ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="${1:-$(dirname "$SCRIPT_DIR")}"
+REPO_DIR="${REPO_DIR:-$(dirname "$SCRIPT_DIR")}"
 DEST_DIR="${REPO_DIR}/claude-config"
 SRC_DIR="${HOME}/.claude"
 MANIFEST="${DEST_DIR}/MANIFEST"
@@ -36,7 +46,12 @@ fi
 
 mkdir -p "$DEST_DIR"
 
-echo "Saving (per MANIFEST): $SRC_DIR  ->  $DEST_DIR"
+if [[ ! -f "${SRC_DIR}/settings.json" ]]; then
+  echo "Error: settings not found: ${SRC_DIR}/settings.json" >&2
+  exit 1
+fi
+
+echo "Saving (per MANIFEST, profile: ${PROFILE}): $SRC_DIR  ->  $DEST_DIR"
 
 COUNT=0
 SKIPPED=0
@@ -51,6 +66,9 @@ while IFS= read -r rel; do
     SKIPPED=$((SKIPPED + 1))
   fi
 done < "$MANIFEST"
+
+cp -p "${SRC_DIR}/settings.json" "${DEST_DIR}/settings.${PROFILE}.json"
+COUNT=$((COUNT + 1))
 
 echo "Saved ${COUNT} file(s), ${SKIPPED} listed-but-missing."
 
