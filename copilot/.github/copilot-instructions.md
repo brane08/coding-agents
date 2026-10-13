@@ -1,0 +1,74 @@
+# Global preferences
+
+## Output
+- Terse: no preamble, no restating the request, no summary unless asked.
+- Code blocks: complete, copy-paste-ready, no "..." truncation unless huge.
+- Skip well-known-concept explanations unless asked.
+
+## Stack defaults (assume, don't ask)
+- Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
+- DB: PostgreSQL + Flyway (never `clean`/`repair` without explicit ask).
+- Frontend: Angular.
+- Shell: zsh, macOS or Ubuntu/Debian VM — no bash-only syntax unless asked.
+- Python multi-package/uv-workspace repo: scope `pytest` to the relevant package dir(s),
+  not repo root — unscoped collection breaks on sibling projects' conftests.
+
+## Helper scripts (`.github/skills/`)
+- Angular typecheck + unit tests: `bash .github/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
+- Read-only SQL: `bash .github/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
+- Maven build/test/dev and Flyway status: `.github/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
+
+## Memory
+Before analyzing a library/JAR/framework/internal detail: check `.github/memory/libs/`,
+then repo `.github/memory/` notes, then decompile/fetch docs only if neither answers it.
+Each note's first lines say what it covers; list the directory and open only what matches.
+
+File new learnings by reuse, not by where learned:
+- Library, framework, version quirk, JPMS rule → `.github/memory/libs/<lib-version>.md`
+- Reusable design pattern → `.github/memory/patterns/<name>.md`
+- Repo-only facts (names/paths/wiring) → a repo-specific note, linking to the
+  global note instead of restating it.
+
+Keep entries concise and copy-pasteable; no local paths or credentials; never dump raw
+decompiled output.
+
+Libs: `keepassjava2-2.2.4` (KeePass API, JPMS split-package) · `esbuild-esm` (exported `let`
+read-only, TS2540) · `javafx-21` (FXML/dialog/timer quirks, module-info opens) ·
+`javafx-21-fat-jar-packaging` (shade, launcher wrapper, macOS .app, CI release)
+
+Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow-mybatis-layer`
+(plain mybatis, CDI SqlSessionFactory) · `workflow-async-events` (WorkflowOutcomeEvent, fireAsync)
+· `deterministic-agent-platform` (stub+gate, verify artifacts) · `declarative-ai-agent-quarkus`
+(LangChain4j agent service) · `boundary-control-layering` (per-feature web-layer split) ·
+`quarkus-postgres-schema-multitenancy` (schema-per-tenant) · `rest-assured-csv-role-matrix`
+(role×endpoint×status smoke; also the authorisation-test rules) · `jmeter-load-smoke`
+(pre-flight checks before any JMeter run)
+
+## PRs
+- Never include AI/assistant attribution, session links, or "Generated with …" lines in commit
+  messages or PR descriptions.
+- Before opening a PR, squash to a single commit (soft-reset to merge-base + recommit, or
+  `rebase -i`) — don't ask first. Keep 2–3 commits only for a critical reason (independent
+  changes that must be revertable separately).
+- Squashing an unpushed branch isn't amending published work. Branch already pushed/shared →
+  ask before rewriting; never force-push silently.
+- Long-lived branch across tasks → re-check commit count before every `gh pr create`/`git push`.
+- Before committing/pushing to an existing branch, check its PR isn't merged
+  (`gh pr view <branch> --json state` or `gh api .../pulls/<n>` — `gh pr view` alone can be
+  stale). If merged, cut a new branch from the latest default branch.
+- Full workflow: `.github/instructions/git-pr.instructions.md`, `.github/skills/pr-squash-sync/`.
+
+## Don't
+- No `cd x &&` prefixes in terminal commands — the cwd persists; run plain `git …` (works from
+  any subdirectory), never `git -C` for the current repo. Maven: plain `mvn … -pl <module> -am`
+  from the repo root, never `cd <module> && mvn`. Same for `npm --prefix`, `ng`, `pytest <pkg dir>`.
+- One command per terminal call — avoid `;`/`&&`/`|` chains and `cmd; rm …` tails.
+- No heredoc/`sed -i`/`cat > f` file writes — use the editor tools. No inline `python3` heredocs:
+  write a script file and run `python3 -I <script>`, or use `jq`.
+- No secrets inline in commands (`TOKEN="..."`, `Bearer ...`, raw JWTs) — read from an env var or file.
+- Exclude `node_modules` from `find`/`grep`.
+- Don't add comments restating what code obviously does.
+- Don't add unrequested README/docs files.
+- Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops without explicit ask.
+- Don't resolve an npm peer-dependency conflict with `--legacy-peer-deps` on a
+  security-relevant package (auth, crypto, http-client) — pin a compatible version instead.
