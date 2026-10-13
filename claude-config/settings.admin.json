@@ -5,6 +5,7 @@
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
     "CLAUDE_CODE_TMPDIR": "/tmp"
   },
   "includeCoAuthoredBy": false,
@@ -104,13 +105,11 @@
       "Bash(bash ~/.claude/skills/flyway-check/flyway-check.sh*)",
       "Bash(bash ~/.claude/skills/ng-verify/verify.sh*)",
       "Bash(bash ~/.claude/skills/guarded-fs/guarded-fs.sh *)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/psql-select/select.sh *)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/mvn-build/build.sh*)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/mvn-test/test.sh*)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/quarkus-dev/dev.sh*)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/flyway-check/flyway-check.sh*)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/ng-verify/verify.sh*)",
-      "Bash(bash $CLAUDE_CONFIG_DIR/skills/guarded-fs/guarded-fs.sh *)",
+      "Bash(QUARKUS_PORT=* bash ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(python3 -I ~/.claude/skills/delegation-audit/audit.py*)",
+      "Bash(jq *)",
+      "Read(~/.claude/**)",
+      "Read(~/.m2/repository/**)",
       "Bash(git add *)",
       "Bash(git add:*)",
       "Bash(git fetch*)",
@@ -124,6 +123,11 @@
       "Bash(bash */claude-config/sync-claude-config.sh)",
       "Bash(bash */claude-config/sync-claude-config.sh admin)",
       "Bash(bash */claude-config/sync-claude-config.sh sandbox)",
+      "Bash(bash */claude-config/save-claude-config.sh)",
+      "Bash(bash */claude-config/save-claude-config.sh admin)",
+      "Bash(bash */claude-config/save-claude-config.sh sandbox)",
+      "Bash(git rev-list *)",
+      "Bash(git merge --ff-only *)",
       "Bash(git show *)",
       "Bash(git ls-files*)",
       "Bash(git rev-parse *)",
@@ -317,6 +321,11 @@
             "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-merged-pr.sh\" 2>/dev/null || true",
             "timeout": 12,
             "statusMessage": "Checking PR state..."
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-git-push.sh\" 2>/dev/null || true",
+            "timeout": 5
           }
         ]
       }

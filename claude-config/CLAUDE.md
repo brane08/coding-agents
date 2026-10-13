@@ -42,6 +42,15 @@
 - `hooks/guard-merged-pr.sh` blocks `git push` / `gh pr create` from a branch whose PR is
   merged → use the `pr-squash-sync` skill (new branch from `origin/<default>`).
 
+## Config sync (claude-config repo ↔ ~/.claude)
+- Repo → `~/.claude`: `bash <repo>/claude-config/sync-claude-config.sh [admin|sandbox]`
+  (default `admin`; copies only `MANIFEST` paths, overwrites; `settings.<profile>.json` →
+  `~/.claude/settings.json`). "Sync" with no profile named → admin; ask if unclear.
+- `~/.claude` → repo: `bash <repo>/claude-config/save-claude-config.sh [admin|sandbox]`
+  (refreshes `MANIFEST` paths only; `settings.json` → `settings.<profile>.json`).
+- New file to track → add a `MANIFEST` line + `git add`; scripts never add files themselves.
+- No explicit reload step; settings are normally picked up live, else restart the session.
+
 ## Session length
 - On a compaction summary at the start of context, or a shift to unrelated work: at the next
   natural pause say "Session compacted N× — consider /clear or a fresh session." Once per

@@ -1,0 +1,36 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^java\\b/": true,
+    "/^javac\\b/": true,
+    "/^javap\\b/": true,
+    "/^jar (-?tf|-?xf)\\b/": true,
+    "/^unzip\\b/": true,
+    "/^mvn\\b(?!.*flyway:(clean|repair))/": true,
+    "/^\\.\\/mvnw\\b(?!.*flyway:(clean|repair))/": true,
+    "/^(gradle|\\.\\/gradlew) (test|build|run|bootRun|quarkusDev|:|\\S*Test)/": true,
+    "/^pytest\\b/": true,
+    "/^npx playwright (test|codegen|show-report)\\b/": true,
+    "/^npm (install$|test\\b|run (build|lint)\\b)/": true,
+    "/^ng (serve|build)\\b/": true,
+    "/^(QUARKUS_PORT=\\S+ )?bash \\.github\\/skills\\/(psql-select\\/select|mvn-build\\/build|mvn-test\\/test|quarkus-dev\\/dev|flyway-check\\/flyway-check|ng-verify\\/verify|guarded-fs\\/guarded-fs)\\.sh\\b/": true,
+    "/^jq\\b/": true,
+    "/^git (add|fetch|commit|status|diff|log|rev-list|merge --ff-only|show|ls-files|rev-parse|branch --show-current|worktree (list|add)|switch|stash|rm|mv|branch -d)\\b/": true,
+    "/^gh (pr (view|list|diff|checks)|issue view|repo view)\\b/": true,
+    "/^(kill|pkill -f|fuser -k|lsof -ti|lsof -i)\\b/": true,
+    "/^(mkdir|find|ls|cat|grep|head|tail|wc|sort|echo|which|pwd|date|uv)\\b/": true,
+
+    "/^mvn\\b.*flyway:(clean|repair)/": false,
+    "/^\\.\\/mvnw\\b.*flyway:(clean|repair)/": false,
+    "/^rm\\b/": false,
+    "/^rmdir\\b/": false,
+    "/^mv\\b/": false,
+    "/^cp\\b/": false,
+    "/^dd\\b/": false,
+    "/^sudo\\b/": false,
+    "/^chmod\\b/": false,
+    "/^chown\\b/": false,
+    "/^(shutdown|reboot|mkfs|format)\\b/": false,
+    "/^(curl|wget|ssh|scp)\\b/": false,
+    "/^cat ~\\/\\.(ssh|aws)\\//": false
+  }
+}
