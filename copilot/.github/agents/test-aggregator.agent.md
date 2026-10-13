@@ -1,5 +1,6 @@
 ---
 description: Summarize a Maven test run — pass/fail counts per module, failing test names, first stack trace line per failure, and suggested -Dtest= rerun commands. Read-only, parses surefire XML and console output.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

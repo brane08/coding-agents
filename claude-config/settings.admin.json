@@ -5,7 +5,7 @@
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
     "CLAUDE_CODE_TMPDIR": "/tmp"
   },
   "includeCoAuthoredBy": false,
@@ -342,7 +342,7 @@
       }
     }
   },
-  "autoCompactWindow": 190000,
+  "autoCompactWindow": 200000,
   "autoMemoryEnabled": false,
   "theme": "light",
   "agentPushNotifEnabled": false,

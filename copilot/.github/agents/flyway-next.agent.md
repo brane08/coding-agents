@@ -1,5 +1,6 @@
 ---
 description: Report the next Flyway migration version and which migrations are pending/applied (V1.0_XX numbering). Read-only — never runs migrate/clean/repair.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

@@ -1,5 +1,6 @@
 ---
 description: Check whether a workflow is fully wired — WorkflowData, PersistentWorkflow class, deriveType() mapping, ACTION_MAP in Angular, wait()+getAndRemoveResponse() pairing, and test coverage. Read-only.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

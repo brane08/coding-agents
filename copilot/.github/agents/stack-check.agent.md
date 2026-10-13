@@ -1,5 +1,6 @@
 ---
 description: Check whether a domain entity is fully wired — DTO, Entity, Mapper, ServiceImpl, JAX-RS Resource, and CDI producer registrations across core-api, data-ebean/data-hibernate, and mono-quarkus. Read-only.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

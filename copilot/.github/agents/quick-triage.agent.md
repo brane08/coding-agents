@@ -1,5 +1,6 @@
 ---
 description: Triage and summarize build/test output, logs, and Flyway status. Good for log scanning, error message triage, and routine status checks (build pass/fail, test results summary). Does not fix.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

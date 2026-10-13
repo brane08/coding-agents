@@ -1,5 +1,6 @@
 ---
 description: Maven dependency tree inspection — what pulls in a given artifact, version conflicts, transitive dependencies for a module. Read-only, no pom.xml edits.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 
