@@ -37,8 +37,8 @@
   only when the diff touches auth, crypto, concurrency, or data migration — say so.
 - No secrets inline in Bash (`TOKEN="..."`, `Bearer ...`, raw JWTs) — they persist in the
   transcript. Read from an env var or file.
-- `hooks/nudge-delegate.sh` injects a one-line reminder when a main-thread Bash call breaks
-  these rules; it only blocks a `cd <dir> &&` prefix. Re-route.
+- `hooks/nudge-delegate.sh` denies a `cd <dir> &&` prefix and reminds on read-only psql,
+  `git -C`, inline secrets. Re-route.
 - `hooks/guard-merged-pr.sh` blocks `git push` / `gh pr create` from a branch whose PR is
   merged → use the `pr-squash-sync` skill (new branch from `origin/<default>`).
 
@@ -94,7 +94,11 @@ decompiled output.
 
 Libs: `keepassjava2-2.2.4` (KeePass API, JPMS split-package) · `esbuild-esm` (exported `let`
 read-only, TS2540) · `javafx-21` (FXML/dialog/timer quirks, module-info opens) ·
-`javafx-21-fat-jar-packaging` (shade, launcher wrapper, macOS .app, CI release)
+`javafx-21-fat-jar-packaging` (shade, launcher wrapper, macOS .app, CI release) ·
+`fxtrayicon-4.2.3` · `testfx-4.0.18-monocle` (headless JavaFX UI tests) · `jnativehook-2.2.2` ·
+`copper-8.1` (mock-based workflow/infra unit tests) · `hibernate-7.4` (mock-based repo unit
+tests) · `ebean-19` · `quarkus-3` (Agroal pool interceptor) · `jmeter-maven-plugin-3.8` (run
+quirks) · `spring-cloud-gateway-server-webmvc-5.0.3`
 
 Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow-mybatis-layer`
 (plain mybatis, CDI SqlSessionFactory) · `workflow-async-events` (WorkflowOutcomeEvent, fireAsync)
@@ -102,7 +106,8 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 (LangChain4j agent service) · `boundary-control-layering` (per-feature web-layer split) ·
 `quarkus-postgres-schema-multitenancy` (schema-per-tenant) · `rest-assured-csv-role-matrix`
 (role×endpoint×status smoke; also the authorisation-test rules) · `jmeter-load-smoke`
-(pre-flight checks before any JMeter run)
+(pre-flight checks before any JMeter run) · `jacoco-mock-unit-coverage` (JaCoCo with mock-based
+unit tests, multi-module Maven)
 
 ## psql
 - SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).

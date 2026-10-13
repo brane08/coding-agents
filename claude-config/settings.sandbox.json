@@ -120,12 +120,12 @@
       "Bash(git diff:*)",
       "Bash(git log *)",
       "Bash(git log:*)",
-      "Bash(bash */claude-config/sync-claude-config.sh)",
-      "Bash(bash */claude-config/sync-claude-config.sh admin)",
-      "Bash(bash */claude-config/sync-claude-config.sh sandbox)",
-      "Bash(bash */claude-config/save-claude-config.sh)",
-      "Bash(bash */claude-config/save-claude-config.sh admin)",
-      "Bash(bash */claude-config/save-claude-config.sh sandbox)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh admin)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh sandbox)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh admin)",
+      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh sandbox)",
       "Bash(git rev-list *)",
       "Bash(git merge --ff-only *)",
       "Bash(git show *)",
@@ -275,6 +275,9 @@
       "Bash(cp *)",
       "Bash(mv *)",
       "mcp__*"
+    ],
+    "additionalDirectories": [
+      "~/.claude/projects"
     ],
     "defaultMode": "auto",
     "blockReadsOutsideWorkingDirectories": true
