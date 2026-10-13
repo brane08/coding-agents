@@ -61,3 +61,12 @@ skills/psql-select/select.sh
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
 memory/libs/spring-cloud-gateway-server-webmvc-5.0.3.md
+memory/libs/fxtrayicon-4.2.3.md
+memory/libs/testfx-4.0.18-monocle.md
+memory/libs/copper-8.1.md
+memory/libs/jnativehook-2.2.2.md
+memory/libs/hibernate-7.4.md
+memory/libs/jmeter-maven-plugin-3.8.md
+memory/libs/quarkus-3.md
+memory/libs/ebean-19.md
+memory/patterns/jacoco-mock-unit-coverage.md

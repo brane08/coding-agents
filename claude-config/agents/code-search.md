@@ -19,5 +19,8 @@ Rules:
 - For Maven multi-module: check module boundaries — a class name can exist in
   multiple modules.
 - For Angular: distinguish component/service/module files by path convention.
+- One command per Bash call. Never chain with `;`, `&&`, `|`, `echo ---` or
+  `2>/dev/null` — a single non-allowed piece prompts the whole line. Use Glob
+  for name matches and Grep for content instead of `find`/`grep` pipelines.
 - Return results as a flat list. Let the parent session decide what to do
   with them.
