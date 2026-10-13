@@ -1,5 +1,6 @@
 ---
 description: Read-only code navigator — find files, grep usages, trace dependencies, locate config/migrations, inspect logs. For "where is X" / "find all Y" / "what calls Z" tasks that need no edits.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 

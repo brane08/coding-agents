@@ -1,5 +1,6 @@
 ---
 description: Inspect a third-party JAR's API/bytecode when source/docs aren't available — method signatures, what a method actually does, whether a constructor/overload exists. Read-only.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'execute']
 ---
 
