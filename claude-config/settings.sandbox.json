@@ -12,6 +12,7 @@
     "allow": [
       "Read(./**)",
       "Edit(./**)",
+      "Edit(~/.claude/**)",
       "Bash(java *)",
       "Bash(java -jar */data-loader/target/*.jar*)",
       "Bash(java -jar data-loader/target/*.jar*)",
@@ -121,6 +122,8 @@
       "Bash(git log *)",
       "Bash(git log:*)",
       "Bash(bash */claude-config/sync-claude-config.sh)",
+      "Bash(bash */claude-config/sync-claude-config.sh admin)",
+      "Bash(bash */claude-config/sync-claude-config.sh sandbox)",
       "Bash(git show *)",
       "Bash(git ls-files*)",
       "Bash(git rev-parse *)",
@@ -128,6 +131,8 @@
       "Bash(git worktree list*)",
       "Bash(git worktree add *)",
       "Bash(git switch *)",
+      "Bash(git checkout *)",
+      "Bash(git push *)",
       "Bash(git stash *)",
       "Bash(git stash pop*)",
       "Bash(git rm *)",
@@ -204,8 +209,6 @@
       "Bash(rm -rf /*)",
       "Bash(rm *)",
       "Bash(rmdir *)",
-      "Bash(mv *)",
-      "Bash(cp *)",
       "Bash(dd *)",
       "Bash(sudo *)",
       "Bash(sudo:*)",
@@ -250,13 +253,10 @@
       "Edit(**/build/**)"
     ],
     "ask": [
-      "Edit(~/.claude/**)",
       "Bash(git reset *)",
-      "Bash(git push *)",
       "Bash(git push --tags*)",
       "Bash(git push --force*)",
       "Bash(git push -f*)",
-      "Bash(git checkout *)",
       "Bash(git branch -D *)",
       "Bash(git remote *)",
       "Bash(git tag *)",
@@ -268,7 +268,8 @@
       "Bash(go mod *)",
       "Bash(uv pip install*)",
       "Bash(psql *)",
-      "Bash(docker *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
       "mcp__*"
     ],
     "defaultMode": "auto",
@@ -340,7 +341,9 @@
       "$defaults",
       "Bash(mvn flyway:info:*)",
       "Bash(mvn flyway:migrate -pl data-ebean)",
-      "Bash(mvn test -pl mono-quarkus:*)"
+      "Bash(mvn test -pl mono-quarkus:*)",
+      "Bash(bash */claude-config/sync-claude-config.sh*)",
+      "Bash(bash */claude-config/save-claude-config.sh*)"
     ],
     "soft_deny": [
       "$defaults",
@@ -370,6 +373,7 @@
       "### User-specific",
       "**Primary use of Claude Code**: software development (Java/Quarkus + Angular school-management monorepo, academy repo)",
       "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
+      "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude-config/ dir is the versioned source of ~/.claude; running claude-config/sync-claude-config.sh or save-claude-config.sh (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
       "**Org-specific CLIs**: None configured",
       "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
     ]

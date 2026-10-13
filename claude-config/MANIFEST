@@ -15,7 +15,8 @@ hooks/guard-merged-pr.sh
 hooks/guard-writes.sh
 hooks/nudge-delegate.sh
 
-settings.json
+# settings.json is profile-specific (settings.admin.json / settings.sandbox.json) and is
+# handled by the sync/save scripts directly, not listed here.
 CLAUDE.md
 
 agents/boilerplate-gen.md

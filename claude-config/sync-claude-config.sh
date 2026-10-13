@@ -12,14 +12,24 @@
 #
 # This script lives inside claude-config/, so repo root = parent dir.
 #
-# Usage: ./sync-claude-config.sh [path-to-repo]
-#   If path-to-repo is omitted, repo root is inferred as one level up
-#   from this script's own location (i.e. claude-config/..).
+# settings.json is profile-specific: settings.<profile>.json -> ~/.claude/settings.json.
+#
+# Usage: ./sync-claude-config.sh [admin|sandbox]
+#   admin   (default) regular user with admin rights
+#   sandbox           low-privilege / sandboxed user
+#   Repo root is inferred as one level up from this script (claude-config/..);
+#   override with REPO_DIR=<path>.
 
 set -euo pipefail
 
+PROFILE="${1:-admin}"
+case "$PROFILE" in
+  admin|sandbox) ;;
+  *) echo "Error: profile must be 'admin' or 'sandbox', got: $PROFILE" >&2; exit 1 ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="${1:-$(dirname "$SCRIPT_DIR")}"
+REPO_DIR="${REPO_DIR:-$(dirname "$SCRIPT_DIR")}"
 SRC_DIR="${REPO_DIR}/claude-config"
 DEST_DIR="${HOME}/.claude"
 MANIFEST="${SRC_DIR}/MANIFEST"
@@ -35,7 +45,13 @@ fi
 
 mkdir -p "$DEST_DIR"
 
-echo "Syncing (per MANIFEST): $SRC_DIR  ->  $DEST_DIR"
+SETTINGS_SRC="${SRC_DIR}/settings.${PROFILE}.json"
+if [[ ! -f "$SETTINGS_SRC" ]]; then
+  echo "Error: settings profile not found: $SETTINGS_SRC" >&2
+  exit 1
+fi
+
+echo "Syncing (per MANIFEST, profile: ${PROFILE}): $SRC_DIR  ->  $DEST_DIR"
 
 COUNT=0
 MISSING=0
@@ -50,6 +66,9 @@ while IFS= read -r rel; do
     MISSING=$((MISSING + 1))
   fi
 done < "$MANIFEST"
+
+cp -p "$SETTINGS_SRC" "${DEST_DIR}/settings.json"
+COUNT=$((COUNT + 1))
 
 echo "Synced ${COUNT} file(s), ${MISSING} listed-but-missing."
 
