@@ -9,7 +9,13 @@ Run (read-only, no model needed to parse):
 python3 -I ~/.claude/skills/delegation-audit/audit.py --since YYYY-MM-DD
 ```
 
-Prints counts per command category and per project, plus top command shapes (first 80 chars,
-secrets redacted). Counts are an upper bound: it can't tell whether a `cat`/`sed` target was
-created that turn. Compare against the last entry in `~/.claude/memory/delegation-audit-log.md`
-(baseline 2026-10-07: 408 since 2026-09-23). Append a 2–3 line entry there; do not paste raw output.
+Counts a lookup (Bash, Grep or Glob) as a violation only when it is the 2nd+ in a run with no
+Edit/Write/Agent between, is piped/chained, or is an inline module-wide test run; a single
+lookup is the allowed locate-before-edit. Prints the run-based count, rate, runs of 3+, a raw
+legacy count (old method), per command/project, and top shapes (80 chars, secrets redacted).
+Compare the rate against the last entry in `~/.claude/memory/delegation-audit-log.md`; old raw
+baselines (408 since 2026-09-23, 808 since 2026-10-07) compare only with the raw line.
+Append a 2–3 line entry there; do not paste raw output.
+
+Context/compaction scan (for window or autocompact tuning): `python3 -I ~/.claude/skills/delegation-audit/ctx.py`
+(peak context, compactions per session, context at compaction, turns per session; main thread only).

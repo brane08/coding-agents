@@ -59,6 +59,12 @@ if [ -n "$FAILURES" ]; then
   echo ""
   echo "Failed:"
   echo "$FAILURES"
+  echo ""
+  echo "Details (first 6 lines after each failure):"
+  for f in */target/surefire-reports/*.txt target/surefire-reports/*.txt; do
+    [ -f "$f" ] || continue
+    grep -A6 -E "<<< (FAILURE|ERROR)" "$f" | head -40 || true
+  done
 fi
 
 exit $EXIT

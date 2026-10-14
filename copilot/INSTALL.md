@@ -23,6 +23,7 @@ Recommended setup: keep one canonical dir, `~/.copilot/`, as a copy of `copilot/
 3. Copy or symlink `.github/` into a repo only for project-specific rules.
 
 Global install: script and memory paths in the text (`.github/skills/...`, `.github/memory/...`) must be rewritten to `~/.copilot/skills/...` and `~/.copilot/memory/...`.
+The terminal auto-approve regex in `vscode-settings.snippet.json` only matches repo-relative `bash .github/skills/...`; for a global install change it to match `bash ~/.copilot/skills/...` too. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
 
 ## VS Code settings
 Merge `vscode-settings.snippet.json` into user `settings.json` (terminal auto-approve: allow = true, deny = false; everything else prompts).

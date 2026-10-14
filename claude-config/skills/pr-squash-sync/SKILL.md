@@ -5,14 +5,11 @@ description: Sync a branch with origin, squash it to one commit and push or open
 
 Run each step as its own Bash call (no `cd`, no chains). Replace `<default>` with the repo's default branch (usually `main`).
 
-1. **Sync check**
-   - `git fetch origin <default>`
-   - `git status --short` (must be clean; otherwise stop and report)
-   - `git rev-list --left-right --count HEAD...origin/<default>`
-   - `git branch --show-current`
+1. **Sync check** — one call: `bash ~/.claude/skills/pr-squash-sync/sync-check.sh <default>`
+   (fetch, branch, status, ahead/behind, tree diff vs origin/<default>, last 3 commits, PR states).
+   Status must be clean; otherwise stop and report.
 
-2. **Is the branch's PR merged?**
-   - `gh pr list --head <branch> --state all --limit 5 --json number,state`
+2. **Is the branch's PR merged?** (the script's last section)
    - `gh pr view <branch> --json state` can be stale; trust `gh pr list`/`gh api`.
    - OPEN → continue on this branch. MERGED (and none OPEN) → step 3. None → step 4.
 
