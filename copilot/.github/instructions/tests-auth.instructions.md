@@ -6,6 +6,6 @@ applyTo: "**/*Test*.java,**/*IT*.java"
 - Confirm roles per test user via `bash .github/skills/psql-select/select.sh` and the endpoint's `@RolesAllowed`/`@PermitAll`. Never assume seed ids.
 - Matrix shape: one `@ParameterizedTest` + `@CsvFileSource`, columns `name,role,method,path,query,expectedStatus,bodyRegex`; a missing or empty CSV must fail.
 - Assert both directions: allowed → 2xx, disallowed → 403, no/invalid token → 401 (`ANON` = invalid token, not a missing header).
-- Run: `bash .github/skills/mvn-test/test.sh <module> [TestClass]`. Single rerun: `mvn -pl <module> -Dtest=Class#method test`.
-- Never `-q` on `mvn test`. Product IDs don't start at 1; REST responses are `{success, data}`; keep the `WELCOME10` promo active.
+- Run: `bash .github/skills/mvn-test/test.sh <module> [TestClass]`. Single rerun: `mvn -pl <module> -am -Dtest=Class#method -Dsurefire.failIfNoSpecifiedTests=false test`.
+- Never `-q` on `mvn test`. REST responses are `{success, data}`.
 - JMeter only for load/perf or smoke against a deployed env.

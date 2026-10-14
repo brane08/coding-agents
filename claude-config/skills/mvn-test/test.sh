@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Usage:
 #   test.sh                                → tests current dir module
-#   test.sh mono-quarkus                   → tests named module
+#   test.sh mono-quarkus                   → tests named module (with -am)
 #   test.sh mono-quarkus UserServiceTest   → specific test class in module
 
 LOG=/tmp/mvn-test.log
@@ -16,31 +16,34 @@ if grep -q "<modules>" pom.xml 2>/dev/null; then
   IS_REACTOR=true
 fi
 
-MODULE=""
-PATTERN=""
+MODULE="${1:-}"
+PATTERN="${2:-}"
 
-case $# in
-  0) ;;
-  1) MODULE="$1" ;;
-  2) MODULE="$1"; PATTERN="$2" ;;
-  *) MODULE="$1"; PATTERN="$2" ;;
-esac
+if [ -n "$MODULE" ] && ! [[ "$MODULE" =~ ^[A-Za-z0-9._,:/-]+$ ]]; then
+  echo "ERROR: invalid module name: $MODULE"
+  exit 2
+fi
+if [ -n "$PATTERN" ] && ! [[ "$PATTERN" =~ ^[A-Za-z0-9._,#*?+!-]+$ ]]; then
+  echo "ERROR: invalid test pattern: $PATTERN"
+  exit 2
+fi
 
-# Build command
 if [ -n "$MODULE" ] && [ -n "$PATTERN" ]; then
-  CMD="mvn verify -pl $MODULE -Dtest=$PATTERN -DfailIfNoTests=false"
+  CMD=(mvn verify -pl "$MODULE" -am "-Dtest=$PATTERN" -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false)
 elif [ -n "$MODULE" ]; then
-  CMD="mvn verify -pl $MODULE"
+  CMD=(mvn verify -pl "$MODULE" -am)
 elif [ "$IS_REACTOR" = true ]; then
   echo "ERROR: At reactor root. Specify a module: test.sh <module> [TestClass]"
   exit 1
 else
-  CMD="mvn verify"
+  CMD=(mvn verify)
 fi
 
-echo "Running: $CMD"
-eval "$CMD" 2>&1 | tee "$LOG"
+echo "Running: ${CMD[*]}"
+set +e
+"${CMD[@]}" 2>&1 | tee "$LOG"
 EXIT=${PIPESTATUS[0]}
+set -e
 
 END=$(date +%s)
 DURATION=$((END - START))

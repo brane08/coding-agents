@@ -15,14 +15,16 @@
 # settings.json is profile-specific: settings.<profile>.json -> ~/.claude/settings.json.
 #
 # Usage: ./sync-claude-config.sh [admin|sandbox]
-#   admin   (default) regular user with admin rights
-#   sandbox           low-privilege / sandboxed user
+#   admin   regular user with admin rights
+#   sandbox low-privilege / sandboxed user
+#   No argument: reuse the profile last synced on this machine (~/.claude/.profile), else admin.
 #   Repo root is inferred as one level up from this script (claude-config/..);
 #   override with REPO_DIR=<path>.
 
 set -euo pipefail
 
-PROFILE="${1:-admin}"
+PROFILE_MARKER="${HOME}/.claude/.profile"
+PROFILE="${1:-$(cat "$PROFILE_MARKER" 2>/dev/null || echo admin)}"
 case "$PROFILE" in
   admin|sandbox) ;;
   *) echo "Error: profile must be 'admin' or 'sandbox', got: $PROFILE" >&2; exit 1 ;;
@@ -68,6 +70,7 @@ while IFS= read -r rel; do
 done < "$MANIFEST"
 
 cp -p "$SETTINGS_SRC" "${DEST_DIR}/settings.json"
+printf '%s\n' "$PROFILE" > "$PROFILE_MARKER"
 COUNT=$((COUNT + 1))
 
 echo "Synced ${COUNT} file(s), ${MISSING} listed-but-missing."

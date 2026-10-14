@@ -11,7 +11,7 @@ Run: QUARKUS_PORT=8102 bash .github/skills/quarkus-dev/dev.sh
 App runs at: http://localhost:8102
 Dev UI at:   http://localhost:8102/q/dev
 
-Note: Must be run from mono-quarkus/ dir or set CLAUDE_PROJECT_DIR.
+Note: Runs from the project root by default; set CLAUDE_PROJECT_DIR=<abs>/mono-quarkus to start from the module dir.
 Stale JARs → NoSuchMethodError — always full rebuild after module changes.
 
 Report:

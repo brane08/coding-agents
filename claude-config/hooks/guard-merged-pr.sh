@@ -10,13 +10,28 @@ input=$(cat)
 cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
 [ -z "$cmd" ] && exit 0
 
+protected=${CLAUDE_PROTECTED_BRANCHES:-main master}
+
 hit=0
+pushed=""
 while IFS= read -r seg; do
   # shellcheck disable=SC2086
   set -- $seg
   while [ $# -gt 0 ] && printf '%s' "$1" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*='; do shift; done
   case "${1:-}" in
-    git) case " $* " in *" push "*) hit=1 ;; esac ;;
+    git)
+      case " $* " in
+        *" push "*)
+          hit=1
+          # first non-flag word after `push` is the remote, the next is the refspec
+          seen=0; n=0
+          for w in "$@"; do
+            if [ "$seen" = 0 ]; then [ "$w" = push ] && seen=1; continue; fi
+            case "$w" in -*) continue ;; esac
+            n=$((n + 1))
+            if [ "$n" = 2 ]; then w=${w#+}; pushed=${w##*:}; fi
+          done ;;
+      esac ;;
     gh)  case " $* " in *" pr create"*|*" pr  create"*) hit=1 ;; esac ;;
   esac
 done <<EOF
@@ -26,7 +41,10 @@ EOF
 
 command -v gh >/dev/null 2>&1 || exit 0
 branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || exit 0
-case "$branch" in HEAD|main|master|"") exit 0 ;; esac
+[ -n "$pushed" ] && [ "$pushed" != HEAD ] && branch=${pushed#refs/heads/}
+[ -z "$branch" ] && exit 0
+[ "$branch" = HEAD ] && exit 0
+for b in $protected; do [ "$branch" = "$b" ] && exit 0; done
 
 tmo=$(command -v timeout || command -v gtimeout || true)
 states=$(${tmo:+$tmo 8} gh pr list --head "$branch" --state all --limit 5 --json state -q '.[].state' 2>/dev/null) || exit 0
