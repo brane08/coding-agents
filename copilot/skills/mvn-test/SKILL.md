@@ -8,9 +8,9 @@ description: >
 # Maven Test
 
 Run one of:
-  bash .github/skills/mvn-test/test.sh mono-quarkus                       # all tests
-  bash .github/skills/mvn-test/test.sh mono-quarkus StudentResourceTest   # specific class
-  bash .github/skills/mvn-test/test.sh data-hibernate                     # unit tests only
+  bash ~/.copilot/skills/mvn-test/test.sh mono-quarkus                       # all tests
+  bash ~/.copilot/skills/mvn-test/test.sh mono-quarkus StudentResourceTest   # specific class
+  bash ~/.copilot/skills/mvn-test/test.sh data-hibernate                     # unit tests only
 
 Notes:
 - Never pass `-q` to `mvn test` — it suppresses the `Tests run:`/`BUILD SUCCESS`/

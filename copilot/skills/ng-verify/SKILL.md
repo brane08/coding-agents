@@ -7,10 +7,10 @@ description: >
 # Angular Verify
 
 Run one of:
-  bash .github/skills/ng-verify/verify.sh                              # current dir
-  bash .github/skills/ng-verify/verify.sh ui-angular                   # named app dir
-  bash .github/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
-  bash .github/skills/ng-verify/verify.sh ui-angular --summary         # digest only
+  bash ~/.copilot/skills/ng-verify/verify.sh                              # current dir
+  bash ~/.copilot/skills/ng-verify/verify.sh ui-angular                   # named app dir
+  bash ~/.copilot/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
+  bash ~/.copilot/skills/ng-verify/verify.sh ui-angular --summary         # digest only
 
 Prefer `--summary`: it prints just the verdict line, `error TS` lines and
 failing specs with their first error line. Don't pipe the script through `grep`/`tail`

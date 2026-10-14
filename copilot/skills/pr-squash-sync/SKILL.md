@@ -5,7 +5,7 @@ description: Sync a branch with origin, squash it to one commit and push or open
 
 Run each step as its own terminal command (no `cd`, no chains). Replace `<default>` with the repo's default branch (usually `main`).
 
-1. **Sync check** — one command: `bash .github/skills/pr-squash-sync/sync-check.sh <default>`
+1. **Sync check** — one command: `bash ~/.copilot/skills/pr-squash-sync/sync-check.sh <default>`
    (fetch, branch, status, ahead/behind, tree diff vs origin/<default>, last 3 commits, PR states).
    Status must be clean; otherwise stop and report.
 
@@ -26,7 +26,7 @@ Run each step as its own terminal command (no `cd`, no chains). Replace `<defaul
 
 6. **Push / PR**
    - `git push -u origin <branch>`
-   - `gh pr create --base <default> --title … --body …` (see `.github/copilot-instructions.md` for the PR rules)
+   - `gh pr create --base <default> --title … --body …` (see `~/.copilot/copilot-instructions.md` for the PR rules)
    - Update an existing PR's text with `gh pr edit <n> --body-file <file>`.
 
 7. **After merge**: `git fetch origin <default>`, `git switch <default>`, `git merge --ff-only origin/<default>`, then `git log --oneline -2`.

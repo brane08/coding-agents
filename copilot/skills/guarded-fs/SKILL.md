@@ -9,9 +9,9 @@ description: >
 # Guarded rm/mv/cp
 
 Run one of:
-  bash .github/skills/guarded-fs/guarded-fs.sh rm <path>...
-  bash .github/skills/guarded-fs/guarded-fs.sh mv <src> <dst>
-  bash .github/skills/guarded-fs/guarded-fs.sh cp [-r] <src>... <dst>
+  bash ~/.copilot/skills/guarded-fs/guarded-fs.sh rm <path>...
+  bash ~/.copilot/skills/guarded-fs/guarded-fs.sh mv <src> <dst>
+  bash ~/.copilot/skills/guarded-fs/guarded-fs.sh cp [-r] <src>... <dst>
 
 Hard rules (cannot be bypassed by flags or symlinks):
 - Every source and destination path must resolve (symlinks followed) inside

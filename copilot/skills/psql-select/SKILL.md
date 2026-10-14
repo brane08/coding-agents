@@ -4,9 +4,9 @@ description: Run read-only PostgreSQL queries (SELECT, EXPLAIN, SHOW, WITH) thro
 ---
 # Read-only psql
 
-Run: bash .github/skills/psql-select/select.sh <normal psql args incl. -c "<sql>">
+Run: bash ~/.copilot/skills/psql-select/select.sh <normal psql args incl. -c "<sql>">
 
-Example: bash .github/skills/psql-select/select.sh -h localhost -U dev -d dev -c "SELECT 1"
+Example: bash ~/.copilot/skills/psql-select/select.sh -h localhost -U dev -d dev -c "SELECT 1"
 
 - Takes the same args as `psql`; the SQL must be passed via exactly one `-c`, one statement (trailing `;` ok). `-f`, `--command` and combined flags like `-Atc` are blocked; pass `-A`/`-t` separately.
 - Only runs when the first word of the SQL is SELECT, EXPLAIN, SHOW or WITH; otherwise exits 1 ("blocked").

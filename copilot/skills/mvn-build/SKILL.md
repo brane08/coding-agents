@@ -8,9 +8,9 @@ description: >
 # Maven Build
 
 Run one of:
-  bash .github/skills/mvn-build/build.sh mono-quarkus      # main app module (with -am)
-  bash .github/skills/mvn-build/build.sh data-ebean        # data module (with -am)
-  bash .github/skills/mvn-build/build.sh --reactor         # full reactor (when asked, or after data-ebean/workflow-core changes)
+  bash ~/.copilot/skills/mvn-build/build.sh mono-quarkus      # main app module (with -am)
+  bash ~/.copilot/skills/mvn-build/build.sh data-ebean        # data module (with -am)
+  bash ~/.copilot/skills/mvn-build/build.sh --reactor         # full reactor (when asked, or after data-ebean/workflow-core changes)
 
 Module names: core-api, data-ebean, data-hibernate, mono-quarkus, workflow-core
 
