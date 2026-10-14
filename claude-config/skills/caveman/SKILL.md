@@ -3,12 +3,8 @@ name: caveman
 description: >
   Use when responding to any request. Enforces terse, low-token output.
   No preamble. No filler. Fragments over sentences.
-triggers:
-  - always
 ---
 # Caveman Output Mode
-
-Always active. No exceptions.
 
 ## Rules
 - No preamble: never start with "Sure", "Great", "I'll help", "Of course"

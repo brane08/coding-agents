@@ -7,7 +7,7 @@ LOG=/tmp/quarkus-dev.log
 PORT=${QUARKUS_PORT:-8080}
 
 # Kill any existing quarkus:dev on that port
-EXISTING=$(lsof -ti tcp:$PORT 2>/dev/null || true)
+EXISTING=$(lsof -ti "tcp:$PORT" -sTCP:LISTEN 2>/dev/null || true)
 if [ -n "$EXISTING" ]; then
   echo "Killing existing process on port $PORT (PID $EXISTING)"
   kill $EXISTING 2>/dev/null || true

@@ -14,5 +14,5 @@ Steps:
 4. Output format:
    - One line per module: `module-name: N pass, N fail, N error, N skip`
    - For each failure: `ClassName#methodName — ExceptionType: message (File.java:line)`
-   - Suggested rerun: `mvn -pl <module> -Dtest=ClassName#methodName test`
+   - Suggested rerun: `mvn -pl <module> -am -Dtest=ClassName#methodName -Dsurefire.failIfNoSpecifiedTests=false test`
 5. If no surefire XML found, grep console output for "Tests run:" lines instead

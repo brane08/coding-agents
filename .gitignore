@@ -8,6 +8,8 @@ claude-config/*
 !claude-config/skills/
 claude-config/skills/*
 !claude-config/skills/caveman/
+!claude-config/skills/delegation-audit/
+!claude-config/skills/pr-squash-sync/
 !claude-config/skills/flyway-check/
 !claude-config/skills/guarded-fs/
 !claude-config/skills/mvn-build/

@@ -45,6 +45,7 @@ if [ -z "${CHROME_BIN:-}" ]; then
 fi
 
 echo "Typecheck: npx tsc --noEmit -p tsconfig.app.json" | tee "$LOG" >"$OUT"
+set +e
 npx tsc --noEmit -p tsconfig.app.json 2>&1 | tee -a "$LOG" >"$OUT"
 TSC_EXIT=${PIPESTATUS[0]}
 
@@ -52,6 +53,7 @@ echo "" >"$OUT"
 echo "Test: npx ng test --watch=false --browsers=ChromeHeadless $INCLUDE" | tee -a "$LOG" >"$OUT"
 npx ng test --watch=false --browsers=ChromeHeadless $INCLUDE 2>&1 | tee -a "$LOG" >"$OUT"
 TEST_EXIT=${PIPESTATUS[0]}
+set -e
 
 END=$(date +%s)
 DURATION=$((END - START))

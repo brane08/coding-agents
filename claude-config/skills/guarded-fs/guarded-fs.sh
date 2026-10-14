@@ -11,9 +11,23 @@ set -euo pipefail
 
 root="$(pwd -P)"
 
+# resolve <path> [follow]: physical path; with follow=1 an existing symlink is judged by its target
+# (destinations: writing through a symlink lands at the target).
 resolve() {
-  local p="$1" dir base
-  if [[ -e "$p" ]]; then
+  local p="$1" follow="${2:-0}" dir base t n=0
+  if [[ "$follow" = 1 ]]; then
+    while [[ -L "$p" && $n -lt 10 ]]; do
+      t=$(readlink "$p")
+      case "$t" in
+        /*) p="$t" ;;
+        *)  p="$(dirname "$p")/$t" ;;
+      esac
+      n=$((n + 1))
+    done
+  fi
+  if [[ -d "$p" && "$follow" = 1 ]]; then
+    printf '%s\n' "$(cd "$p" && pwd -P)"
+  elif [[ -e "$p" ]]; then
     dir=$(cd "$(dirname "$p")" && pwd -P)
     base=$(basename "$p")
     printf '%s/%s\n' "$dir" "$base"
@@ -65,25 +79,38 @@ case "$cmd" in
   mv)
     [[ $# -eq 2 ]] || { echo "usage: guarded-fs.sh mv <src> <dst>" >&2; exit 1; }
     src_r=$(resolve "$1")
-    dst_r=$(resolve "$2")
+    dst_r=$(resolve "$2" 1)
     check_inside "$src_r" "$1"
     check_inside "$dst_r" "$2"
+    if [[ -d "$2" ]]; then
+      check_inside "$(resolve "$2/$(basename "$1")" 1)" "$2/$(basename "$1")"
+    fi
     exec mv -- "$1" "$2"
     ;;
   cp)
-    args=("$@")
-    n=${#args[@]}
+    flags=()
+    paths=()
+    for a in "$@"; do
+      case "$a" in
+        -[rRpPfinavL]*|--recursive) flags+=("$a") ;;
+        -*) echo "guarded-fs: blocked — unsupported cp flag '$a'" >&2; exit 1 ;;
+        *) paths+=("$a") ;;
+      esac
+    done
+    n=${#paths[@]}
     [[ $n -ge 2 ]] || { echo "usage: guarded-fs.sh cp [-r] <src>... <dst>" >&2; exit 1; }
-    dst="${args[$((n-1))]}"
+    dst="${paths[$((n-1))]}"
     for ((i=0; i<n-1; i++)); do
-      p="${args[$i]}"
-      [[ "$p" == -* ]] && continue
+      p="${paths[$i]}"
       r=$(resolve "$p")
       check_inside "$r" "$p"
+      if [[ -d "$dst" ]]; then
+        check_inside "$(resolve "$dst/$(basename "$p")" 1)" "$dst/$(basename "$p")"
+      fi
     done
-    dst_r=$(resolve "$dst")
+    dst_r=$(resolve "$dst" 1)
     check_inside "$dst_r" "$dst"
-    exec cp -- "$@"
+    exec cp ${flags[@]+"${flags[@]}"} -- "${paths[@]}"
     ;;
   *)
     echo "usage: guarded-fs.sh <rm|mv|cp> ..." >&2

@@ -1,13 +1,12 @@
 #!/bin/bash
 # Usage: flyway-check.sh [database]
 # Database precedence: argument > $DB_NAME > "dev". $DB_URL, if set, is used as-is
-# and the database argument is ignored. Credentials come from env or .env, never the command line.
+# and the database argument is ignored. Local DBs use trust auth: no password handling.
+# Maven runs from the project root ($CLAUDE_PROJECT_DIR, else the current directory);
+# set FLYWAY_MODULE to a module path to pass -pl <module> -am.
 set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-.}"
-
-# Source .env if present (for project-local overrides)
-[ -f .env ] && source .env
 
 DB_NAME="${1:-${DB_NAME:-dev}}"
 DB_HOST="${DB_HOST:-localhost}"
@@ -18,14 +17,18 @@ else
   DB_URL="${DB_URL:-jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}}"
 fi
 DB_USER="${DB_USER:-dev}"
-DB_PASS="${DB_PASS:-}"
 
-# Local DBs usually use trust auth: pass a password only when one is set.
-pass_args=()
-[ -n "$DB_PASS" ] && pass_args=(-Dflyway.password="$DB_PASS")
+mod_args=()
+if [ -n "${FLYWAY_MODULE:-}" ]; then
+  if ! [[ "$FLYWAY_MODULE" =~ ^[A-Za-z0-9._,:/-]+$ ]]; then
+    echo "ERROR: invalid FLYWAY_MODULE: $FLYWAY_MODULE"
+    exit 2
+  fi
+  mod_args=(-pl "$FLYWAY_MODULE" -am)
+fi
 
 mvn flyway:info \
+  ${mod_args[@]+"${mod_args[@]}"} \
   -Dflyway.url="$DB_URL" \
   -Dflyway.user="$DB_USER" \
-  ${pass_args[@]+"${pass_args[@]}"} \
   2>&1 | grep -E "Version|State|Pending|current|Failed|Checksum" | grep -v "^\[INFO\] ---"

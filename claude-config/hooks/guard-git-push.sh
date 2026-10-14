@@ -11,6 +11,10 @@
 # Protected branches: $CLAUDE_PROTECTED_BRANCHES (space separated), default "main master".
 
 input=$(cat)
+if ! command -v jq >/dev/null 2>&1; then
+  printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"guard-git-push: jq missing, cannot inspect the command"}}'
+  exit 0
+fi
 cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
 [ -z "$cmd" ] && exit 0
 
@@ -30,6 +34,7 @@ is_protected() {
 printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
   # shellcheck disable=SC2086
   set -- $seg
+  while [ $# -gt 0 ] && printf '%s' "$1" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*='; do shift; done
   [ "${1:-}" = "git" ] || continue
 
   # find the "push" subcommand, skipping global flags like -C <dir>
@@ -49,15 +54,19 @@ printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
       continue
     fi
     case "$w" in
-      --force|-f|--force-with-lease|--force-with-lease=*|--force-if-includes)
+      --force|--force-with-lease|--force-with-lease=*|--force-if-includes)
         force=1 ;;
-      --delete|-d)
+      --delete)
         delete=1 ;;
+      -[!-]*)
+        # combined short flags, e.g. -fu / -uf / -df
+        case "$w" in *f*) force=1 ;; esac
+        case "$w" in *d*) delete=1 ;; esac ;;
       --mirror)
         # rewrites every ref on the remote, protected ones included
         emit deny "git push --mirror can rewrite protected branches ($protected). Push an explicit refspec instead."
         exit 0 ;;
-      -*) ;;                       # any other flag
+      -*) ;;                       # any other long flag
       *)  refspecs="$refspecs $w" ;;  # remote, then refspec(s)
     esac
   done

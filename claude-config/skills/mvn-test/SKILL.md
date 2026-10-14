@@ -14,8 +14,8 @@ The only inline exception is a single-class `-Dtest=` rerun right after a fix.
 
 Run one of:
   bash ~/.claude/skills/mvn-test/test.sh mono-quarkus                       # all tests
-  bash ~/.claude/skills/mvn-test/test.sh mono-quarkus CartControllerTest    # specific class
-  bash ~/.claude/skills/mvn-test/test.sh data-hibernate                     # unit tests only
+  bash ~/.claude/skills/mvn-test/test.sh mono-quarkus StudentResourceTest   # specific class
+  bash ~/.claude/skills/mvn-test/test.sh data-hibernate                     # data-hibernate (+ upstream modules) tests
 
 Notes:
 - Never pass `-q` to `mvn test` — it suppresses the `Tests run:`/`BUILD SUCCESS`/
@@ -24,9 +24,6 @@ Notes:
   immediately after the `mvn` command, not after piping through `tail` — `test.sh`
   already does this correctly via `PIPESTATUS[0]`; use it instead of ad hoc `mvn` calls.
 - Quarkus starts once and is shared across all tests in mono-quarkus
-- Product IDs don't start at 1 — fetch from GET /rest/products dynamically in tests
-- REST responses: {success: true, data: [...]} — assert .body("success", is(true))
-- WELCOME10 promo must stay active (needed by CheckoutControllerTest)
 
 Report:
 - Pass / fail / error counts

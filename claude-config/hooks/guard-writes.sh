@@ -12,6 +12,11 @@
 
 input=$(cat)
 
+if ! command -v jq >/dev/null 2>&1; then
+  printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"guard-writes: jq missing, cannot verify write path"}}'
+  exit 0
+fi
+
 f=$(printf '%s' "$input" | jq -r '
   .tool_input.file_path // .tool_input.notebook_path // empty
 ')
@@ -46,6 +51,12 @@ done
 if [ -d "$p" ] && rp=$(cd "$p" 2>/dev/null && pwd -P); then
   abs="$rp$rest"
 fi
+# `..` after a not-yet-existing directory is never normalised above; refuse it.
+case "$rest" in
+  */..|*/../*)
+    printf '%s' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Path contains .. after a non-existent directory; use a normalised path"}}'
+    exit 0 ;;
+esac
 abs=${abs%/}
 [ -z "$abs" ] && abs="/"
 

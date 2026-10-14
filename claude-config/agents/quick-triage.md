@@ -14,7 +14,8 @@ the first line of each stack trace. Nothing else.
 For log scanning: extract ERROR/WARN lines with timestamps, dedupe repeated
 patterns, report counts not full text.
 
-For Flyway status checks: run `mvn flyway:info` (read-only only — never
+For Flyway status checks: run `bash ~/.claude/skills/flyway-check/flyway-check.sh`
+(`FLYWAY_MODULE=<module>` when the config is in a module; read-only only — never
 `migrate`, `clean`, or `repair`). Report pending vs. applied migrations as a
 flat list: version, description, status. Flag any "Pending" entries clearly
 since those need the parent session's attention before anyone runs migrate.

@@ -15,12 +15,12 @@
 
 ## Helper scripts (`.github/skills/`)
 - Angular typecheck + unit tests: `bash .github/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
-- Read-only SQL: `bash .github/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
+- Read-only SQL: `bash .github/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
 - Maven build/test/dev and Flyway status: `.github/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
 
 ## Memory
-Before analyzing a library/JAR/framework/internal detail: check `.github/memory/libs/`,
-then repo `.github/memory/` notes, then decompile/fetch docs only if neither answers it.
+Before analyzing a library/JAR/framework/internal detail: check `.github/memory/libs/`
+(global install: `~/.copilot/memory/libs/`), then repo-specific notes, then decompile/fetch docs only if neither answers it.
 Each note's first lines say what it covers; list the directory and open only what matches.
 
 File new learnings by reuse, not by where learned:
@@ -34,7 +34,8 @@ decompiled output.
 
 Libs: `keepassjava2-2.2.4` (KeePass API, JPMS split-package) · `esbuild-esm` (exported `let`
 read-only, TS2540) · `javafx-21` (FXML/dialog/timer quirks, module-info opens) ·
-`javafx-21-fat-jar-packaging` (shade, launcher wrapper, macOS .app, CI release)
+`javafx-21-fat-jar-packaging` (shade, launcher wrapper, macOS .app, CI release) ·
+`spring-cloud-gateway-server-webmvc-5.0.3`
 
 Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow-mybatis-layer`
 (plain mybatis, CDI SqlSessionFactory) · `workflow-async-events` (WorkflowOutcomeEvent, fireAsync)
@@ -47,15 +48,8 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 ## PRs
 - Never include AI/assistant attribution, session links, or "Generated with …" lines in commit
   messages or PR descriptions.
-- Before opening a PR, squash to a single commit (soft-reset to merge-base + recommit, or
-  `rebase -i`) — don't ask first. Keep 2–3 commits only for a critical reason (independent
-  changes that must be revertable separately).
-- Squashing an unpushed branch isn't amending published work. Branch already pushed/shared →
-  ask before rewriting; never force-push silently.
-- Long-lived branch across tasks → re-check commit count before every `gh pr create`/`git push`.
-- Before committing/pushing to an existing branch, check its PR isn't merged
-  (`gh pr view <branch> --json state` or `gh api .../pulls/<n>` — `gh pr view` alone can be
-  stale). If merged, cut a new branch from the latest default branch.
+- Squash to one commit before a PR; check the branch's PR isn't merged
+  (`gh pr list --head <branch> --state all --json state`) before committing/pushing.
 - Full workflow: `.github/instructions/git-pr.instructions.md`, `.github/skills/pr-squash-sync/`.
 
 ## Don't
@@ -69,6 +63,7 @@ Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow
 - Exclude `node_modules` from `find`/`grep`.
 - Don't add comments restating what code obviously does.
 - Don't add unrequested README/docs files.
+- `rm`/`mv`/`cp` are not auto-approved: use `git rm`/`git mv` for tracked files, else `bash .github/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).
 - Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops without explicit ask.
 - Don't resolve an npm peer-dependency conflict with `--legacy-peer-deps` on a
   security-relevant package (auth, crypto, http-client) — pin a compatible version instead.

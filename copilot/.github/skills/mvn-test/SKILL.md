@@ -9,7 +9,7 @@ description: >
 
 Run one of:
   bash .github/skills/mvn-test/test.sh mono-quarkus                       # all tests
-  bash .github/skills/mvn-test/test.sh mono-quarkus CartControllerTest    # specific class
+  bash .github/skills/mvn-test/test.sh mono-quarkus StudentResourceTest   # specific class
   bash .github/skills/mvn-test/test.sh data-hibernate                     # unit tests only
 
 Notes:
@@ -19,12 +19,10 @@ Notes:
   immediately after the `mvn` command, not after piping through `tail` — `test.sh`
   already does this correctly via `PIPESTATUS[0]`; use it instead of ad hoc `mvn` calls.
 - Quarkus starts once and is shared across all tests in mono-quarkus
-- Product IDs don't start at 1 — fetch from GET /rest/products dynamically in tests
 - REST responses: {success: true, data: [...]} — assert .body("success", is(true))
-- WELCOME10 promo must stay active (needed by CheckoutControllerTest)
 
 Report:
 - Pass / fail / error counts
 - Names of any FAILED or ERROR tests
 - Total time
-- On failure: suggested rerun `mvn -pl <module> -Dtest=ClassName#method test`
+- On failure: suggested rerun `mvn -pl <module> -am -Dtest=ClassName#method -Dsurefire.failIfNoSpecifiedTests=false test`
