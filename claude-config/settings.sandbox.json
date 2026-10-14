@@ -4,9 +4,14 @@
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
-    "CLAUDE_CODE_TMPDIR": "/tmp"
+    "CLAUDE_CODE_TMPDIR": "/tmp",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90"
   },
-  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "allow": [
       "Bash(git push *)",
@@ -85,7 +90,7 @@
       "Bash(./gradlew bootRun*)",
       "Bash(./gradlew quarkusDev*)",
       "Bash(./gradlew *Test*)",
-      "Bash(./gradlew :*)",
+      "Bash(./gradlew *)",
       "Bash(pytest *)",
       "Bash(npx playwright test*)",
       "Bash(npx playwright codegen*)",
@@ -121,12 +126,12 @@
       "Bash(git diff:*)",
       "Bash(git log *)",
       "Bash(git log:*)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh admin)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/sync-claude-config.sh sandbox)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh admin)",
-      "Bash(bash /Users/automator/projects/coding-agents/claude-config/save-claude-config.sh sandbox)",
+      "Bash(bash */claude-config/sync-claude-config.sh)",
+      "Bash(bash */claude-config/sync-claude-config.sh admin)",
+      "Bash(bash */claude-config/sync-claude-config.sh sandbox)",
+      "Bash(bash */claude-config/save-claude-config.sh)",
+      "Bash(bash */claude-config/save-claude-config.sh admin)",
+      "Bash(bash */claude-config/save-claude-config.sh sandbox)",
       "Bash(git rev-list *)",
       "Bash(git merge --ff-only *)",
       "Bash(git show *)",
@@ -305,7 +310,7 @@
     "defaultMode": "auto",
     "blockReadsOutsideWorkingDirectories": true
   },
-  "model": "opusplan[1m]",
+  "model": "opusplan",
   "skillOverrides": {
     "superpowers:brainstorming": "off",
     "superpowers:dispatching-parallel-agents": "off",
@@ -323,7 +328,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "matcher": "Write|Edit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
@@ -414,6 +419,7 @@
       "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
     ]
   },
-  "autoCompact": true,
+  "autoCompactEnabled": true,
+  "idleCompaction": false,
   "notifyOnAgentStop": true
 }
