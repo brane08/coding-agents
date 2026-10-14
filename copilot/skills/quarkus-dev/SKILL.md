@@ -6,7 +6,7 @@ description: >
 ---
 # Quarkus Dev Mode
 
-Run: QUARKUS_PORT=8102 bash .github/skills/quarkus-dev/dev.sh
+Run: QUARKUS_PORT=8102 bash ~/.copilot/skills/quarkus-dev/dev.sh
 
 App runs at: http://localhost:8102
 Dev UI at:   http://localhost:8102/q/dev

@@ -13,19 +13,18 @@
 - Python multi-package/uv-workspace repo: scope `pytest` to the relevant package dir(s),
   not repo root — unscoped collection breaks on sibling projects' conftests.
 
-## Helper scripts (`.github/skills/`)
-- Angular typecheck + unit tests: `bash .github/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
-- Read-only SQL: `bash .github/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
-- Maven build/test/dev and Flyway status: `.github/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
+## Helper scripts (`~/.copilot/skills/`)
+- Angular typecheck + unit tests: `bash ~/.copilot/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
+- Read-only SQL: `bash ~/.copilot/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
+- Maven build/test/dev and Flyway status: `~/.copilot/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
 
 ## Memory
-Before analyzing a library/JAR/framework/internal detail: check `.github/memory/libs/`
-(global install: `~/.copilot/memory/libs/`), then repo-specific notes, then decompile/fetch docs only if neither answers it.
+Before analyzing a library/JAR/framework/internal detail: check `~/.copilot/memory/libs/`, then repo-specific notes, then decompile/fetch docs only if neither answers it.
 Each note's first lines say what it covers; list the directory and open only what matches.
 
 File new learnings by reuse, not by where learned:
-- Library, framework, version quirk, JPMS rule → `.github/memory/libs/<lib-version>.md`
-- Reusable design pattern → `.github/memory/patterns/<name>.md`
+- Library, framework, version quirk, JPMS rule → `~/.copilot/memory/libs/<lib-version>.md`
+- Reusable design pattern → `~/.copilot/memory/patterns/<name>.md`
 - Repo-only facts (names/paths/wiring) → a repo-specific note, linking to the
   global note instead of restating it.
 
@@ -54,7 +53,7 @@ unit tests, multi-module Maven)
   messages or PR descriptions.
 - Squash to one commit before a PR; check the branch's PR isn't merged
   (`gh pr list --head <branch> --state all --json state`) before committing/pushing.
-- Full workflow: `.github/instructions/git-pr.instructions.md`, `.github/skills/pr-squash-sync/`.
+- Full workflow: `~/.copilot/instructions/git-pr.instructions.md`, `~/.copilot/skills/pr-squash-sync/`.
 
 ## Don't
 - No `cd x &&` prefixes in terminal commands — the cwd persists; run plain `git …` (works from
@@ -67,7 +66,7 @@ unit tests, multi-module Maven)
 - Exclude `node_modules` from `find`/`grep`.
 - Don't add comments restating what code obviously does.
 - Don't add unrequested README/docs files.
-- `rm`/`mv`/`cp` are not auto-approved: use `git rm`/`git mv` for tracked files, else `bash .github/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).
+- `rm`/`mv`/`cp` are not auto-approved: use `git rm`/`git mv` for tracked files, else `bash ~/.copilot/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).
 - Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops without explicit ask.
 - Don't resolve an npm peer-dependency conflict with `--legacy-peer-deps` on a
   security-relevant package (auth, crypto, http-client) — pin a compatible version instead.

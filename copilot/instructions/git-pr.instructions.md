@@ -2,7 +2,7 @@
 applyTo: "**"
 ---
 # Git / PR workflow
-Applies to commit, push and PR tasks. Step-by-step: `.github/skills/pr-squash-sync/SKILL.md`.
+Applies to commit, push and PR tasks. Step-by-step: `~/.copilot/skills/pr-squash-sync/SKILL.md`.
 
 - Before a codebase scan or new work: `git fetch origin <default>`, then `git rev-list --left-right --count HEAD...origin/<default>`. Working tree must be clean.
 - Current branch's commits already squash-merged (empty tree diff vs `origin/<default>`) → `git switch -c <new> origin/<default>`; don't merge/rebase the stale branch. Otherwise merge/ff.

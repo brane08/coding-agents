@@ -2,10 +2,12 @@
 
 Derived from `claude-config/`. Per-repo is the reliable path.
 
-## Per repo
-Copy `copilot/.github/` into the repo root (merge with any existing `.github/`).
-Includes: `copilot-instructions.md`, `instructions/*.instructions.md`, `skills/`, `agents/*.agent.md`, `memory/`.
-Skill scripts are referenced as `.github/skills/<n>/<f>` (repo-root relative); keep exec bits (`chmod +x .github/skills/*/*.sh`).
+## Layout
+`copilot/` mirrors `~/.copilot/`: `copilot-instructions.md`, `instructions/*.instructions.md`, `skills/`, `agents/*.agent.md`, `memory/`.
+Skill scripts are referenced as `~/.copilot/skills/<n>/<f>`; keep exec bits (`chmod +x ~/.copilot/skills/*/*.sh`).
+
+## Per repo (project-specific rules only)
+Copy the needed pieces into `<repo>/.github/` (merge with any existing `.github/`). Paths in the text point at `~/.copilot/...`; rewrite them to `.github/...` if the repo copy must be self-contained, and adjust the auto-approve regex accordingly.
 
 ## User-level (global) — verify against your IDE version
 No single global location is read by every Copilot IDE plugin.
@@ -17,13 +19,12 @@ No single global location is read by every Copilot IDE plugin.
 | Copilot CLI | `~/.copilot/` (instructions, agents, skills) |
 | Per repo (all IDEs) | `.github/copilot-instructions.md`, `AGENTS.md` |
 
-Recommended setup: keep one canonical dir, `~/.copilot/`, as a copy of `copilot/.github/` contents.
+Recommended setup: keep one canonical dir, `~/.copilot/`, as a copy of `copilot/` contents.
 1. VS Code: point the four `chat.*FilesLocations` / `chat.agentSkillsLocations` settings at `~/.copilot/{instructions,prompts,agents,skills}`.
 2. JetBrains: symlink `global-copilot-instructions.md` to `~/.copilot/copilot-instructions.md`.
-3. Copy or symlink `.github/` into a repo only for project-specific rules.
+3. Copy into a repo's `.github/` only for project-specific rules.
 
-Global install: script and memory paths in the text (`.github/skills/...`, `.github/memory/...`) must be rewritten to `~/.copilot/skills/...` and `~/.copilot/memory/...`.
-The terminal auto-approve regex in `vscode-settings.snippet.json` only matches repo-relative `bash .github/skills/...`; for a global install change it to match `bash ~/.copilot/skills/...` too. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
+The terminal auto-approve regex in `vscode-settings.snippet.json` matches `bash ~/.copilot/skills/...`; widen it for repo-relative `.github/skills/...` copies. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
 
 ## VS Code settings
 Merge `vscode-settings.snippet.json` into user `settings.json` (terminal auto-approve: allow = true, deny = false; everything else prompts).
@@ -41,4 +42,4 @@ The read-only/triage agents pin `model: GPT-5.6 Luna` (a cheap GPT model; the Co
 ## Not ported (intentional)
 - Claude hooks (write guard, merged-PR guard, push guard, delegate nudge) and the admin/sandbox permission profiles: hook payloads differ, and a port would fail open silently.
   `pr-squash-sync` and `git-pr.instructions.md` carry the merged-PR check as a manual step.
-- Delegation/subagent rules, `delegation-audit`, Claude-only skills (bce, web-*, z*, etc.), `Read`/`Edit` path deny rules (use `.github/copilot-instructions.md` rules + `.copilotignore`-style exclusions if your setup has them).
+- Delegation/subagent rules, `delegation-audit`, Claude-only skills (bce, web-*, z*, etc.), `Read`/`Edit` path deny rules (use `copilot-instructions.md` rules + `.copilotignore`-style exclusions if your setup has them).

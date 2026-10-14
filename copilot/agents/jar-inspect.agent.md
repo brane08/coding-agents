@@ -21,7 +21,7 @@ Workflow:
   type), inspect that one too rather than guessing from the name.
 - Never write into the project tree.
 
-Before decompiling: check `.github/memory/libs/` and any repo-level memory notes
+Before decompiling: check `~/.copilot/memory/libs/` and any repo-level memory notes
 first — the answer may already be recorded from a prior inspection.
 
 Output format: class/method signature(s) directly answering the question, plus
