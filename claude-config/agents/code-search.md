@@ -22,5 +22,7 @@ Rules:
 - One command per Bash call. Never chain with `;`, `&&`, `|`, `echo ---` or
   `2>/dev/null` — a single non-allowed piece prompts the whole line. Use Glob
   for name matches and Grep for content instead of `find`/`grep` pipelines.
+- Give `path:startLine-endLine` for every hit so the caller can Read offset/limit directly
+  without re-grepping.
 - Return results as a flat list. Let the parent session decide what to do
   with them.

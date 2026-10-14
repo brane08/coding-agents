@@ -11,7 +11,7 @@
     "/^npx playwright (test|codegen|show-report)\\b/": true,
     "/^npm (install$|test\\b|run (build|lint)\\b)/": true,
     "/^ng (serve|build)\\b/": true,
-    "/^((QUARKUS_PORT|CLAUDE_PROJECT_DIR|FLYWAY_MODULE)=\\S+ )?bash \\.github\\/skills\\/(psql-select\\/select|mvn-build\\/build|mvn-test\\/test|quarkus-dev\\/dev|flyway-check\\/flyway-check|ng-verify\\/verify|guarded-fs\\/guarded-fs)\\.sh\\b/": true,
+    "/^((QUARKUS_PORT|CLAUDE_PROJECT_DIR|FLYWAY_MODULE)=\\S+ )?bash \\.github\\/skills\\/(psql-select\\/select|mvn-build\\/build|mvn-test\\/test|quarkus-dev\\/dev|flyway-check\\/flyway-check|ng-verify\\/verify|guarded-fs\\/guarded-fs|pr-squash-sync\\/sync-check)\\.sh\\b/": true,
     "/^jq\\b/": true,
     "/^git (add|fetch|commit|status|diff|log|rev-list|merge --ff-only|show|ls-files|rev-parse|branch --show-current|worktree (list|add)|switch|stash|rm|mv|branch -d)\\b/": true,
     "/^gh (pr (view|list|diff|checks)|issue view|repo view)\\b/": true,

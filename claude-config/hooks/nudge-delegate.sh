@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PreToolUse hook for Bash (main thread only). Denies a `cd <dir> &&` prefix.
+# PreToolUse hook for Bash (main thread only). Denies a `cd <dir> &&` prefix and
+# piped/chained (|, ;, &&) lookup commands (grep/rg/find/ls/cat/head/tail/wc/sed/awk).
 # Injects a one-line reminder for: read-only psql queries, `git -C`, inlined secrets.
 # Every deny/nudge is appended (category only, never command text) to
 # $STATE/delegation-nudges.tsv.
@@ -37,6 +38,18 @@ elif printf '%s' "$cmd" | grep -Eq '^([A-Za-z_][A-Za-z0-9_]*=[^ ]* +)*git +-C ';
   cat_="${cat_:-git-C}"
   msg="${msg:+$msg }approvals: run plain 'git ...' in the current repo (it works from any subdirectory); -C defeats allow rules."
 fi
+
+# Piped/chained lookups prompt (compound commands defeat allow rules): steer to native tools.
+case "$first" in
+  grep|rg|find|ls|cat|head|tail|wc|sed|awk)
+    unquoted=$(printf '%s' "$cmd" | sed -E "s/\"([^\"\\\\]|\\\\.)*\"//g; s/'[^']*'//g")
+    if printf '%s' "$unquoted" | grep -Eq '\||;|&&'; then
+      mkdir -p "$STATE" 2>/dev/null && printf '%s\t%s\t%s\t%s\n' "$now" "$sid" "lookup-chain-deny" "$(basename "$PWD")" >> "$STATE/delegation-nudges.tsv" 2>/dev/null
+      jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"Blocked: one command per call, no |, ; or &&. Use the Grep tool (head_limit, -n, -A/-B) or Read with offset/limit; for 3+ lookups dispatch one code-search."}}'
+      exit 0
+    fi
+    ;;
+esac
 
 # Secret hygiene: inline bearer/JWT/token literals in a command.
 if printf '%s' "$cmd" | grep -Eq '(TOKEN|SECRET|PASSWORD|API_KEY|APIKEY)=["'"'"']?[A-Za-z0-9._-]{20,}|Bearer [A-Za-z0-9._-]{20,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.'; then

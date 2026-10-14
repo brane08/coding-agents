@@ -1,6 +1,6 @@
 ---
 name: flyway-next
-description: Use when asked about the next Flyway migration version, what migrations are pending/applied, or what V1.0_XX number to use next. Read-only — never runs migrate/clean/repair.
+description: Use when asked about the next Flyway migration version, what migrations are pending/applied, to list migrations, or what V1.0_XX number to use next. Read-only — never runs migrate/clean/repair.
 tools: Read, Grep, Glob, Bash
 model: haiku
 ---

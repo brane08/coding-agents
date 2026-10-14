@@ -22,3 +22,14 @@ future audits don't re-flag the same already-fixed gaps.
   tail 85→3, head 12→2, ls 30→10; cat rose 58→80. Remaining: grep (142), sed (106),
   git diff/log/show (14), mostly academy and grocery-shop.
 - Rule text now allows a single `grep`/`cat` on one known path inline; 2+ chained → `code-search`.
+
+## 2026-10-14
+- Opus review of 17 transcripts since 2026-10-07: raw 808 was ~40% false positives and volume-driven
+  (reminders fired ~340×/day with no effect; only a deny changes behaviour). audit.py now counts
+  runs (2nd+ lookup, no Edit/Write/Agent between), piped/chained lookups, Grep/Glob tools and
+  inline test runs, and prints a rate. New baseline: 450 violations / 1,749 calls (26%), 89 runs of 3+
+  (raw legacy 842). Old raw baselines compare only with the raw line.
+- Fixes: nudge-delegate.sh denies piped/chained lookups; CLAUDE.md locate-before-edit rule;
+  `pr-squash-sync/sync-check.sh`; test.sh failure details; code-search returns line ranges;
+  admin-only `hooks/chain-guard.sh` denies the 3rd consecutive lookup. Re-audit after a restart:
+  sessions open before these changes ran the old rules.

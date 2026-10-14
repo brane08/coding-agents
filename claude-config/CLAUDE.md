@@ -9,8 +9,11 @@
 - Read-only search/nav (file discovery, grep, "where is X", log inspection,
   including `cat`/`ls`/`tail`/`head`/`wc`/`sed`/`awk` on files you didn't just
   create/edit this turn) → `code-search`; `Explore` only as fallback. Never do
-  this in the main thread, via Bash or the Grep/Glob tools. Exception: one Read/Grep on a
-  single known path, or files you are about to edit. Two or more lookups → dispatch.
+  this in the main thread, via Bash or the Grep/Glob tools. Exception: locate-before-edit —
+  one Grep-tool call (not Bash `grep`) or Read offset/limit on a single known path or a file
+  you are about to edit. Read line ranges with Read, never `sed -n`/`cat`/`grep -A`; no
+  `|`/`;`/`&&` on lookups (hook-denied). Two or more lookups → dispatch. Don't re-grep a
+  `code-search` result; Read the lines it reported.
 - Read-only git queries (`log`/`diff`/`show`/`blame`) — batch into one `code-search`
   dispatch when you need more than one; a single `git status` inline is fine.
 - Tests never run inline. Dispatch to `quick-triage`:
@@ -23,7 +26,7 @@
 - Maven dep-tree → `dep-inspect`. Third-party jar API/bytecode (no source/docs) → `jar-inspect`.
 - Flyway status → `quick-triage` running `bash ~/.claude/skills/flyway-check/flyway-check.sh`
   (`FLYWAY_MODULE=<module>` when the config is in a module); never migrate/clean/repair.
-  Next migration version / pending → `flyway-next`.
+  Next migration version / pending / listing migrations → `flyway-next` (a listing is a Glob, not `ls`).
 - Entity wiring (DTO→Entity→Mapper→Producers→Resource) → `stack-check`. Workflow wiring
   (deriveType/ACTION_MAP/wait+getAndRemoveResponse/tests) → `workflow-check`.
 - Main thread is for: edits, architecture decisions, multi-file changes, anything needing
@@ -39,7 +42,8 @@
   only when the diff touches auth, crypto, concurrency, or data migration — say so.
 - No secrets inline in Bash (`TOKEN="..."`, `Bearer ...`, raw JWTs) — they persist in the
   transcript. Read from an env var or file.
-- Hooks: a `cd <dir> &&`/`;` prefix is denied; read-only psql, `git -C`, inline secrets get a
+- Hooks: a `cd <dir> &&`/`;` prefix is denied; admin profile also denies the 3rd consecutive
+  lookup (Bash/Grep/Glob) with no Edit/Write/Agent between → one `code-search`; read-only psql, `git -C`, inline secrets get a
   reminder. `git push`/`gh pr create` from a merged-PR branch is blocked → `pr-squash-sync`
   skill. Force-push/delete of main/master is denied. Writes outside the project/scratchpad are
   denied, `~/.claude` writes ask. `.env`, `*.key`, `*.pem`, `application-prod.*` are unreadable;
@@ -61,6 +65,22 @@
 - On a compaction summary at the start of context, or a shift to unrelated work: at the next
   natural pause say "Session compacted N× — consider /clear or a fresh session." Once per
   task from the 2nd compaction on; never mid-task.
+
+## Session scans (history reviews)
+- Run the scripts, don't hand-parse transcripts: `delegation-audit/audit.py --since <date>`
+  (routing) and `delegation-audit/ctx.py` (context/compaction). Main-thread turns only
+  (exclude sidechains); dedupe by message id.
+- Always report: window checked (dates, session count, per project); routing violation rate vs
+  the last log entry; peak context + context at compaction + compactions per session + turns
+  between compactions; turns/tokens per model (main vs subagents) with the share of
+  mechanical-only turns (Bash/Grep/Glob/Read, no text) per model, and what could drop a tier
+  (sonnet/opus subagent doing lookups → haiku; opus outside auth/crypto/concurrency/migration
+  → sonnet); top 3 repeated shapes; which rules/hooks were changed since the last
+  scan (so a rate change is attributable). Flag sessions open before the last config change.
+- Before changing a window/autocompact/hook setting, state the measured number it targets.
+  Log 2–3 lines in `~/.claude/memory/delegation-audit-log.md`; never paste raw output.
+- Cost claims: separate cache-read from uncached tokens; say what was not measured (quality
+  after compaction).
 
 ## Stack defaults (assume, don't ask)
 - Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
@@ -121,11 +141,11 @@ unit tests, multi-module Maven)
   never set `PGPASSWORD`.
 
 ## Git / PRs
-- Before a scan or new work: `git fetch origin <default>`, compare with
-  `git rev-list --left-right --count HEAD...origin/<default>`; working tree clean. Current
-  branch already squash-merged (empty tree diff vs origin/<default>) → new branch from
-  `origin/<default>`, don't merge/rebase the stale one. Verify with
-  `git branch --show-current` + `git log --oneline -3`.
+- Before a scan or new work: `bash ~/.claude/skills/pr-squash-sync/sync-check.sh <default>`
+  (one call: fetch, branch, status, ahead/behind, tree diff, last 3 commits, PR states);
+  working tree clean. Current branch already squash-merged (empty tree diff vs
+  origin/<default>) → new branch from `origin/<default>`, don't merge/rebase the stale one.
+  Verify after switching with the same script.
 - Before committing/pushing to an existing branch, check its PR isn't merged
   (`gh pr list --head <branch> --state all --json state`; `gh pr view` can be stale). If
   merged → `pr-squash-sync` skill (new branch from the latest default).

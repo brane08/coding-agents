@@ -13,6 +13,7 @@
 hooks/guard-git-push.sh
 hooks/guard-merged-pr.sh
 hooks/guard-writes.sh
+hooks/chain-guard.sh
 hooks/nudge-delegate.sh
 
 # settings.json is profile-specific (settings.admin.json / settings.sandbox.json) and is
@@ -29,6 +30,7 @@ agents/stack-check.md
 agents/test-aggregator.md
 agents/workflow-check.md
 
+memory/delegation-audit-log.md
 memory/libs/esbuild-esm.md
 memory/libs/javafx-21-fat-jar-packaging.md
 memory/libs/javafx-21.md
@@ -46,6 +48,7 @@ memory/patterns/workflow-mybatis-layer.md
 skills/caveman/SKILL.md
 skills/delegation-audit/SKILL.md
 skills/delegation-audit/audit.py
+skills/delegation-audit/ctx.py
 skills/flyway-check/flyway-check.sh
 skills/flyway-check/SKILL.md
 skills/guarded-fs/SKILL.md
@@ -57,6 +60,7 @@ skills/mvn-test/test.sh
 skills/ng-verify/SKILL.md
 skills/ng-verify/verify.sh
 skills/pr-squash-sync/SKILL.md
+skills/pr-squash-sync/sync-check.sh
 skills/psql-select/select.sh
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
