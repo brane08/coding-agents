@@ -69,7 +69,8 @@ while IFS= read -r rel; do
   fi
 done < "$MANIFEST"
 
-cp -p "$SETTINGS_SRC" "${DEST_DIR}/settings.json"
+# Repo settings carry @@REPO_DIR@@ instead of a machine-specific path.
+sed "s|@@REPO_DIR@@|${REPO_DIR}|g" "$SETTINGS_SRC" > "${DEST_DIR}/settings.json"
 printf '%s\n' "$PROFILE" > "$PROFILE_MARKER"
 COUNT=$((COUNT + 1))
 
