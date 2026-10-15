@@ -124,12 +124,12 @@
       "Bash(git diff:*)",
       "Bash(git log *)",
       "Bash(git log:*)",
-      "Bash(bash */claude-config/sync-claude-config.sh)",
-      "Bash(bash */claude-config/sync-claude-config.sh admin)",
-      "Bash(bash */claude-config/sync-claude-config.sh sandbox)",
-      "Bash(bash */claude-config/save-claude-config.sh)",
-      "Bash(bash */claude-config/save-claude-config.sh admin)",
-      "Bash(bash */claude-config/save-claude-config.sh sandbox)",
+      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh)",
+      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh admin)",
+      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh sandbox)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh admin)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh sandbox)",
       "Bash(git rev-list *)",
       "Bash(git merge --ff-only *)",
       "Bash(git show *)",
@@ -382,7 +382,7 @@
       }
     }
   },
-  "autoCompactWindow": 300000,
+  "autoCompactWindow": 400000,
   "autoMemoryEnabled": false,
   "theme": "light",
   "agentPushNotifEnabled": false,
@@ -391,8 +391,8 @@
       "$defaults",
       "Bash(mvn flyway:info:*)",
       "Bash(mvn test -pl mono-quarkus:*)",
-      "Bash(bash */claude-config/sync-claude-config.sh*)",
-      "Bash(bash */claude-config/save-claude-config.sh*)"
+      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh*)"
     ],
     "soft_deny": [
       "$defaults",
