@@ -1,21 +1,132 @@
 {
-  "cleanupPeriodDays": 30,
-  "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
-    "CLAUDE_CODE_TMPDIR": "/tmp",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90"
-  },
+  "agentPushNotifEnabled": false,
   "attribution": {
     "commit": "",
     "pr": "",
     "sessionUrl": false
   },
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 400000,
+  "autoMemoryEnabled": false,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(mvn flyway:info:*)",
+      "Bash(mvn test -pl mono-quarkus:*)",
+      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh*)"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: Private (brane08/academy, confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured",
+      "**Default / protected branches**: Default branch `main`; no protected branches listed and rulesets not queryable here — do not assume unprotected",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Source control**: The trusted repo (brane08/academy) and its remote(s) only (no additional orgs configured)",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (Java/Quarkus + Angular school-management monorepo, academy repo)",
+      "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
+      "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude-config/ dir is the versioned source of ~/.claude; running claude-config/sync-claude-config.sh or save-claude-config.sh (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
+      "**Org-specific CLIs**: None configured",
+      "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(mvn *flyway:clean*)",
+      "Bash(mvn *flyway:repair*)",
+      "Bash(./mvnw *flyway:clean*)",
+      "Bash(./mvnw *flyway:repair*)"
+    ]
+  },
+  "cleanupPeriodDays": 30,
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "env": {
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
+    "CLAUDE_CODE_TMPDIR": "/tmp"
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "repo": "anthropics/claude-plugins-official",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-writes.sh\"",
+            "statusMessage": "Checking write scope...",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit|NotebookEdit"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/chain-guard.sh\" 2>/dev/null || true",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|Grep|Glob|Write|Edit|NotebookEdit|Agent"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/nudge-delegate.sh\" 2>/dev/null || true",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-merged-pr.sh\" 2>/dev/null || true",
+            "statusMessage": "Checking PR state...",
+            "timeout": 12,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-git-push.sh\" 2>/dev/null || true",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ]
+  },
+  "idleCompaction": false,
+  "model": "opusplan",
+  "notifyOnAgentStop": true,
   "permissions": {
+    "additionalDirectories": [
+      "~/.claude/projects"
+    ],
     "allow": [
       "Read(./**)",
       "Edit(./**)",
+      "Edit(.claude/memory/**)",
       "Edit(~/.claude/**)",
       "Bash(java *)",
       "Bash(java -jar */data-loader/target/*.jar*)",
@@ -189,6 +300,31 @@
       "Bash(CLAUDE_CODE_TMPDIR=* unzip -l *)",
       "Bash(CLAUDE_CODE_TMPDIR=* unzip -p *)"
     ],
+    "ask": [
+      "Bash(mvn *flyway:migrate*)",
+      "Bash(./mvnw *flyway:migrate*)",
+      "Bash(git reset *)",
+      "Bash(git push *)",
+      "Bash(git push --tags*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git checkout *)",
+      "Bash(git branch -D *)",
+      "Bash(git remote *)",
+      "Bash(git tag *)",
+      "Bash(gradle dependencies*)",
+      "Bash(./gradlew dependencies*)",
+      "Bash(pip *)",
+      "Bash(npm update*)",
+      "Bash(npm uninstall*)",
+      "Bash(go mod *)",
+      "Bash(uv pip install*)",
+      "Bash(psql *)",
+      "Bash(docker *)",
+      "mcp__*"
+    ],
+    "blockReadsOutsideWorkingDirectories": true,
+    "defaultMode": "auto",
     "deny": [
       "Read(../**)",
       "Edit(../**)",
@@ -280,37 +416,8 @@
       "Edit(**/.gradle/**)",
       "Read(**/build/**)",
       "Edit(**/build/**)"
-    ],
-    "ask": [
-      "Bash(mvn *flyway:migrate*)",
-      "Bash(./mvnw *flyway:migrate*)",
-      "Bash(git reset *)",
-      "Bash(git push *)",
-      "Bash(git push --tags*)",
-      "Bash(git push --force*)",
-      "Bash(git push -f*)",
-      "Bash(git checkout *)",
-      "Bash(git branch -D *)",
-      "Bash(git remote *)",
-      "Bash(git tag *)",
-      "Bash(gradle dependencies*)",
-      "Bash(./gradlew dependencies*)",
-      "Bash(pip *)",
-      "Bash(npm update*)",
-      "Bash(npm uninstall*)",
-      "Bash(go mod *)",
-      "Bash(uv pip install*)",
-      "Bash(psql *)",
-      "Bash(docker *)",
-      "mcp__*"
-    ],
-    "additionalDirectories": [
-      "~/.claude/projects"
-    ],
-    "defaultMode": "auto",
-    "blockReadsOutsideWorkingDirectories": true
+    ]
   },
-  "model": "opusplan",
   "skillOverrides": {
     "superpowers:brainstorming": "off",
     "superpowers:dispatching-parallel-agents": "off",
@@ -325,111 +432,5 @@
     "superpowers:verification-before-completion": "off",
     "superpowers:writing-skills": "off"
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-writes.sh\"",
-            "timeout": 10,
-            "statusMessage": "Checking write scope..."
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Grep|Glob|Write|Edit|NotebookEdit|Agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/chain-guard.sh\" 2>/dev/null || true",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/nudge-delegate.sh\" 2>/dev/null || true",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-merged-pr.sh\" 2>/dev/null || true",
-            "timeout": 12,
-            "statusMessage": "Checking PR state..."
-          },
-          {
-            "type": "command",
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-git-push.sh\" 2>/dev/null || true",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  },
-  "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
-  },
-  "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
-      }
-    }
-  },
-  "autoCompactWindow": 400000,
-  "autoMemoryEnabled": false,
-  "theme": "light",
-  "agentPushNotifEnabled": false,
-  "autoMode": {
-    "allow": [
-      "$defaults",
-      "Bash(mvn flyway:info:*)",
-      "Bash(mvn test -pl mono-quarkus:*)",
-      "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
-      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh*)"
-    ],
-    "soft_deny": [
-      "$defaults",
-      "Bash(mvn *flyway:clean*)",
-      "Bash(mvn *flyway:repair*)",
-      "Bash(./mvnw *flyway:clean*)",
-      "Bash(./mvnw *flyway:repair*)"
-    ],
-    "environment": [
-      "### Org-wide",
-      "**Organization**: None configured",
-      "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: Private (brane08/academy, confirmed via gh)",
-      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
-      "**Secrets management**: None configured",
-      "**Default / protected branches**: Default branch `main`; no protected branches listed and rulesets not queryable here — do not assume unprotected",
-      "**CI/CD deploy targets**: None configured",
-      "**Network posture**: None configured",
-      "**Source control**: The trusted repo (brane08/academy) and its remote(s) only (no additional orgs configured)",
-      "**Trusted internal domains**: None configured",
-      "**Trusted cloud buckets**: None configured",
-      "**Key internal services**: None configured",
-      "**Internal package registry**: None configured",
-      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
-      "**Data retention / declassification**: None configured",
-      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment (hyphen/underscore/dot-delimited — e.g. matches `prod-db`, not `producer`)",
-      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
-      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
-      "### User-specific",
-      "**Primary use of Claude Code**: software development (Java/Quarkus + Angular school-management monorepo, academy repo)",
-      "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
-      "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude-config/ dir is the versioned source of ~/.claude; running claude-config/sync-claude-config.sh or save-claude-config.sh (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
-      "**Org-specific CLIs**: None configured",
-      "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
-    ]
-  },
-  "autoCompactEnabled": true,
-  "idleCompaction": false,
-  "notifyOnAgentStop": true
+  "theme": "light"
 }

@@ -68,7 +68,7 @@ while IFS= read -r rel; do
   fi
 done < "$MANIFEST"
 
-sed "s|${REPO_DIR}|@@REPO_DIR@@|g" "${SRC_DIR}/settings.json" > "${DEST_DIR}/settings.${PROFILE}.json"
+sed "s|${REPO_DIR}|@@REPO_DIR@@|g" "${SRC_DIR}/settings.json" | jq -S . > "${DEST_DIR}/settings.${PROFILE}.json"
 COUNT=$((COUNT + 1))
 
 echo "Saved ${COUNT} file(s), ${SKIPPED} listed-but-missing."

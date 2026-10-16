@@ -74,3 +74,4 @@ memory/libs/jmeter-maven-plugin-3.8.md
 memory/libs/quarkus-3.md
 memory/libs/ebean-19.md
 memory/patterns/jacoco-mock-unit-coverage.md
+memory/patterns/tracking-pattern.md

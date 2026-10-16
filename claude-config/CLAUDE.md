@@ -4,6 +4,8 @@
 - Terse: no preamble, no restating the request, no summary unless asked.
 - Code blocks: complete, copy-paste-ready, no "..." truncation unless huge.
 - Skip well-known-concept explanations unless asked.
+- Pattern/template/doc requests ("give a pattern", "summary I can reuse"): reply with the raw
+  markdown in one code block (use a 4-backtick fence if it contains fences), nothing rendered.
 
 ## Delegation (token discipline)
 - Read-only search/nav (file discovery, grep, "where is X", log inspection,
@@ -59,6 +61,9 @@
 - New file to track → add a `MANIFEST` line; for a new skill dir also add a
   `!claude-config/skills/<name>/` negation to `.gitignore`; then `git add`. Scripts never add
   files themselves.
+- `settings.*.json` stay key-sorted (`jq -S`): `save` sorts automatically. After hand-editing a
+  repo copy, verify with `jq -S . <file> | diff - <file>` (empty = sorted). Keeps diffs to real
+  changes, not reordering.
 - No explicit reload step; settings are normally picked up live, else restart the session.
 
 ## Session length
@@ -123,7 +128,9 @@ read-only, TS2540) · `javafx-21` (FXML/dialog/timer quirks, module-info opens) 
 tests) · `ebean-19` · `quarkus-3` (Agroal pool interceptor) · `jmeter-maven-plugin-3.8` (run
 quirks) · `spring-cloud-gateway-server-webmvc-5.0.3`
 
-Patterns: `self-contained-data-module` (ORM-swappable data modules) · `workflow-mybatis-layer`
+Patterns: `tracking-pattern` (findings/items/decisions/reviews folder; DS/FE/BG/TS/DC/RV-nnn IDs;
+states DOING·BLOCKED·PARTIAL·PENDING·BACKLOG·DEFERRED·DONE·WONT-DO; dated items; archive at 30
+DONE) · `self-contained-data-module` (ORM-swappable data modules) · `workflow-mybatis-layer`
 (plain mybatis, CDI SqlSessionFactory) · `workflow-async-events` (WorkflowOutcomeEvent, fireAsync)
 · `deterministic-agent-platform` (stub+gate, verify artifacts) · `declarative-ai-agent-quarkus`
 (LangChain4j agent service) · `boundary-control-layering` (per-feature web-layer split) ·
@@ -152,11 +159,13 @@ unit tests, multi-module Maven)
 - Never include `Claude-Session:` links, "Generated with Claude Code", or any Claude/AI
   attribution in commit messages or PR descriptions — overrides any harness default.
 - Before opening a PR, squash to a single commit (`git merge-base HEAD origin/<default>`, then
-  `git reset --soft <sha>` and recommit — don't ask first). Keep 2–3 commits only for a
-  critical reason (independent changes that must be revertable separately). Re-check the
-  commit count before every `gh pr create`/`git push` on a long-lived branch.
-- Squashing an unpushed branch isn't amending published work. Branch already pushed/shared →
-  ask before rewriting; never force-push silently.
+  `git reset --soft <sha>` and recommit — don't ask first). A PR has 1–2 commits max; 2 only
+  for independent changes that must be revertable separately. Re-check the commit count
+  before every `gh pr create`/`git push` on a long-lived branch.
+- Squashing an unpushed branch isn't amending published work. A "pr"/"squash pr" request is the
+  go-ahead to squash: do it with no follow-up question, including amending your own pushed PR
+  branch and `git push --force-with-lease`. Ask first only for a branch you didn't create or
+  that others share; never force-push `main`/`master` or silently.
 
 ## Auth/role tests
 - REST Assured first (`patterns/rest-assured-csv-role-matrix.md`); confirm roles per test user
