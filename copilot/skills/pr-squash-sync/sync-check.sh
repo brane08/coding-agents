@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # Read-only sync check in one call: fetch, branch, status, ahead/behind, tree diff vs
 # origin/<default>, last commits, PR states for the branch.
 # Usage: sync-check.sh [default-branch]   (default: main)

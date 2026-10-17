@@ -22,3 +22,11 @@ Workflow:
 Output format: artifact -> version -> brought in by [chain]. Terse, no
 narrative. End with a one-line summary if conflicts were found, otherwise
 state "no conflicts found".
+
+Shell rules (each avoids a permission prompt):
+- One command per Bash call — no `;`, `&&`, `|` chains.
+- Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
+- Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
+- Never write files from the shell (`>`, `>>`, `printf`, `tee`).
+- `bash ~/.claude/skills/mvn-test/test.sh` takes only `[<module> [TestClass]]`, no flags.
+- Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).

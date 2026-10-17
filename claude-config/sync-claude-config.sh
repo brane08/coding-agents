@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 #
 # sync-claude-config.sh
 # Copies Claude Code config from repo's claude-config/ into ~/.claude/

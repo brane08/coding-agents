@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 #
 # save-claude-config.sh
 # Copies ~/.claude/ config INTO the repo's claude-config/ (local -> repo).

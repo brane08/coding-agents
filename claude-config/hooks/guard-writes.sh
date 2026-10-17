@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # PreToolUse guard for file-writing tools.
 #
 #   inside project          -> pass through (normal permission rules apply)

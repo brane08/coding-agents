@@ -14,7 +14,11 @@
       "Bash(mvn flyway:info:*)",
       "Bash(mvn test -pl mono-quarkus:*)",
       "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
-      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh*)"
+      "Bash(zsh @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/sync-claude-config.sh*)",
+      "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh*)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/save-claude-config.sh*)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/save-claude-config.sh*)"
     ],
     "environment": [
       "### Org-wide",
@@ -71,11 +75,23 @@
     }
   },
   "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "bash ~/.claude/hooks/log-ask.sh 2>/dev/null || true",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
     "PreToolUse": [
       {
         "hooks": [
           {
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-writes.sh\"",
+            "command": "bash ~/.claude/hooks/guard-writes.sh",
             "statusMessage": "Checking write scope...",
             "timeout": 10,
             "type": "command"
@@ -86,7 +102,7 @@
       {
         "hooks": [
           {
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/chain-guard.sh\" 2>/dev/null || true",
+            "command": "bash ~/.claude/hooks/chain-guard.sh 2>/dev/null || true",
             "timeout": 5,
             "type": "command"
           }
@@ -96,18 +112,18 @@
       {
         "hooks": [
           {
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/nudge-delegate.sh\" 2>/dev/null || true",
+            "command": "bash ~/.claude/hooks/nudge-delegate.sh 2>/dev/null || true",
             "timeout": 5,
             "type": "command"
           },
           {
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-merged-pr.sh\" 2>/dev/null || true",
+            "command": "bash ~/.claude/hooks/guard-merged-pr.sh 2>/dev/null || true",
             "statusMessage": "Checking PR state...",
             "timeout": 12,
             "type": "command"
           },
           {
-            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/guard-git-push.sh\" 2>/dev/null || true",
+            "command": "bash ~/.claude/hooks/guard-git-push.sh 2>/dev/null || true",
             "timeout": 5,
             "type": "command"
           }
@@ -211,16 +227,38 @@
       "Bash(npm run build*)",
       "Bash(npm run lint*)",
       "Bash(bash ~/.claude/skills/psql-select/select.sh *)",
+      "Bash(zsh ~/.claude/skills/psql-select/select.sh *)",
+      "Bash(ksh ~/.claude/skills/psql-select/select.sh *)",
       "Bash(bash ~/.claude/skills/mvn-build/build.sh*)",
+      "Bash(zsh ~/.claude/skills/mvn-build/build.sh*)",
+      "Bash(ksh ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(bash ~/.claude/skills/mvn-test/test.sh*)",
+      "Bash(zsh ~/.claude/skills/mvn-test/test.sh*)",
+      "Bash(ksh ~/.claude/skills/mvn-test/test.sh*)",
       "Bash(bash ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(zsh ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(ksh ~/.claude/skills/quarkus-dev/dev.sh*)",
       "Bash(bash ~/.claude/skills/flyway-check/flyway-check.sh*)",
+      "Bash(zsh ~/.claude/skills/flyway-check/flyway-check.sh*)",
+      "Bash(ksh ~/.claude/skills/flyway-check/flyway-check.sh*)",
       "Bash(bash ~/.claude/skills/ng-verify/verify.sh*)",
+      "Bash(zsh ~/.claude/skills/ng-verify/verify.sh*)",
+      "Bash(ksh ~/.claude/skills/ng-verify/verify.sh*)",
       "Bash(bash ~/.claude/skills/guarded-fs/guarded-fs.sh *)",
+      "Bash(zsh ~/.claude/skills/guarded-fs/guarded-fs.sh *)",
+      "Bash(ksh ~/.claude/skills/guarded-fs/guarded-fs.sh *)",
       "Bash(QUARKUS_PORT=* bash ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(QUARKUS_PORT=* zsh ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(QUARKUS_PORT=* ksh ~/.claude/skills/quarkus-dev/dev.sh*)",
       "Bash(CLAUDE_PROJECT_DIR=* bash ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(CLAUDE_PROJECT_DIR=* zsh ~/.claude/skills/quarkus-dev/dev.sh*)",
+      "Bash(CLAUDE_PROJECT_DIR=* ksh ~/.claude/skills/quarkus-dev/dev.sh*)",
       "Bash(FLYWAY_MODULE=* bash ~/.claude/skills/flyway-check/flyway-check.sh*)",
+      "Bash(FLYWAY_MODULE=* zsh ~/.claude/skills/flyway-check/flyway-check.sh*)",
+      "Bash(FLYWAY_MODULE=* ksh ~/.claude/skills/flyway-check/flyway-check.sh*)",
       "Bash(bash ~/.claude/skills/pr-squash-sync/sync-check.sh*)",
+      "Bash(zsh ~/.claude/skills/pr-squash-sync/sync-check.sh*)",
+      "Bash(ksh ~/.claude/skills/pr-squash-sync/sync-check.sh*)",
       "Bash(python3 -I ~/.claude/skills/delegation-audit/audit.py*)",
       "Bash(jq *)",
       "Read(~/.claude/**)",
@@ -230,6 +268,8 @@
       "Bash(git fetch*)",
       "Bash(git commit *)",
       "Bash(git commit:*)",
+      "Bash(git reset --soft *)",
+      "Bash(git rebase --onto *)",
       "Bash(git status*)",
       "Bash(git diff *)",
       "Bash(git diff:*)",
@@ -238,9 +278,21 @@
       "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh)",
       "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh admin)",
       "Bash(bash @@REPO_DIR@@/claude-config/sync-claude-config.sh sandbox)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/sync-claude-config.sh)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/sync-claude-config.sh admin)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/sync-claude-config.sh sandbox)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/sync-claude-config.sh)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/sync-claude-config.sh admin)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/sync-claude-config.sh sandbox)",
       "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh)",
       "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh admin)",
       "Bash(bash @@REPO_DIR@@/claude-config/save-claude-config.sh sandbox)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/save-claude-config.sh)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/save-claude-config.sh admin)",
+      "Bash(zsh @@REPO_DIR@@/claude-config/save-claude-config.sh sandbox)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/save-claude-config.sh)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/save-claude-config.sh admin)",
+      "Bash(ksh @@REPO_DIR@@/claude-config/save-claude-config.sh sandbox)",
       "Bash(git rev-list *)",
       "Bash(git merge --ff-only *)",
       "Bash(git show *)",
@@ -303,7 +355,9 @@
     "ask": [
       "Bash(mvn *flyway:migrate*)",
       "Bash(./mvnw *flyway:migrate*)",
-      "Bash(git reset *)",
+      "Bash(git reset --hard*)",
+      "Bash(git reset --keep*)",
+      "Bash(git reset --merge*)",
       "Bash(git push *)",
       "Bash(git push --tags*)",
       "Bash(git push --force*)",

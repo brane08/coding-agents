@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # PreToolUse guard: block force-pushing or deleting a protected branch.
 #
 # Pattern rules cannot express this. "git push --force* origin main*" misses

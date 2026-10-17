@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # PreToolUse guard for Bash: refuse `git push` / `gh pr create` from a branch whose PR is
 # already merged (stale branch). Cut a new branch from origin/<default> instead.
 #

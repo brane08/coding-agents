@@ -15,6 +15,7 @@ hooks/guard-merged-pr.sh
 hooks/guard-writes.sh
 hooks/chain-guard.sh
 hooks/nudge-delegate.sh
+hooks/log-ask.sh
 
 # settings.json is profile-specific (settings.admin.json / settings.sandbox.json) and is
 # handled by the sync/save scripts directly, not listed here.
@@ -49,6 +50,7 @@ skills/caveman/SKILL.md
 skills/delegation-audit/SKILL.md
 skills/delegation-audit/audit.py
 skills/delegation-audit/ctx.py
+skills/delegation-audit/permissions.py
 skills/flyway-check/flyway-check.sh
 skills/flyway-check/SKILL.md
 skills/guarded-fs/SKILL.md
