@@ -2,8 +2,8 @@
 [ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 #
 # sync-claude-config.sh
-# Copies Claude Code config from repo's claude-config/ into ~/.claude/
-# Copies ONLY the paths listed in claude-config/MANIFEST — an explicit,
+# Copies Claude Code config from repo's claude/ into ~/.claude/
+# Copies ONLY the paths listed in claude/MANIFEST — an explicit,
 # hand-maintained list, not derived from git state at run time. A file only
 # moves if it's a line in MANIFEST, regardless of whether it happens to be
 # git-tracked, staged, or dirty.
@@ -11,7 +11,7 @@
 # anything in ~/.claude/, including files ~/.claude/ has that MANIFEST
 # doesn't list.
 #
-# This script lives inside claude-config/, so repo root = parent dir.
+# This script lives inside claude/, so repo root = parent dir.
 #
 # settings.json is profile-specific: settings.<profile>.json -> ~/.claude/settings.json.
 #
@@ -19,7 +19,7 @@
 #   admin   regular user with admin rights
 #   sandbox low-privilege / sandboxed user
 #   No argument: reuse the profile last synced on this machine (~/.claude/.profile), else admin.
-#   Repo root is inferred as one level up from this script (claude-config/..);
+#   Repo root is inferred as one level up from this script (claude/..);
 #   override with REPO_DIR=<path>.
 
 set -euo pipefail
@@ -33,7 +33,7 @@ esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${REPO_DIR:-$(dirname "$SCRIPT_DIR")}"
-SRC_DIR="${REPO_DIR}/claude-config"
+SRC_DIR="${REPO_DIR}/claude"
 DEST_DIR="${HOME}/.claude"
 MANIFEST="${SRC_DIR}/MANIFEST"
 

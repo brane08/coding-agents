@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 [ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
-# PreToolUse hook (main thread only; admin profile). Denies the 3rd consecutive lookup
+# PreToolUse hook (main thread only; admin profile). Denies the 7th consecutive lookup
 # (read-only Bash command, Grep or Glob) with no Edit/Write/Agent in between, and points at
 # a single code-search dispatch. Read and non-lookup Bash calls are neutral, including scripts
 # run with bash/zsh/ksh/sh/dash; `<shell> -c "<cmd>"` is judged by <cmd>. Per-session
@@ -52,9 +52,9 @@ mkdir -p "$STATE/chain" 2>/dev/null
 n=$(cat "$f" 2>/dev/null)
 n=${n:-0}
 
-if [ "$n" -ge 2 ]; then
+if [ "$n" -ge 6 ]; then
   printf '%s\t%s\t%s\t%s\n' "$(date +%s)" "$sid" "chain-deny" "$(basename "$PWD")" >> "$STATE/delegation-nudges.tsv" 2>/dev/null
-  jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"3rd consecutive lookup with no edit in between: dispatch one code-search with all remaining questions (ask for path:startLine-endLine), then Read those ranges."}}'
+  jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"7th consecutive lookup with no edit in between: dispatch one code-search with all remaining questions (ask for path:startLine-endLine), then Read those ranges."}}'
   exit 0
 fi
 

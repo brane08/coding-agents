@@ -1,6 +1,6 @@
 # Copilot config install
 
-Derived from `claude-config/`. Per-repo is the reliable path.
+Derived from `claude/`. Per-repo is the reliable path.
 
 ## Layout
 `copilot/` mirrors `~/.copilot/`: `copilot-instructions.md`, `instructions/*.instructions.md`, `skills/`, `agents/*.agent.md`, `memory/`.
