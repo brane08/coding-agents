@@ -146,7 +146,9 @@ DONE) · `self-contained-data-module` (ORM-swappable data modules) · `workflow-
 unit tests, multi-module Maven) · `claude-config-repo-sync` (repo ↔ ~/.claude merge routine, dir rename)
 
 ## psql
-- SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
+- SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh "<sql>"` (local Postgres:
+  localhost, user postgres, db prore, `-A -t`) or `select.sh <db> "<sql>"` for another db
+  (e.g. `prore_test`). The long `-h/-U/-d/-c` form still works for non-default hosts.
 - Plain `psql` always prompts — reserve for INSERT/UPDATE/DELETE/DDL. Never run a read-only
   query (incl. in subagents or scripts) via plain `psql`; keep the same args (`-h/-U/-d/-c`),
   just swap the command for `select.sh`. Exactly one `-c` and one statement; pass `-A`/`-t`
