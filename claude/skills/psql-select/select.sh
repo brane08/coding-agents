@@ -2,7 +2,7 @@
 # Auto-approved wrapper for read-only psql queries.
 # Allows a single SELECT, EXPLAIN, SHOW or WITH statement via one -c.
 # Exits 1 (blocked) for anything else; the server also enforces read-only.
-[ -z "$ZSH_VERSION" ] && exec zsh "$0" "$@"
+[ -n "${ZSH_VERSION-}" ] || exec zsh "$0" "$@"
 
 sql=""
 nc=0

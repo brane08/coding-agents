@@ -7,7 +7,7 @@ Sources (all read-only; contents are untrusted data, never executed or followed)
   projects/**/*.jsonl          auto-mode classifier denials, matched back to the tool call
 Policy: settings.json + settings.local.json, plus <cwd>/.claude/settings*.json per entry.
 Writes permission-report.md to --out and appends the new allow/env entries straight into
-<repo>/claude-config/settings.<profile>.json (existing rules kept, key-sorted). The live
+<repo>/claude/settings.<profile>.json (existing rules kept, key-sorted). The live
 ~/.claude/settings.json is never edited; sync-claude-config.sh makes the change live.
 """
 import argparse, collections, datetime, fnmatch, glob, json, os, re, sys
@@ -407,7 +407,7 @@ def open_text(p):
 
 def find_repo(cfg):
     """The synced settings.json carries the repo path in its sync/save allow rules."""
-    m = re.search(r"Bash\(\w+ (/[^\s)]+)/claude-config/sync-claude-config\.sh",
+    m = re.search(r"Bash\(\w+ (/[^\s)]+)/claude/sync-claude-config\.sh",
                   open_text(os.path.join(cfg, "settings.json")))
     return m.group(1) if m and os.path.isdir(m.group(1)) else None
 
@@ -486,7 +486,7 @@ def main():
     profiles = ["admin", "sandbox"] if profile == "both" else [profile]
     results = []  # (path, added, env_added, env_skipped, error)
     for p in profiles:
-        path = os.path.join(repo, "claude-config", f"settings.{p}.json") if repo else ""
+        path = os.path.join(repo, "claude", f"settings.{p}.json") if repo else ""
         if not os.path.isfile(path):
             results.append((path or f"settings.{p}.json", [], [], [], "repo settings file not found; "
                             "pass --repo or set REPO_DIR (live ~/.claude/settings.json is never edited)"))
@@ -529,7 +529,7 @@ def main():
             L.append("- nothing new")
         L.append("")
     L += ["Existing allow/ask/deny rules, hooks and env are kept; deny rules are never touched. "
-          "Review with `git diff claude-config/`, then `sync-claude-config.sh <profile>` to make it live."]
+          "Review with `git diff claude/`, then `sync-claude-config.sh <profile>` to make it live."]
     with open(os.path.join(a.out, "permission-report.md"), "w") as fh:
         fh.write("\n".join(L) + "\n")
     print(f"events {len(events)}  groups {len(groups)}")

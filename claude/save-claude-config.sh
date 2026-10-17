@@ -2,17 +2,17 @@
 [ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 #
 # save-claude-config.sh
-# Copies ~/.claude/ config INTO the repo's claude-config/ (local -> repo).
-# Refreshes ONLY the paths listed in claude-config/MANIFEST — an explicit,
+# Copies ~/.claude/ config INTO the repo's claude/ (local -> repo).
+# Refreshes ONLY the paths listed in claude/MANIFEST — an explicit,
 # hand-maintained list, not derived from git state at run time.
 # To add a genuinely NEW file to the shared config: copy it in, add a line
 # to MANIFEST, and `git add` both the file and MANIFEST. This script only
 # updates what MANIFEST already lists — a local-only file never leaks in
 # just because it happens to sit in ~/.claude/skills or ~/.claude/agents.
 # Always overwrites. Uses plain cp (no rsync). No rm -rf — never deletes
-# anything in claude-config/.
+# anything in claude/.
 #
-# This script lives inside claude-config/, so repo root = parent dir.
+# This script lives inside claude/, so repo root = parent dir.
 #
 # settings.json is profile-specific: ~/.claude/settings.json -> settings.<profile>.json.
 #
@@ -20,7 +20,7 @@
 #   admin   regular user with admin rights
 #   sandbox low-privilege / sandboxed user
 #   No argument: reuse the profile last synced on this machine (~/.claude/.profile), else admin.
-#   Repo root is inferred as one level up from this script (claude-config/..);
+#   Repo root is inferred as one level up from this script (claude/..);
 #   override with REPO_DIR=<path>.
 
 set -euo pipefail
@@ -33,7 +33,7 @@ esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${REPO_DIR:-$(dirname "$SCRIPT_DIR")}"
-DEST_DIR="${REPO_DIR}/claude-config"
+DEST_DIR="${REPO_DIR}/claude"
 SRC_DIR="${HOME}/.claude"
 MANIFEST="${DEST_DIR}/MANIFEST"
 
@@ -87,5 +87,5 @@ LOCAL_ONLY_AGENTS=$(comm -23 <(ls "${SRC_DIR}/agents" 2>/dev/null | sed 's|\.md$
 [[ -n "$LOCAL_ONLY_AGENTS" ]] && echo "Local-only agents (not in MANIFEST, not saved): $(echo "$LOCAL_ONLY_AGENTS" | tr '\n' ' ')"
 
 echo "Done."
-echo "Review changes with: cd $REPO_DIR && git status claude-config/"
-echo "New file to add to the shared config? cp it in, add a line to MANIFEST, then: git add claude-config/..."
+echo "Review changes with: cd $REPO_DIR && git status claude/"
+echo "New file to add to the shared config? cp it in, add a line to MANIFEST, then: git add claude/..."

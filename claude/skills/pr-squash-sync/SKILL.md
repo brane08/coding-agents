@@ -29,6 +29,6 @@ Run each step as its own Bash call (no `cd`, no chains). Replace `<default>` wit
    - `gh pr create --base <default> --title … --body …` (see `CLAUDE.md` for the PR body rules)
    - Update an existing PR's text with `gh pr edit <n> --body-file <file>`.
 
-7. **After merge**: `git fetch origin <default>`, `git switch <default>`, `git merge --ff-only origin/<default>`, then `git log --oneline -2`. Remind the user to sync `~/.claude` if `claude-config/` changed (`sync-claude-config.sh`).
+7. **After merge**: `git fetch origin <default>`, `git switch <default>`, `git merge --ff-only origin/<default>`, then `git log --oneline -2`. Remind the user to sync `~/.claude` if `claude/` changed (`sync-claude-config.sh`).
 
 The `guard-merged-pr.sh` hook blocks `git push` and `gh pr create` from a branch whose PR is already merged.

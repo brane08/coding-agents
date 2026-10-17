@@ -1,33 +1,33 @@
-# claude-config/ — only these are tracked:
+# claude/ — only these are tracked:
 #   settings.json, CLAUDE.md, skills/, agents/, memory/, hooks/
-# Everything else under claude-config/ is ignored.
-claude-config/*
-!claude-config/settings.json
-!claude-config/CLAUDE.md
-!claude-config/MANIFEST
-!claude-config/skills/
-claude-config/skills/*
-!claude-config/skills/caveman/
-!claude-config/skills/delegation-audit/
-!claude-config/skills/pr-squash-sync/
-!claude-config/skills/flyway-check/
-!claude-config/skills/guarded-fs/
-!claude-config/skills/mvn-build/
-!claude-config/skills/mvn-test/
-!claude-config/skills/ng-verify/
-!claude-config/skills/psql-select/
-!claude-config/skills/quarkus-dev/
-!claude-config/agents/
-!claude-config/memory/
-!claude-config/hooks/
-!claude-config/sync-claude-config.sh
-!claude-config/save-claude-config.sh
+# Everything else under claude/ is ignored.
+claude/*
+!claude/settings.json
+!claude/CLAUDE.md
+!claude/MANIFEST
+!claude/skills/
+claude/skills/*
+!claude/skills/caveman/
+!claude/skills/delegation-audit/
+!claude/skills/pr-squash-sync/
+!claude/skills/flyway-check/
+!claude/skills/guarded-fs/
+!claude/skills/mvn-build/
+!claude/skills/mvn-test/
+!claude/skills/ng-verify/
+!claude/skills/psql-select/
+!claude/skills/quarkus-dev/
+!claude/agents/
+!claude/memory/
+!claude/hooks/
+!claude/sync-claude-config.sh
+!claude/save-claude-config.sh
 
 # OS junk
 .DS_Store
 **/.DS_Store
 
-# Claude Code local/secret files (in case they ever land under claude-config/)
+# Claude Code local/secret files (in case they ever land under claude/)
 **/settings.local.json
 **/.credentials.json
 

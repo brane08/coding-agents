@@ -33,3 +33,9 @@ future audits don't re-flag the same already-fixed gaps.
   `pr-squash-sync/sync-check.sh`; test.sh failure details; code-search returns line ranges;
   admin-only `hooks/chain-guard.sh` denies the 3rd consecutive lookup. Re-audit after a restart:
   sessions open before these changes ran the old rules.
+
+## 2026-10-17
+- `hooks/chain-guard.sh` limit 3 -> 7 consecutive lookups (user choice). Target number not measured: no count of
+  `chain-deny` rows in `state/delegation-nudges.tsv` beforehand. Re-audit with `audit.py` and compare.
+- `~/.claude` added to `additionalDirectories`; ask-log scan (21 asks) showed Bash `grep` on `~/.claude` as the
+  repeat prompt, 0 `Grep`-tool asks. Detail: `memory/sessions/2026-10-17-config-sync-and-permissions.md`.

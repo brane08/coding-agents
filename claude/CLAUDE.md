@@ -44,22 +44,22 @@
   only when the diff touches auth, crypto, concurrency, or data migration — say so.
 - No secrets inline in Bash (`TOKEN="..."`, `Bearer ...`, raw JWTs) — they persist in the
   transcript. Read from an env var or file.
-- Hooks: a `cd <dir> &&`/`;` prefix is denied; admin profile also denies the 3rd consecutive
+- Hooks: a `cd <dir> &&`/`;` prefix is denied; admin profile also denies the 7th consecutive
   lookup (Bash/Grep/Glob) with no Edit/Write/Agent between → one `code-search`; read-only psql, `git -C`, inline secrets get a
   reminder. `git push`/`gh pr create` from a merged-PR branch is blocked → `pr-squash-sync`
   skill. Force-push/delete of main/master is denied. Writes outside the project/scratchpad are
-  denied, `~/.claude` writes ask. `.env`, `*.key`, `*.pem`, `application-prod.*` are unreadable;
+  denied; `~/.claude` is an additional directory (reads, greps and writes need no prompt). `.env`, `*.key`, `*.pem`, `application-prod.*` are unreadable;
   `find -exec/-delete` and `sort -o` are denied. Use `git switch` (allowed), not `git checkout`
   (asks).
 
-## Config sync (claude-config repo ↔ ~/.claude)
-- Repo → `~/.claude`: `bash <repo>/claude-config/sync-claude-config.sh [admin|sandbox]`
+## Config sync (claude repo ↔ ~/.claude)
+- Repo → `~/.claude`: `bash <repo>/claude/sync-claude-config.sh [admin|sandbox]`
   (no arg → profile last synced here, per `~/.claude/.profile`, else `admin`; copies only
   `MANIFEST` paths, overwrites; `settings.<profile>.json` → `~/.claude/settings.json`).
-- `~/.claude` → repo: `bash <repo>/claude-config/save-claude-config.sh [admin|sandbox]`
+- `~/.claude` → repo: `bash <repo>/claude/save-claude-config.sh [admin|sandbox]`
   (refreshes `MANIFEST` paths only; `settings.json` → `settings.<profile>.json`).
 - New file to track → add a `MANIFEST` line; for a new skill dir also add a
-  `!claude-config/skills/<name>/` negation to `.gitignore`; then `git add`. Scripts never add
+  `!claude/skills/<name>/` negation to `.gitignore`; then `git add`. Scripts never add
   files themselves.
 - `settings.*.json` stay key-sorted (`jq -S`): `save` sorts automatically. After hand-editing a
   repo copy, verify with `jq -S . <file> | diff - <file>` (empty = sorted). Keeps diffs to real
@@ -119,6 +119,8 @@ File new learnings by reuse, not by where learned:
 - Reusable design pattern → `~/.claude/memory/patterns/<name>.md`
 - Repo-only facts (names/paths/wiring) → repo `.claude/memory/<topic>.md`, linking to the
   global note instead of restating it.
+- Working-session record (what changed, decisions, open items) → `~/.claude/memory/sessions/<yyyy-mm-dd>-<topic>.md`,
+  linking to the libs/patterns notes for reusable facts; list it in `MANIFEST`.
 
 Keep entries concise and copy-pasteable; no local paths or credentials; never dump raw
 decompiled output.
@@ -129,7 +131,8 @@ read-only, TS2540) · `javafx-21` (FXML/dialog/timer quirks, module-info opens) 
 `fxtrayicon-4.2.3` · `testfx-4.0.18-monocle` (headless JavaFX UI tests) · `jnativehook-2.2.2` ·
 `copper-8.1` (mock-based workflow/infra unit tests) · `hibernate-7.4` (mock-based repo unit
 tests) · `ebean-19` · `quarkus-3` (Agroal pool interceptor) · `jmeter-maven-plugin-3.8` (run
-quirks) · `spring-cloud-gateway-server-webmvc-5.0.3`
+quirks) · `spring-cloud-gateway-server-webmvc-5.0.3` · `claude-code-permissions` (prompts,
+additionalDirectories, allow-rule matching, hooks)
 
 Patterns: `tracking-pattern` (findings/items/decisions/reviews folder; DS/FE/BG/TS/DC/RV-nnn IDs;
 states DOING·BLOCKED·PARTIAL·PENDING·BACKLOG·DEFERRED·DONE·WONT-DO; dated items; archive at 30
@@ -140,7 +143,7 @@ DONE) · `self-contained-data-module` (ORM-swappable data modules) · `workflow-
 `quarkus-postgres-schema-multitenancy` (schema-per-tenant) · `rest-assured-csv-role-matrix`
 (role×endpoint×status smoke; also the authorisation-test rules) · `jmeter-load-smoke`
 (pre-flight checks before any JMeter run) · `jacoco-mock-unit-coverage` (JaCoCo with mock-based
-unit tests, multi-module Maven)
+unit tests, multi-module Maven) · `claude-config-repo-sync` (repo ↔ ~/.claude merge routine, dir rename)
 
 ## psql
 - SELECT/EXPLAIN/SHOW → `bash ~/.claude/skills/psql-select/select.sh` (auto-approved).
@@ -186,7 +189,6 @@ unit tests, multi-module Maven)
 - No `sed -i` / `cat > f` / `printf … >> f` / heredoc writes — use `Edit`/`Write` (append =
   Edit anchored on the file's last line). No inline `python3` heredocs:
   write the script to the scratchpad and run `python3 -I <script>`, or use `jq`.
-- Search under `~/.claude`: Grep tool or `code-search`, never Bash `grep` (outside cwd prompts).
 - `.claude/memory/**` tracking edits: one row or block per `Edit`; multi-row edits trip the
   auto-mode classifier. If one is denied, say so and let the user approve — don't retry.
 - Skill/hook scripts: `bash|zsh|ksh ~/.claude/skills/<skill>/<script>.sh …` (any of the three

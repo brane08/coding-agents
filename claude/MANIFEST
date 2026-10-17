@@ -1,5 +1,5 @@
-# Explicit list of files shared between this repo's claude-config/ and
-# ~/.claude/. One path per line, relative to claude-config/.
+# Explicit list of files shared between this repo's claude/ and
+# ~/.claude/. One path per line, relative to claude/.
 #
 # This is the single source of truth for sync-claude-config.sh and
 # save-claude-config.sh — they copy exactly these paths, nothing else,
@@ -77,3 +77,6 @@ memory/libs/quarkus-3.md
 memory/libs/ebean-19.md
 memory/patterns/jacoco-mock-unit-coverage.md
 memory/patterns/tracking-pattern.md
+memory/patterns/claude-config-repo-sync.md
+memory/libs/claude-code-permissions.md
+memory/sessions/2026-10-17-config-sync-and-permissions.md

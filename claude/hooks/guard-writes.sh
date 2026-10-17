@@ -4,7 +4,7 @@
 #
 #   inside project          -> pass through (normal permission rules apply)
 #   agent scratchpad only   -> pass through (claude-<uid>/ dirs under a tmp root)
-#   ~/.claude (config)      -> ask
+#   ~/.claude (config)      -> pass through (normal permission rules apply)
 #   anywhere else           -> deny
 #
 # Limitation: only covers Claude Code's file tools. A subprocess that opens files
@@ -86,9 +86,7 @@ emit() {
 
 case "$abs" in
   "$proj"|"$proj"/*) exit 0 ;;
-  "$cfg"|"$cfg"/*)
-    emit ask "Writes to global Claude config: $abs"
-    exit 0 ;;
+  "$cfg"|"$cfg"/*) exit 0 ;;
   *)
     emit deny "Writes outside the project are not allowed: $abs"
     exit 0 ;;
