@@ -64,6 +64,7 @@ skills/ng-verify/verify.sh
 skills/pr-squash-sync/SKILL.md
 skills/pr-squash-sync/sync-check.sh
 skills/psql-select/select.sh
+skills/psql-select/SKILL.md
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
 memory/libs/spring-cloud-gateway-server-webmvc-5.0.3.md

@@ -45,7 +45,7 @@
       "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
       "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude/ dir is the versioned source of ~/.claude; running claude/sync-claude-config.sh or save-claude-config.sh (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
       "**Org-specific CLIs**: None configured",
-      "**routine under academy/ prefix**: `mvn` (37×) and `psql` read-only queries via `~/.claude/skills/psql-select/select.sh` are routine build/test/db-read operations in this repo per CLAUDE.md; `flyway:clean`/`flyway:repair` remain excluded"
+      "**routine in any project**: `mvn` builds/tests and read-only `psql` queries via `~/.claude/skills/psql-select/select.sh` (SELECT/EXPLAIN/SHOW only, enforced by the script) against the local Postgres (`-h localhost` only, not IP addresses) are routine build/test/db-read operations per CLAUDE.md; never against prod hosts or names; `flyway:clean`/`flyway:repair` remain excluded"
     ],
     "soft_deny": [
       "$defaults",

@@ -4,6 +4,18 @@
 # Exits 1 (blocked) for anything else; the server also enforces read-only.
 [ -n "${ZSH_VERSION-}" ] || exec zsh "$0" "$@"
 
+# Short form against the local Postgres: select.sh "<sql>" | select.sh <db> "<sql>"
+# (host localhost, user postgres, db prore unless given, unaligned tuples-only output).
+# The local Postgres is trusted: any database on it (prore, prore_test, pagila, sakila, ...)
+# is fine to query from any project. Reads only; never point it at a remote or prod host.
+if (( $# >= 1 )) && [[ "$1" != -* ]]; then
+  case $# in
+    1) set -- -h localhost -U postgres -d prore -A -t -c "$1" ;;
+    2) set -- -h localhost -U postgres -d "$1" -A -t -c "$2" ;;
+    *) echo "psql-select: usage: select.sh \"<sql>\" | select.sh <db> \"<sql>\"" >&2; exit 1 ;;
+  esac
+fi
+
 sql=""
 nc=0
 args=("$@")
