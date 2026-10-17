@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 set -euo pipefail
 
 # Usage:

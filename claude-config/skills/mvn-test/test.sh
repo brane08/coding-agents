@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 set -euo pipefail
 
 # Usage:
@@ -18,6 +19,11 @@ fi
 
 MODULE="${1:-}"
 PATTERN="${2:-}"
+
+if [ $# -gt 2 ] || [[ "$MODULE" == -* || "$PATTERN" == -* ]]; then
+  echo "ERROR: usage: test.sh [<module> [TestClass]] — no flags (--summary belongs to ng-verify/verify.sh)"
+  exit 2
+fi
 
 if [ -n "$MODULE" ] && ! [[ "$MODULE" =~ ^[A-Za-z0-9._,:/-]+$ ]]; then
   echo "ERROR: invalid module name: $MODULE"

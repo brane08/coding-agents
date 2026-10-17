@@ -75,6 +75,9 @@
 - Run the scripts, don't hand-parse transcripts: `delegation-audit/audit.py --since <date>`
   (routing) and `delegation-audit/ctx.py` (context/compaction). Main-thread turns only
   (exclude sidechains); dedupe by message id.
+- Permission prompts: `delegation-audit/permissions.py --since <date> [--profile both]` →
+  report, and new allow/env entries written into repo `settings.<profile>.json` from the
+  `log-ask.sh` log (`--dry-run` to preview); never add rules from memory of a prompt.
 - Always report: window checked (dates, session count, per project); routing violation rate vs
   the last log entry; peak context + context at compaction + compactions per session + turns
   between compactions; turns/tokens per model (main vs subagents) with the share of
@@ -178,9 +181,18 @@ unit tests, multi-module Maven)
   --prefix`, `ng`, `pytest <pkg dir>`: pass a path, don't `cd`.
 - One command per Bash call (parallel calls when independent) — no `;`/`&&`/`|` chains or
   `cmd; rm …` tails; compound commands defeat allow rules and prompt. In subagents prefer
-  `Grep`/`Glob` over shell pipelines.
-- No `sed -i` / `cat > f` / heredoc writes — use `Edit`/`Write`. No inline `python3` heredocs:
+  `Grep`/`Glob` over shell pipelines. Put "one command per call, no chaining, Read not
+  `sed -n`" in every ad hoc agent prompt.
+- No `sed -i` / `cat > f` / `printf … >> f` / heredoc writes — use `Edit`/`Write` (append =
+  Edit anchored on the file's last line). No inline `python3` heredocs:
   write the script to the scratchpad and run `python3 -I <script>`, or use `jq`.
+- Search under `~/.claude`: Grep tool or `code-search`, never Bash `grep` (outside cwd prompts).
+- `.claude/memory/**` tracking edits: one row or block per `Edit`; multi-row edits trip the
+  auto-mode classifier. If one is denied, say so and let the user approve — don't retry.
+- Skill/hook scripts: `bash|zsh|ksh ~/.claude/skills/<skill>/<script>.sh …` (any of the three
+  is allowed; scripts re-exec into their own shell). Always `~/.claude/…` — never `$HOME`,
+  `/Users/…` or `/home/…`: allow rules only match `~`, a full path prompts or is blocked.
+- `test.sh` takes only `[<module> [Class]]` (flags are rejected); `--summary` is `verify.sh` only.
 - Exclude `node_modules` from `find`/`grep` (`--exclude-dir`, `-not -path`) — deny rules block it.
 - `rm`/`mv`/`cp` are denied: use `git rm`/`git mv` for tracked files, else
   `bash ~/.claude/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).

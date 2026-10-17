@@ -15,6 +15,7 @@
 
 ## Helper scripts (`~/.copilot/skills/`)
 - Angular typecheck + unit tests: `bash ~/.copilot/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
+- Skill scripts: run as `bash|zsh|ksh ~/.copilot/skills/<skill>/<script>.sh` — always `~`, never `$HOME` or an absolute path (auto-approve only matches `~`).
 - Read-only SQL: `bash ~/.copilot/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
 - Maven build/test/dev and Flyway status: `~/.copilot/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
 

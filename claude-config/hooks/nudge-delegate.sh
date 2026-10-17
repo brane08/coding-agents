@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # PreToolUse hook for Bash (main thread only). Denies a `cd <dir> &&` prefix and
 # piped/chained (|, ;, &&) lookup commands (grep/rg/find/ls/cat/head/tail/wc/sed/awk).
 # Injects a one-line reminder for: read-only psql queries, `git -C`, inlined secrets.

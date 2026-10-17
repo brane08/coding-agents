@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # Guarded rm/mv/cp — hard-confined to the current working directory tree.
 # Refuses any source/destination that resolves (symlinks included) outside
 # the working dir, refuses the working dir root itself, refuses .git.

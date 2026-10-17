@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # Usage: flyway-check.sh [database]
 # Database precedence: argument > $DB_NAME > "dev". $DB_URL, if set, is used as-is
 # and the database argument is ignored. Local DBs use trust auth: no password handling.
