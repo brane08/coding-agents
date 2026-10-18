@@ -3,6 +3,7 @@ name: jar-inspect
 description: Use to inspect a third-party JAR's API/bytecode when source/docs aren't available — find a class's method signatures, check what a method actually does, confirm a constructor/overload exists. Read-only, no edits.
 tools: Read, Grep, Glob, Bash
 model: haiku
+autoCompactWindow: 110000
 permissionMode: default
 ---
 

@@ -3,6 +3,7 @@ name: flyway-next
 description: Use when asked about the next Flyway migration version, what migrations are pending/applied, to list migrations, or what V1.0_XX number to use next. Read-only — never runs migrate/clean/repair.
 tools: Read, Grep, Glob, Bash
 model: haiku
+autoCompactWindow: 110000
 ---
 
 List files in the migrations directory, find the highest V1.0_XX number, and report the next available version. Also run `bash ~/.claude/skills/flyway-check/flyway-check.sh` (`FLYWAY_MODULE=<module>` if needed) to show pending vs applied status.

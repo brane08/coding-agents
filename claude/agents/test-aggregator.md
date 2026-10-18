@@ -3,6 +3,7 @@ name: test-aggregator
 description: Use after a test run to get a summary — pass/fail counts per module, names of failing tests, first stack trace line per failure, and suggested -Dtest= rerun commands. Read-only, parses surefire XML and console output.
 tools: Read, Grep, Glob, Bash
 model: haiku
+autoCompactWindow: 110000
 ---
 
 Parse surefire/failsafe test results and produce a terse failure report.

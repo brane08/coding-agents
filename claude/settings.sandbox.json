@@ -45,14 +45,10 @@
       "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
       "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude/ dir is the versioned source of ~/.claude; running claude/sync-claude-config.sh or save-claude-config.sh (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
       "**Org-specific CLIs**: None configured",
-      "**routine in any project**: `mvn` builds/tests and read-only `psql` queries via `~/.claude/skills/psql-select/select.sh` (SELECT/EXPLAIN/SHOW only, enforced by the script) against the local Postgres (`-h localhost` only, not IP addresses) are routine build/test/db-read operations per CLAUDE.md; never against prod hosts or names; `flyway:clean`/`flyway:repair` remain excluded"
+      "**routine in any project**: `mvn` builds/tests and read-only `psql` queries via `~/.claude/skills/psql-select/select.sh` (SELECT/EXPLAIN/SHOW only, enforced by the script) against the local Postgres (`-h localhost` only, not IP addresses) are routine build/test/db-read operations per CLAUDE.md; never against prod hosts or names; all `flyway:*` goals (incl. migrate/clean/repair) are user-approved on local dev databases"
     ],
     "soft_deny": [
-      "$defaults",
-      "Bash(mvn *flyway:clean*)",
-      "Bash(mvn *flyway:repair*)",
-      "Bash(./mvnw *flyway:clean*)",
-      "Bash(./mvnw *flyway:repair*)"
+      "$defaults"
     ]
   },
   "cleanupPeriodDays": 30,
@@ -191,8 +187,8 @@
       "Bash(mvn -pl * -am verify*)",
       "Bash(mvn quarkus:dev*)",
       "Bash(mvn -q quarkus:dev:*)",
-      "Bash(mvn -q flyway:info)",
-      "Bash(mvn flyway:info*)",
+      "Bash(mvn *flyway*)",
+      "Bash(./mvnw *flyway*)",
       "Bash(gradle test *)",
       "Bash(gradle test)",
       "Bash(gradle build *)",
@@ -346,8 +342,6 @@
       "Bash(CLAUDE_CODE_TMPDIR=* unzip -p *)"
     ],
     "ask": [
-      "Bash(mvn *flyway:migrate*)",
-      "Bash(./mvnw *flyway:migrate*)",
       "Bash(git reset --hard*)",
       "Bash(git reset --keep*)",
       "Bash(git reset --merge*)",
@@ -426,10 +420,6 @@
       "Bash(head .env*)",
       "Bash(tail .env*)",
       "Bash(grep * .env*)",
-      "Bash(mvn *flyway:clean*)",
-      "Bash(mvn *flyway:repair*)",
-      "Bash(./mvnw *flyway:clean*)",
-      "Bash(./mvnw *flyway:repair*)",
       "Bash(find * -delete*)",
       "Bash(find * -exec*)",
       "Bash(find * -execdir*)",

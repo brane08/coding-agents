@@ -39,3 +39,16 @@ future audits don't re-flag the same already-fixed gaps.
   `chain-deny` rows in `state/delegation-nudges.tsv` beforehand. Re-audit with `audit.py` and compare.
 - `~/.claude` added to `additionalDirectories`; ask-log scan (21 asks) showed Bash `grep` on `~/.claude` as the
   repeat prompt, 0 `Grep`-tool asks. Detail: `memory/sessions/2026-10-17-config-sync-and-permissions.md`.
+
+## 2026-10-18
+- Subagent windows: added `autoCompactWindow: 110000` (frontmatter, needs Claude Code v2.1.296+)
+  to all 9 `agents/*.md`. Not measured: no `ctx.py` peak-context-per-subagent number was available
+  (transcripts are on the local machine); chosen by hand as a cap well below the session's 400000.
+  Re-run `ctx.py`; if no subagent ever nears 110k the field is inert, if some compact often raise it.
+- Scan 2026-10-16..18 (16 transcripts, 600 lookups): 61 violation runs = 10% (raw legacy 106); grocery-shop 6, academy 39,
+  coding-agents 16. Not compared with the 2026-10-14 baseline (26%, different counting window). No rule/hook changes since 10-17.
+- `ctx.py` is all-time, all projects (24 sessions, 56 compactions): peak median 156k, p90 341k; compaction median 157k. Sonnet main
+  cache-read ~97% of input (630M vs 18.2M fresh), so main-thread context size is the cost driver. Subagents: sonnet 4972 turns
+  (32% mechanical, 32M fresh), haiku 3308 (19%, ~5.9k fresh/turn), opus 1044 (26%).
+- Targets, no setting changed: main window cap ~200k, long implementer runs split one bug per agent, lookups to haiku. Not measured:
+  this session alone, dollar cost, quality after compaction.
