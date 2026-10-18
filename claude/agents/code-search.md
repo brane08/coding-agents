@@ -3,6 +3,7 @@ name: code-search
 description: Use proactively for any read-only lookup — find files, grep usages, trace dependencies, locate config/migrations, inspect logs. Use whenever the task is "where is X" / "find all Y" / "what calls Z" and does not require edits.
 tools: Read, Grep, Glob, Bash
 model: haiku
+autoCompactWindow: 110000
 permissionMode: default
 ---
 

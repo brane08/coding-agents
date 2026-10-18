@@ -3,6 +3,7 @@ name: quick-triage
 description: Use to classify an incoming task as simple/complex before deciding whether to hand off to Sonnet/Opus. Good for log scanning, error message triage, and routine status checks (build pass/fail, test results summary).
 tools: Read, Grep, Bash
 model: haiku
+autoCompactWindow: 110000
 permissionMode: default
 ---
 

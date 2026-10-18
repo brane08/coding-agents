@@ -27,7 +27,8 @@
   `boilerplate-gen`. Never for anything involving a design decision.
 - Maven dep-tree → `dep-inspect`. Third-party jar API/bytecode (no source/docs) → `jar-inspect`.
 - Flyway status → `quick-triage` running `bash ~/.claude/skills/flyway-check/flyway-check.sh`
-  (`FLYWAY_MODULE=<module>` when the config is in a module); never migrate/clean/repair.
+  (`FLYWAY_MODULE=<module>` when the config is in a module); the status script is read-only —
+  migrate/clean/repair only via explicit `mvn`/`mvnw flyway:*` on local dev DBs.
   Next migration version / pending / listing migrations → `flyway-next` (a listing is a Glob, not `ls`).
 - Entity wiring (DTO→Entity→Mapper→Producers→Resource) → `stack-check`. Workflow wiring
   (deriveType/ACTION_MAP/wait+getAndRemoveResponse/tests) → `workflow-check`.
@@ -92,7 +93,8 @@
 
 ## Stack defaults (assume, don't ask)
 - Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
-- DB: PostgreSQL + Flyway (never `clean`/`repair` without explicit ask; `migrate` asks).
+- DB: PostgreSQL + Flyway (all `mvn`/`mvnw flyway:*` goals incl. migrate/clean/repair are
+  allowed without a prompt, local dev DBs only — never prod hosts/names; run only when asked).
 - Frontend: Angular.
 - Shell: zsh, macOS or Ubuntu/Debian VM — no bash-only syntax unless asked.
 - Python multi-package/uv-workspace repo: scope `pytest` to the relevant package dir(s),

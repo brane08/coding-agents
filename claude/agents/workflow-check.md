@@ -3,6 +3,7 @@ name: workflow-check
 description: Use when asked if a workflow is fully wired — checks WorkflowData, PersistentWorkflow class, deriveType() mapping, ACTION_MAP in Angular, wait()+getAndRemoveResponse() pairing, and test coverage. Read-only.
 tools: Read, Grep, Glob, Bash
 model: haiku
+autoCompactWindow: 110000
 ---
 
 Given a workflow name (e.g. `EventApproval`), verify all wiring points and report FOUND/MISSING for each.

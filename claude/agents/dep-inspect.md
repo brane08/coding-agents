@@ -3,6 +3,7 @@ name: dep-inspect
 description: Use for Maven dependency tree inspection — find what pulls in a given artifact, detect version conflicts, list transitive dependencies for a module. Read-only, no edits to pom.xml.
 tools: Read, Grep, Bash
 model: haiku
+autoCompactWindow: 110000
 permissionMode: default
 ---
 
