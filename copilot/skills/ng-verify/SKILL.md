@@ -15,7 +15,7 @@ Run one of:
 Prefer `--summary`: it prints just the verdict line, `error TS` lines and
 failing specs with their first error line. Don't pipe the script through `grep`/`tail`
 (a piped command is not covered by terminal auto-approve). The full log is
-always in `/tmp/ng-verify.log`.
+always in `<project>/.copilot/logs/ng-verify.log` (self-ignoring dir; read it there, not from `/tmp`).
 
 Notes:
 - Requires `tsconfig.app.json` in the target dir — errors out early if missing

@@ -9,7 +9,10 @@ set -euo pipefail
 #   verify.sh <angular-dir> --summary               → print only the digest (no pipes needed):
 #                                                     TOTAL lines, error TS, failing specs + first error line
 
-LOG=/tmp/ng-verify.log
+LOGDIR="$(cd "${CLAUDE_PROJECT_DIR:-.}" && pwd)/.claude/logs"
+mkdir -p "$LOGDIR"
+[ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
+LOG="$LOGDIR/ng-verify.log"
 START=$(date +%s)
 
 DIR="."

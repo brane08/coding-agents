@@ -4,7 +4,10 @@ set -euo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-.}"
 
-LOG=/tmp/quarkus-dev.log
+LOGDIR="$(pwd)/.claude/logs"
+mkdir -p "$LOGDIR"
+[ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
+LOG="$LOGDIR/quarkus-dev.log"
 PORT=${QUARKUS_PORT:-8080}
 
 # Kill any existing quarkus:dev on that port
