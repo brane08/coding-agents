@@ -52,3 +52,8 @@ future audits don't re-flag the same already-fixed gaps.
   (32% mechanical, 32M fresh), haiku 3308 (19%, ~5.9k fresh/turn), opus 1044 (26%).
 - Targets, no setting changed: main window cap ~200k, long implementer runs split one bug per agent, lookups to haiku. Not measured:
   this session alone, dollar cost, quality after compaction.
+
+## 2026-10-21
+- Main `autoCompactWindow` 400000 -> 350000 and `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 90 -> 85 (user choice, both profiles). Targets the 10-18
+  `ctx.py` numbers: peak p90 341k (window sits just above it), compaction median 157k. If trigger = pct x window: ~297k vs ~360k before.
+  Looser than the 10-18 ~200k cap target. Not measured: sessions that reach 297k, quality after compaction. Re-run `ctx.py` to compare.
