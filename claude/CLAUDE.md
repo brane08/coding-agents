@@ -49,7 +49,10 @@
   lookup (Bash/Grep/Glob) with no Edit/Write/Agent between → one `code-search`; read-only psql, `git -C`, inline secrets get a
   reminder. `git push`/`gh pr create` from a merged-PR branch is blocked → `pr-squash-sync`
   skill. Force-push/delete of main/master is denied. Writes outside the project/scratchpad are
-  denied; `~/.claude` is an additional directory (reads, greps and writes need no prompt). `.env`, `*.key`, `*.pem`, `application-prod.*` are unreadable;
+  denied; `~/.claude` is an additional directory (reads, greps and writes need no prompt, except edits to
+  `settings*.json` and `hooks/**`, which ask; use the sync script). `.env`, `*.key`, `*.pem`, `application-prod.*`,
+  `~/.kube`, `~/.netrc`, `~/.npmrc`, `~/.m2/settings.xml` are unreadable (Read tool and Bash cat/head/tail/grep);
+  `mvn`/`mvnw` `deploy`, `exec:java|exec`, `release:prepare|perform|rollback|branch|stage` are denied;
   `find -exec/-delete` and `sort -o` are denied. Use `git switch` (allowed), not `git checkout`
   (asks).
 
