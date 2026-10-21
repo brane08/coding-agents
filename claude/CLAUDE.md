@@ -199,6 +199,8 @@ unit tests, multi-module Maven) · `claude-config-repo-sync` (repo ↔ ~/.claude
   is allowed; scripts re-exec into their own shell). Always `~/.claude/…` — never `$HOME`,
   `/Users/…` or `/home/…`: allow rules only match `~`, a full path prompts or is blocked.
 - `test.sh` takes only `[<module> [Class]]` (flags are rejected); `--summary` is `verify.sh` only.
+- Skill logs (`mvn-test`, `mvn-build`, `quarkus-dev`, `ng-verify`) are in `<project>/.claude/logs/<skill>.log`
+  (self-ignoring dir), never `/tmp`: Read or Grep them there; a `/tmp` path is outside the project and prompts.
 - Exclude `node_modules` from `find`/`grep` (`--exclude-dir`, `-not -path`) — deny rules block it.
 - `rm`/`mv`/`cp` are denied: use `git rm`/`git mv` for tracked files, else
   `bash ~/.claude/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).

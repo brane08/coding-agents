@@ -18,7 +18,7 @@ Run one of:
 Prefer `--summary` when dispatching: it prints just the verdict line, `error TS` lines and
 failing specs with their first error line. Never pipe the script through `grep`/`tail` — a
 piped command prompts for approval; the bare script call is allowlisted. The full log is
-always in `/tmp/ng-verify.log`.
+always in `<project>/.claude/logs/ng-verify.log` (self-ignoring dir; read it there, not from `/tmp`).
 
 Notes:
 - Requires `tsconfig.app.json` in the target dir — errors out early if missing

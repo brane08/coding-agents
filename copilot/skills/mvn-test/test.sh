@@ -7,7 +7,10 @@ set -euo pipefail
 #   test.sh mono-quarkus                   → tests named module (with -am)
 #   test.sh mono-quarkus UserServiceTest   → specific test class in module
 
-LOG=/tmp/mvn-test.log
+LOGDIR="$(cd "${CLAUDE_PROJECT_DIR:-.}" && pwd)/.copilot/logs"
+mkdir -p "$LOGDIR"
+[ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
+LOG="$LOGDIR/mvn-test.log"
 START=$(date +%s)
 
 cd "${CLAUDE_PROJECT_DIR:-.}"

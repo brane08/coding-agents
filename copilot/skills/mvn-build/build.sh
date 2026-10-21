@@ -9,7 +9,10 @@ set -euo pipefail
 #   build.sh --reactor            → full reactor build
 # Extra -flags are passed to mvn as separate arguments (never evaluated by a shell).
 
-LOG=/tmp/mvn-build.log
+LOGDIR="$(cd "${CLAUDE_PROJECT_DIR:-.}" && pwd)/.copilot/logs"
+mkdir -p "$LOGDIR"
+[ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
+LOG="$LOGDIR/mvn-build.log"
 START=$(date +%s)
 
 cd "${CLAUDE_PROJECT_DIR:-.}"
