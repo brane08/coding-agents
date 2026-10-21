@@ -6,7 +6,7 @@
     "sessionUrl": false
   },
   "autoCompactEnabled": true,
-  "autoCompactWindow": 400000,
+  "autoCompactWindow": 350000,
   "autoMemoryEnabled": false,
   "autoMode": {
     "allow": [
@@ -59,7 +59,7 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85",
     "CLAUDE_CODE_TMPDIR": "/tmp"
   },
   "extraKnownMarketplaces": {
