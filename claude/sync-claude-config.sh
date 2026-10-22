@@ -7,9 +7,11 @@
 # hand-maintained list, not derived from git state at run time. A file only
 # moves if it's a line in MANIFEST, regardless of whether it happens to be
 # git-tracked, staged, or dirty.
-# Always overwrites. Uses plain cp (no rsync). No rm -rf — never deletes
-# anything in ~/.claude/, including files ~/.claude/ has that MANIFEST
-# doesn't list.
+# Always overwrites, after backing up the files it replaces to
+# ~/.claude/backups/<epoch-minute>/ (newest 5 kept; BACKUP_KEEP=<n> to change).
+# Uses plain cp (no rsync). Never deletes anything in ~/.claude/ except
+# backup dirs beyond the newest 5, including files ~/.claude/ has that
+# MANIFEST doesn't list.
 #
 # This script lives inside claude/, so repo root = parent dir.
 #
@@ -55,6 +57,35 @@ if [[ ! -f "$SETTINGS_SRC" ]]; then
 fi
 
 echo "Syncing (per MANIFEST, profile: ${PROFILE}): $SRC_DIR  ->  $DEST_DIR"
+
+# Back up the destination files about to be overwritten into
+# ~/.claude/backups/<epoch rounded down to the minute>/, keeping the newest
+# BACKUP_KEEP (default 5). A second run in the same minute keeps the first copy.
+BACKUP_ROOT="${DEST_DIR}/backups"
+BACKUP_KEEP="${BACKUP_KEEP:-5}"
+NOW=$(date +%s)
+BACKUP_DIR="${BACKUP_ROOT}/$((NOW / 60 * 60))"
+if [[ ! -d "$BACKUP_DIR" ]]; then
+  BACKED=0
+  while IFS= read -r rel; do
+    [[ -z "$rel" || "$rel" == \#* ]] && continue
+    if [[ -f "${DEST_DIR}/${rel}" ]]; then
+      mkdir -p "${BACKUP_DIR}/$(dirname "$rel")"
+      cp -p "${DEST_DIR}/${rel}" "${BACKUP_DIR}/${rel}"
+      BACKED=$((BACKED + 1))
+    fi
+  done < "$MANIFEST"
+  if [[ -f "${DEST_DIR}/settings.json" ]]; then
+    mkdir -p "$BACKUP_DIR"
+    cp -p "${DEST_DIR}/settings.json" "${BACKUP_DIR}/settings.json"
+    BACKED=$((BACKED + 1))
+  fi
+  [[ "$BACKED" -gt 0 ]] && echo "Backed up ${BACKED} file(s) -> ${BACKUP_DIR}"
+  # Prune: only numeric dirs directly under backups/.
+  { ls -1 "$BACKUP_ROOT" 2>/dev/null | grep -E '^[0-9]+$' | sort -rn | tail -n +$((BACKUP_KEEP + 1)) | while IFS= read -r old; do
+    rm -rf -- "${BACKUP_ROOT:?}/${old}"
+  done; } || true
+fi
 
 COUNT=0
 MISSING=0
