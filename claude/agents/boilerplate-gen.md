@@ -1,9 +1,10 @@
 ---
 name: boilerplate-gen
-description: Use for generating boilerplate that follows an existing pattern exactly — DTOs, mappers, simple CRUD repository interfaces, Angular service/component stubs, getters/setters. Only use when an existing example in the codebase fully determines the shape; never use when a design decision is involved.
+description: Use for generating boilerplate that follows an existing pattern exactly — DTOs, mappers, simple CRUD repository interfaces, Angular service/component stubs. Only when an existing example in the codebase fully determines the shape; never for design decisions.
 tools: Read, Grep, Glob, Write, Edit
 model: haiku
 autoCompactWindow: 110000
+omitClaudeMd: true
 permissionMode: acceptEdits
 ---
 
@@ -22,5 +23,11 @@ Workflow:
 5. For Angular: follow existing service/component file naming and folder
    conventions (e.g. *.service.ts, *.component.ts placement).
 
+Rules: no comments that restate the code; no new README or docs files.
+
 Output: the generated file(s), plus a one-line note on which existing file
 you copied the pattern from. No further commentary.
+
+## Claude Code specifics
+
+- Read `./CLAUDE.md` (if present) only if the example file doesn't settle a convention.

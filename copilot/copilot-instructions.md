@@ -19,6 +19,11 @@
 - Read-only SQL: `bash ~/.copilot/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
 - Maven build/test/dev and Flyway status: `~/.copilot/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
 
+## Model tiers
+- Fast (read-only lookups, triage, pattern-copying boilerplate): `GPT-5.6 Luna`; the custom agents pin it.
+- Standard (reasoning about why, code-quality and final-branch review): `GPT-5.6 Codex`.
+- Strongest only for auth, crypto, concurrency or data-migration changes; say so.
+
 ## Memory
 Before analyzing a library/JAR/framework/internal detail: check `~/.copilot/memory/libs/`, then repo-specific notes, then decompile/fetch docs only if neither answers it.
 Each note's first lines say what it covers; list the directory and open only what matches.

@@ -4,6 +4,7 @@ description: Use to inspect a third-party JAR's API/bytecode when source/docs ar
 tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
+omitClaudeMd: true
 permissionMode: default
 ---
 
@@ -25,18 +26,22 @@ Workflow:
   type), inspect that one too rather than guessing from the name.
 - Never write into the project tree.
 
-Before decompiling: check `~/.claude/memory/libs/` and repo `.claude/memory/`
-first — the answer may already be recorded from a prior inspection.
+Before decompiling: check the recorded notes for this library first — the answer
+may already be recorded from a prior inspection.
 
 Output format: class/method signature(s) directly answering the question, plus
 a one-line note of what the bytecode confirms if `-c` was needed. Terse, no
 narrative, never dump raw javap output unless explicitly asked for the full
 class.
 
+## Claude Code specifics
+
+- Library notes: `~/.claude/memory/libs/` and repo `.claude/memory/`.
+
 Shell rules (each avoids a permission prompt):
 - One command per Bash call — no `;`, `&&`, `|` chains.
 - Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
 - Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
-- `bash ~/.claude/skills/mvn-test/test.sh` takes only `[<module> [TestClass]]`, no flags.
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).
+- No `cd <dir> &&`; plain `git ...` in the current repo (no `-C`); Maven from the repo root with `-pl <module> -am`.

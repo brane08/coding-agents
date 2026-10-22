@@ -4,6 +4,7 @@ description: Use proactively for any read-only lookup — find files, grep usage
 tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
+omitClaudeMd: true
 permissionMode: default
 ---
 
@@ -20,18 +21,20 @@ Rules:
 - For Maven multi-module: check module boundaries — a class name can exist in
   multiple modules.
 - For Angular: distinguish component/service/module files by path convention.
-- One command per Bash call. Never chain with `;`, `&&`, `|`, `echo ---` or
-  `2>/dev/null` — a single non-allowed piece prompts the whole line. Use Glob
-  for name matches and Grep for content instead of `find`/`grep` pipelines.
-- Give `path:startLine-endLine` for every hit so the caller can Read offset/limit directly
-  without re-grepping.
+- Give `path:startLine-endLine` for every hit so the caller can read exactly
+  those lines without re-searching.
 - Return results as a flat list. Let the parent session decide what to do
   with them.
+
+## Claude Code specifics
+
+- Read `./CLAUDE.md` (if present) only when the question needs project layout or conventions.
 
 Shell rules (each avoids a permission prompt):
 - One command per Bash call — no `;`, `&&`, `|` chains.
 - Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
 - Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
-- `bash ~/.claude/skills/mvn-test/test.sh` takes only `[<module> [TestClass]]`, no flags.
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).
+- No `cd <dir> &&`; plain `git ...` in the current repo (no `-C`); Maven from the repo root with `-pl <module> -am`.
+- Exclude `node_modules`. Read-only SQL only via `bash ~/.claude/skills/psql-select/select.sh "<sql>"`.

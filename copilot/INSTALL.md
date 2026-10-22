@@ -34,10 +34,19 @@ Regex keys need a recent VS Code with `chat.tools.terminal.autoApprove` — veri
 Supports instructions (`copilot-instructions.md`, `*.instructions.md`) and prompt files only; skills, custom agents and auto-approve settings may not apply — verify against your IDE version.
 
 ## Model pinning
-The read-only/triage agents pin `model: GPT-5.6 Luna` (a cheap GPT model; the Copilot equivalent of the haiku pin in Claude). The value must match the exact model name in your Copilot model picker, otherwise edit or remove it. An unavailable model falls back to the picker's default.
+Agents pin a model by tier, so a role keeps its cost class across tools:
+
+| Tier | Use for | Claude | Copilot |
+|---|---|---|---|
+| fast | read-only lookups, triage, summaries, pattern-copying boilerplate | `haiku` | `GPT-5.6 Luna` |
+| standard | reasoning about why, code-quality and final-branch review, ad hoc agents that decide something | `sonnet` | `GPT-5.6 Codex` |
+| strongest | auth, crypto, concurrency, data-migration changes only | `opus` | not pinned; choose in the picker |
+
+All 9 custom agents here are fast tier and pin `model: GPT-5.6 Luna`. There is no standard-tier agent file yet; when you add one, pin `model: GPT-5.6 Codex`.
+The value must match the exact model name in your Copilot model picker, otherwise edit or remove it. An unavailable model falls back to the picker's default.
 
 - The `model` property is VS Code-only. Remove it from agent files used by the GitHub.com coding agent, which errors on it.
-- Business/Enterprise admins must enable the GPT-5.6 policy before the pinned model is available.
+- Business/Enterprise admins must enable the GPT-5.6 policy before the pinned models are available.
 
 ## Not ported (intentional)
 - Claude hooks (write guard, merged-PR guard, push guard, delegate nudge) and the admin/sandbox permission profiles: hook payloads differ, and a port would fail open silently.
