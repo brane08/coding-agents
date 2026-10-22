@@ -4,9 +4,10 @@ description: Use when asked about the next Flyway migration version, what migrat
 tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
+omitClaudeMd: true
 ---
 
-List files in the migrations directory, find the highest V1.0_XX number, and report the next available version. Also run `bash ~/.claude/skills/flyway-check/flyway-check.sh` (`FLYWAY_MODULE=<module>` if needed) to show pending vs applied status.
+List files in the migrations directory, find the highest V1.0_XX number, and report the next available version. Also run the `flyway-check` skill script (set the module if needed) to show pending vs applied status.
 
 Steps:
 1. Glob `database/release1.0/migration/V1.0_*.sql` and `database/release1.0/test/V1.0_*.sql`
@@ -14,10 +15,13 @@ Steps:
 3. Report: current max, next version number, and list any pending migrations from flyway:info output if asked
 4. Never suggest or run flyway:migrate, flyway:clean, or flyway:repair
 
+## Claude Code specifics
+
+- Flyway script: `bash ~/.claude/skills/flyway-check/flyway-check.sh` (`FLYWAY_MODULE=<module>` if needed).
+
 Shell rules (each avoids a permission prompt):
 - One command per Bash call — no `;`, `&&`, `|` chains.
 - Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
 - Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
-- `bash ~/.claude/skills/mvn-test/test.sh` takes only `[<module> [TestClass]]`, no flags.
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).

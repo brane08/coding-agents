@@ -4,6 +4,7 @@ description: Use when asked if a domain entity is fully wired — checks DTO, En
 tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
+omitClaudeMd: true
 ---
 
 Given an entity name (e.g. `TransferCertificate`), search across all modules and report what exists and what is missing.
@@ -17,10 +18,11 @@ Checklist per entity:
 
 For each item report: FOUND (with file path) or MISSING.
 
+## Claude Code specifics
+
 Shell rules (each avoids a permission prompt):
 - One command per Bash call — no `;`, `&&`, `|` chains.
 - Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
 - Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
-- `bash ~/.claude/skills/mvn-test/test.sh` takes only `[<module> [TestClass]]`, no flags.
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).

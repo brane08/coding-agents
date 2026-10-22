@@ -1,5 +1,6 @@
 ---
 description: Generate boilerplate that follows an existing pattern exactly — DTOs, mappers, simple CRUD repository interfaces, Angular service/component stubs, getters/setters. Only when an existing example fully determines the shape; never for design decisions.
+model: GPT-5.6 Luna
 tools: ['read', 'search', 'edit']
 ---
 
