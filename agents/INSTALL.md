@@ -23,6 +23,9 @@ The spec does not mandate skill locations; `.agents/skills/` is the documented c
 2. Per repo that needs the rules: copy `agents/AGENTS.md` to `<repo>/AGENTS.md`.
 3. Project-only skills: copy the skill directory into `<repo>/.agents/skills/` instead of the user dir.
 
+### Windows (PowerShell 5.1+)
+`powershell -NoProfile -ExecutionPolicy Bypass -File agents\install.ps1 [dest]` installs to `~\.agents` (step 1 equivalent). Markdown is rewritten to the `.ps1` commands, no `.sh` is copied, and the runners come from `claude/skills` plus `lib/Common.psm1`. Project dir: `AGENT_PROJECT_DIR` (or `CLAUDE_PROJECT_DIR`), else the current directory. Step 2 and 3: copy `AGENTS.md` as-is (it still names `.sh`; the installed skill docs do not). Allowlist rules must match `powershell -NoProfile -ExecutionPolicy Bypass -File $HOME/.agents/skills/...ps1` (installed docs use `$HOME`, not `~`).
+
 Scripts resolve the project from `AGENT_PROJECT_DIR`, else the current directory, and write logs to `<project>/.agents/logs/`.
 Command allowlists must match `~/.agents/skills/...` as written (with `~`). Add the rules your tool needs; none are shipped here.
 

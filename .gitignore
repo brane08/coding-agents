@@ -22,6 +22,11 @@ claude/skills/*
 !claude/hooks/
 !claude/sync-claude-config.sh
 !claude/save-claude-config.sh
+!claude/sync-claude-config.ps1
+!claude/save-claude-config.ps1
+!claude/settings.*.windows.json
+!claude/lib/
+!claude/tests/
 
 # OS junk
 .DS_Store
