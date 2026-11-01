@@ -1,0 +1,32 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^java\\b/": true,
+    "/^javac\\b/": true,
+    "/^javap\\b/": true,
+    "/^jar (-?tf|-?xf)\\b/": true,
+    "/^mvn\\b(?!.*flyway:(clean|repair|migrate))/": true,
+    "/^\\.\\\\mvnw(\\.cmd)?\\b(?!.*flyway:(clean|repair|migrate))/": true,
+    "/^(gradle|\\.\\\\gradlew(\\.bat)?) (test|build|run|bootRun|quarkusDev|:|\\S*Test)/": true,
+    "/^pytest\\b/": true,
+    "/^npx playwright (test|codegen|show-report)\\b/": true,
+    "/^npm (install$|test\\b|run (build|lint)\\b)/": true,
+    "/^ng (serve|build)\\b/": true,
+    "/^powershell(\\.exe)? -NoProfile -ExecutionPolicy Bypass -File (~|\\$HOME|\\$env:USERPROFILE)[\\\\\\/]\\.copilot[\\\\\\/]skills[\\\\\\/](psql-select[\\\\\\/]select|mvn-build[\\\\\\/]build|mvn-test[\\\\\\/]test|quarkus-dev[\\\\\\/]dev|flyway-check[\\\\\\/]flyway-check|ng-verify[\\\\\\/]verify|guarded-fs[\\\\\\/]guarded-fs|pr-squash-sync[\\\\\\/]sync-check)\\.ps1\\b/": true,
+    "/^jq\\b/": true,
+    "/^git (add|fetch|commit|status|diff|log|rev-list|merge --ff-only|show|ls-files|rev-parse|branch --show-current|worktree (list|add)|switch|stash|rm|mv|branch -d)\\b/": true,
+    "/^gh (pr (view|list|diff|checks)|issue view|repo view)\\b/": true,
+    "/^(Stop-Process|Get-NetTCPConnection)\\b/": true,
+    "/^(mkdir|New-Item|Get-ChildItem|ls|dir|Get-Content|cat|Select-String|Measure-Object|Select-Object|Sort-Object|Write-Output|echo|where\\.exe|Get-Location|pwd|Get-Date|uv)\\b/": true,
+
+    "/^mvn\\b.*flyway:(clean|repair|migrate)/": false,
+    "/^\\.\\\\mvnw(\\.cmd)?\\b.*flyway:(clean|repair|migrate)/": false,
+    "/^(rm|Remove-Item|del|erase|ri)\\b/": false,
+    "/^(rmdir|rd)\\b/": false,
+    "/^(mv|move|Move-Item|mi)\\b/": false,
+    "/^(cp|copy|Copy-Item|ci)\\b/": false,
+    "/^(Invoke-Expression|iex)\\b/": false,
+    "/^(curl|wget|Invoke-WebRequest|Invoke-RestMethod|iwr|irm|ssh|scp)\\b/": false,
+    "/^(shutdown|Restart-Computer|Stop-Computer|format|Format-Volume)\\b/": false,
+    "/^(Get-Content|cat|type) .*[\\\\\\/]\\.(ssh|aws)[\\\\\\/]/": false
+  }
+}

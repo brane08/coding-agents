@@ -15,7 +15,7 @@ Copy to a repo root, or import it from a tool-specific instructions file.
 
 ## Skills
 Skills live in `~/.agents/skills/<name>/` (user) or `<repo>/.agents/skills/<name>/` (project) in the Agent Skills format;
-run their scripts as `bash ~/.agents/skills/<name>/<script>` (any of bash, zsh, ksh works). Always write the path with `~`.
+run their scripts as `bash ~/.agents/skills/<name>/<script>.sh` (any of bash, zsh, ksh works). Always write the path with `~`.
 
 | Skill | Use for | Command |
 |---|---|---|

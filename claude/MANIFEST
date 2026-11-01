@@ -17,8 +17,18 @@ hooks/chain-guard.sh
 hooks/nudge-delegate.sh
 hooks/log-ask.sh
 
-# settings.json is profile-specific (settings.admin.json / settings.sandbox.json) and is
-# handled by the sync/save scripts directly, not listed here.
+# Windows PowerShell 5.1 twins of the hooks, plus their shared module.
+lib/Common.psm1
+hooks/guard-git-push.ps1
+hooks/guard-merged-pr.ps1
+hooks/guard-writes.ps1
+hooks/chain-guard.ps1
+hooks/nudge-delegate.ps1
+hooks/log-ask.ps1
+
+# settings.json is profile-specific (settings.<profile>.json on Unix,
+# settings.<profile>.windows.json on Windows) and is handled by the sync/save scripts
+# directly, not listed here.
 CLAUDE.md
 
 agents/boilerplate-gen.md
@@ -67,6 +77,14 @@ skills/psql-select/select.sh
 skills/psql-select/SKILL.md
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
+skills/flyway-check/flyway-check.ps1
+skills/guarded-fs/guarded-fs.ps1
+skills/mvn-build/build.ps1
+skills/mvn-test/test.ps1
+skills/ng-verify/verify.ps1
+skills/pr-squash-sync/sync-check.ps1
+skills/psql-select/select.ps1
+skills/quarkus-dev/dev.ps1
 memory/libs/spring-cloud-gateway-server-webmvc-5.0.3.md
 memory/libs/fxtrayicon-4.2.3.md
 memory/libs/testfx-4.0.18-monocle.md
