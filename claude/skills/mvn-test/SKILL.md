@@ -13,7 +13,7 @@ If anything failed, follow up with `test-aggregator` for the `-Dtest=` rerun com
 The only inline exception is a single-class `-Dtest=` rerun right after a fix.
 
 Run one of:
-  bash ~/.claude/skills/mvn-test/test.sh mono-quarkus                       # all tests
+  bash ~/.claude/skills/mvn-test/test.sh mono-quarkus                       # whole module, runs `mvn verify` (use only when the work touched the module)
   bash ~/.claude/skills/mvn-test/test.sh mono-quarkus StudentResourceTest   # specific class
   bash ~/.claude/skills/mvn-test/test.sh data-hibernate                     # data-hibernate (+ upstream modules) tests
 

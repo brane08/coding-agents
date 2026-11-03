@@ -25,7 +25,7 @@ case "$first" in
   psql)
     if printf '%s' "$cmd" | grep -Eiq -- "-c +[\"']? *(select|explain|show|with)[ (]"; then
       cat_="psql-readonly"
-      msg="psql: read-only query via plain psql prompts for permission; use 'bash ~/.claude/skills/psql-select/select.sh <same psql args>' (auto-approved)."
+      msg="psql: use 'bash ~/.claude/skills/psql-select/select.sh \"<sql>\"' for read-only queries (enforced read-only)."
     fi
     ;;
 esac
@@ -46,7 +46,7 @@ case "$first" in
     unquoted=$(printf '%s' "$cmd" | sed -E "s/\"([^\"\\\\]|\\\\.)*\"//g; s/'[^']*'//g")
     if printf '%s' "$unquoted" | grep -Eq '\||;|&&'; then
       mkdir -p "$STATE" 2>/dev/null && printf '%s\t%s\t%s\t%s\n' "$now" "$sid" "lookup-chain-deny" "$(basename "$PWD")" >> "$STATE/delegation-nudges.tsv" 2>/dev/null
-      jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"Blocked: one command per call, no |, ; or &&. Use the Grep tool (head_limit, -n, -A/-B) or Read with offset/limit; for 3+ lookups dispatch one code-search."}}'
+      jq -cn '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:"Blocked: one command per call, no |, ; or &&. Use Read with offset/limit or dispatch one code-search (Grep tool only for a single locate-before-edit)."}}'
       exit 0
     fi
     ;;

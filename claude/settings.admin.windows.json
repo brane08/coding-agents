@@ -6,7 +6,7 @@
     "sessionUrl": false
   },
   "autoCompactEnabled": true,
-  "autoCompactWindow": 350000,
+  "autoCompactWindow": 250000,
   "autoMemoryEnabled": false,
   "autoMode": {
     "allow": [
@@ -16,7 +16,8 @@
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File @@REPO_DIR@@/claude/sync-claude-config.ps1*)",
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File @@REPO_DIR@@/claude/sync-claude-config.ps1*)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File @@REPO_DIR@@/claude/save-claude-config.ps1*)",
-      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File @@REPO_DIR@@/claude/save-claude-config.ps1*)"
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File @@REPO_DIR@@/claude/save-claude-config.ps1*)",
+      "Edit/Write under .claude/memory/tracking/** (todo.md, items/*, findings/*, decisions.md, review.md, archive.md) in the user's repos is routine item-state bookkeeping, including multi-line section moves and archive appends; not self-modification or deletion."
     ],
     "environment": [
       "### Org-wide",
@@ -40,10 +41,10 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: software development (Java/Quarkus + Angular school-management monorepo, academy repo)",
-      "**Trusted repo**: /data/incubator/source/academy (github.com/brane08/academy, private) and its configured remote `origin`",
+      "**Trusted repo**: ~/projects/academy (github.com/brane08/academy, private), ~/projects/grocery-shop and ~/projects/pagila-samples, each with its configured remote `origin`",
       "**Trusted repo (Claude config)**: github.com/brane08/coding-agents (private) and its remote `origin`. Its claude/ dir is the versioned source of ~/.claude; running claude/sync-claude-config.ps1 or save-claude-config.ps1 (profile admin|sandbox) and editing files under ~/.claude are user-intended routine operations, not self-modification to block",
       "**Org-specific CLIs**: None configured",
-      "**routine in any project**: `mvn` builds/tests and read-only `psql` queries via `~/.claude/skills/psql-select/select.ps1` (SELECT/EXPLAIN/SHOW only, enforced by the script) against the local Postgres (`-h localhost` only, not IP addresses) are routine build/test/db-read operations per CLAUDE.md; never against prod hosts or names; all `flyway:*` goals (incl. migrate/clean/repair) are user-approved on local dev databases"
+      "**routine in any project**: `mvn` builds/tests and read-only `psql` queries via `~/.claude/skills/psql-select/select.ps1` (SELECT/EXPLAIN/SHOW only, enforced by the script) against the local Postgres (`-h localhost` or `-h 127.0.0.1`, no other hosts) are routine build/test/db-read operations per CLAUDE.md; never against prod hosts or names; all `flyway:*` goals (incl. migrate/clean/repair) are user-approved on local dev databases"
     ],
     "soft_deny": [
       "$defaults"
@@ -57,7 +58,7 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "85"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -73,6 +74,11 @@
         "hooks": [
           {
             "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File @@HOME@@/.claude/hooks/log-ask.ps1",
+            "timeout": 15,
+            "type": "command"
+          },
+          {
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File @@HOME@@/.claude/hooks/autonomous-deny.ps1",
             "timeout": 15,
             "type": "command"
           }
@@ -130,7 +136,8 @@
   "notifyOnAgentStop": true,
   "permissions": {
     "additionalDirectories": [
-      "~/.claude"
+      "~/.claude",
+      "~/.m2/repository"
     ],
     "allow": [
       "Read(./**)",
@@ -219,6 +226,14 @@
       "Bash(npm test*)",
       "Bash(npm run build*)",
       "Bash(npm run lint*)",
+      "Bash(npm --prefix * test*)",
+      "Bash(npm --prefix * run *)",
+      "Bash(npm ci*)",
+      "Bash(ng test*)",
+      "Bash(npx ng *)",
+      "Bash(npx tsc *)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/await-user/wait.ps1*)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/await-user/wait.ps1*)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 *)",
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 *)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-build/build.ps1*)",
@@ -237,6 +252,8 @@
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/pr-squash-sync/sync-check.ps1*)",
       "Bash(python3 -I ~/.claude/skills/delegation-audit/audit.py*)",
       "Bash(jq *)",
+      "Bash(rg *)",
+      "Bash(uniq *)",
       "Bash(diff *)",
       "Read(~/.claude/**)",
       "Read(~/.m2/repository/**)",
@@ -280,6 +297,11 @@
       "Bash(git rm *)",
       "Bash(git mv *)",
       "Bash(git branch -d *)",
+      "Bash(git for-each-ref *)",
+      "Bash(git -c core.editor=true *)",
+      "Bash(readlink *)",
+      "Bash(stat *)",
+      "Bash(uv run *)",
       "Bash(gh pr view*)",
       "Bash(gh pr list*)",
       "Bash(gh pr diff*)",
@@ -321,7 +343,25 @@
       "Bash(CLAUDE_CODE_TMPDIR=* javap *)",
       "Bash(CLAUDE_CODE_TMPDIR=* jar *)",
       "Bash(CLAUDE_CODE_TMPDIR=* unzip -l *)",
-      "Bash(CLAUDE_CODE_TMPDIR=* unzip -p *)"
+      "Bash(CLAUDE_CODE_TMPDIR=* unzip -p *)",
+      "Bash(git grep *)",
+      "Bash(unzip *)",
+      "Bash(npx ui-angular *)",
+      "Bash(gh pr create *)",
+      "Bash(git branch -D *)",
+      "Bash(psql -h 127.0.0.1 *)",
+      "Bash(psql -h localhost *)",
+      "Bash(psql * -h 127.0.0.1 *)",
+      "Bash(psql * -h localhost *)",
+      "Bash(pg_dump -h 127.0.0.1 *)",
+      "Bash(pg_dump -h localhost *)",
+      "Bash(pg_dump * -h 127.0.0.1 *)",
+      "Bash(pg_dump * -h localhost *)",
+      "Bash(createdb -h 127.0.0.1 *)",
+      "Bash(createdb -h localhost *)",
+      "Bash(dropdb -h 127.0.0.1 *)",
+      "Bash(dropdb -h localhost *)",
+      "Bash(mvn -q *)"
     ],
     "ask": [
       "Edit(~/.claude/settings.json)",
@@ -335,7 +375,6 @@
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(git checkout *)",
-      "Bash(git branch -D *)",
       "Bash(git remote *)",
       "Bash(git tag *)",
       "Bash(gradle dependencies*)",
@@ -345,7 +384,6 @@
       "Bash(npm uninstall*)",
       "Bash(go mod *)",
       "Bash(uv pip install*)",
-      "Bash(psql *)",
       "Bash(docker *)",
       "mcp__*"
     ],
@@ -456,6 +494,20 @@
       "Bash(sort * -o*)",
       "Bash(sort --output*)",
       "Bash(sort * --output*)",
+      "Bash(sort -uo*)",
+      "Bash(sort * -uo*)",
+      "Bash(find * -fprint*)",
+      "Bash(cat * > *)",
+      "Bash(cat * >> *)",
+      "Bash(head -n * .env*)",
+      "Bash(tail -n * .env*)",
+      "Bash(cat -n .env*)",
+      "Bash(grep * ./.env*)",
+      "Bash(grep -R * /*)",
+      "Bash(psql *DROP DATABASE prore*)",
+      "Bash(psql *DROP DATABASE \"prore\"*)",
+      "Bash(dropdb * prore)",
+      "Bash(dropdb * prore_test)",
       "Bash(git stash drop*)",
       "Bash(git stash clear*)",
       "Edit(**/target/**)",

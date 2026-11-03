@@ -57,3 +57,26 @@ future audits don't re-flag the same already-fixed gaps.
 - Main `autoCompactWindow` 400000 -> 350000 and `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 90 -> 85 (user choice, both profiles). Targets the 10-18
   `ctx.py` numbers: peak p90 341k (window sits just above it), compaction median 157k. If trigger = pct x window: ~297k vs ~360k before.
   Looser than the 10-18 ~200k cap target. Not measured: sessions that reach 297k, quality after compaction. Re-run `ctx.py` to compare.
+
+## 2026-10-28 (permission prompts)
+- `permissions.py --since 2026-10-24 --profile both --dry-run` (separate haiku agent): 150 dialogs, 0 classifier denials, 38 groups. Top: `javap` 37 and
+  `Write(*.md)` 12 (allowed yet prompted, so a hook asks; no rule fixes it), `psql` 12, `git branch -D` 8, `git push --force-with-lease` 4, `unzip` 12.
+- Dry run proposes per profile: allow `Bash(unzip *)`, allow `Bash(npx ui-angular *)`, env `OPENROUTER_API_KEY`. Nothing written; kept as prompts: psql writes,
+  force-push, branch -D, dependency installs, shell `-c` wrappers. Not measured: which hook asks for javap/Write(*.md).
+- Re-run same day, `--since 2026-10-24 --dry-run`, all projects (grocery-shop, pagila-samples, academy): 205 dialogs (+55), 0 classifier denials, 47 groups.
+  Subagent-origin prompts dominate: javap 38/38, `git grep` 13/13, outside-cwd `grep`/`ls`/`find` 32 of 32 (~/.m2 sources jars, ms-playwright cache).
+  New vs earlier run: `git grep *` (13, no rule) and `gh pr create *` (4; 2 compound via `$()`, 2 no rule). Dry run now proposes 5 allows + 1 env per
+  profile (`git grep *`, `unzip *`, `genai-assistant/.venv/bin/python *`, `npx ui-angular *`, `gh pr create *`; `OPENROUTER_API_KEY`). Nothing written.
+  Open decisions: (1) ~/.m2/repository as additionalDirectories (removes ~32 prompts from "prefer maven sources" work, but widens acceptEdits edits; secrets deny
+  rules stay), (2) find the hook behind javap/unzip -l/Write(*.md) asks (not measured), (3) the `OPENROUTER_API_KEY` env prefix is a secret in a command line:
+  move to env, don't allow the prefix. Kept as prompts: psql writes, `git branch -D` (9), force-push (8), `uv pip install` (5), `-c` wrappers (2).
+  Report: ~/.claude/state/permission-analysis/permission-report.md.
+- 2026-10-28 re-run `--since 2026-10-24 --profile both --dry-run`: 206 dialogs, 47 groups, 0 classifier denials. Top: javap 38, git grep 13, psql 12, Write(*.md) 12, grep 12 (outside cwd), unzip 11+6, ls 10, find 10+5. Proposals unchanged (5 allow + OPENROUTER_API_KEY env). Recurred: javap, unzip, npx ui-angular, OPENROUTER env. No settings changed.
+
+## 2026-11-03 (permission prompts, applied)
+- Same window, same 206 events / 47 groups (ask log unchanged since 10-28). Applied: 5 allows + 1 env per profile. Added by hand to both profiles: allow `rg *`, `uniq *`;
+  deny `find -fprint`, `sort -uo`, `cat f > out`, `.env` head/tail/cat -n/grep forms, `grep -R /abs`; chain-guard hook wired in sandbox (grocery-shop/academy memory audits).
+  `jar-inspect` + CLAUDE.md now prefer source over javap. Not measured: effect on javap prompt count (re-run `permissions.py` after a week).
+- Main `autoCompactWindow` 350000 -> 250000 and `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 85 -> 80 (user choice, all 4 settings files). Targets the 10-18 `ctx.py` numbers
+  (peak p90 341k, compaction median 157k): trigger pct x window = ~200k vs ~297k, matching the earlier ~200k cap target. Not measured: quality after compaction,
+  how often autonomous loops now compact. Re-run `ctx.py` to compare.
