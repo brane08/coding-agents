@@ -2,7 +2,7 @@
 name: guarded-fs
 description: >
   Use when a task needs to delete, rename, or copy files/dirs (rm/mv/cp)
-  and raw rm/mv/cp are denied. Confines the operation to the current
+  and raw rm/mv/cp are denied (admin profile; sandbox: mv/cp ask, git push and git checkout allowed). Confines the operation to the current
   working directory tree — refuses any path (source or destination) that
   resolves outside it, refuses the working dir root itself, refuses .git.
 ---

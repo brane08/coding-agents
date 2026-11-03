@@ -61,3 +61,22 @@ Subclass `PersistentScottyEngine` overriding only `run`, `notify`, `queryActiveW
 - Workflow classes appear ~0% under Quarkus coverage; measure them with these harness tests in workflow-core.
 - `Response` ctors (8.1.0): `(cid, E, Exception, boolean isTimeout, String, Long, String)` / `(cid, E, Exception)` / `(cid)`. Only the 7-arg form can set `isTimeout`; the 3-arg one is a normal reply.
 - Keep `PersistentWorkflow<Long>` data type in harness (`Workflow<Long>`); custom data types are a production constraint (see project CLAUDE.md), not a test one.
+
+## Production wiring on Quarkus (constraints that held in two repos)
+- Workflow data type must be `PersistentWorkflow<Long>` (grocery-shop). Custom data types fail deserialization (classloader isolation). A separate project uses `PersistentWorkflow<XxxData>` with a `Serializable` data class; check per project before changing.
+- Register workflow classes explicitly via `WorkflowProvider` (`CustomWorkflowRepository(pkgs, cl, explicitClasses)`): Guava `ClassPath` cannot enumerate `QuarkusClassLoader`.
+- `CDIInjector.getBean()` must use `Object.class` as the type parameter, not `bean.getClass()` (CDI client proxy class breaks the lookup).
+- Table cleanup FK order before deleting workflow rows: `cop_workflow_instance_error` -> `cop_wait` -> `cop_response` -> `cop_queue` -> `cop_workflow_instance`.
+- `@AutoWire` types resolve by dynamic `CDI.current().select(..)`: Arc prunes SPI impls as unused in the packaged app (tests hide it because test classes inject them). Mark them `@Unremovable` or cover the package with `quarkus.arc.unremovable-types` (see `quarkus-3.md`).
+- Packaged app: Copper scans `java.class.path`; see the legacy-jar bullet in `quarkus-3.md`. Engine starts lazily, so a broken package shows only on first workflow use. Engine absent -> return 503 from workflow endpoints; `@QuarkusTest` workflow POSTs therefore always 503 (assert the DB row via the injected service).
+
+## Wait/notify recipe
+```java
+String corrId = getEngine().createUUID();
+workflowStateService.recordStep(wfId, STEP_NAME, corrId);
+wait(WaitMode.FIRST, timeout, TimeUnit.DAYS, corrId);      // wait FIRST, then read the response
+Response<String> r = getAndRemoveResponse(corrId);         // ALWAYS call after wait(); removes the response row
+String status = (r != null && !r.isTimeout()) ? r.getResponse() : "TIMEOUT";
+```
+- Notify from REST/service: `engine.notify(new Response<>(corrId, action, null), new Acknowledge.BestEffortAcknowledge())`.
+- Project rule: always call `getAndRemoveResponse(corrId)` after `wait()`; only the `wait(WaitMode, timeout, TimeUnit, cids...)` overloads are valid here.

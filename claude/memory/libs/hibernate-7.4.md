@@ -85,3 +85,4 @@ Mock sibling repos (`SystemConfigRepository`, `BranchStockRepository`, ...) and 
 - Mock-only tests prove query shape and branching, not that the JPQL/native SQL is valid; invalid SQL still needs a real-DB test.
 - Parity: data-ebean mirrors each repo; write the same case list for both (see `ebean-19.md` "Mock-based unit testing").
 - `@QuarkusTest` coverage of the same classes is a separate, higher number; do not mix with module-own unit coverage.
+- `LocalTime` entity field on a Postgres `time` column with `hibernate.jdbc.time_zone=UTC` and a non-UTC JVM zone reads back shifted (09:00 seeded by SQL -> 10:00 in Dublin summer). Store minutes-of-day in a smallint and expose `LocalTime` accessors instead; native SQL `to_char` also works for reads.
