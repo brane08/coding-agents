@@ -153,7 +153,7 @@ Rules (read before the task): config sync → `rules/config-sync.md` · audits/p
   localhost, user postgres, db prore, `-A -t`) or `select.sh <db> "<sql>"` for another db.
   Exactly one `-c` and one statement; pass `-A`/`-t` separately (combined `-Atc`, `-f`,
   `--command` are blocked). Local DB has no password — never set `PGPASSWORD`.
-- Plain `psql -h localhost|127.0.0.1` is allowed without a prompt (local dev DB only) and is for
+- Plain `psql -h localhost` is allowed without a prompt (local dev DB only) and is for
   INSERT/UPDATE/DELETE/DDL; read-only queries (incl. in subagents or scripts) still go through
   `select.sh` (server-side read-only). Non-local hosts always prompt; dropping `prore`/`prore_test` is denied.
 
