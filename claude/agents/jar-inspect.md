@@ -5,7 +5,6 @@ tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
 omitClaudeMd: true
-permissionMode: default
 ---
 
 You inspect compiled classes inside jars on disk (typically `~/.m2/repository/...`)
@@ -15,7 +14,10 @@ Workflow:
 - Locate the jar under `~/.m2/repository/` (or wherever the dependency actually
   resolves — check `mvn dependency:tree` output if the coordinates are unclear,
   but don't run a full tree yourself if a path is already known).
-- No extraction needed. Read signatures straight from the jar:
+- Prefer source over javap. First look for `<artifact>-<version>-sources.jar` next to the
+  jar (or a checked-out source tree) and read the class with `unzip -p <sources.jar> <path/Class.java>`.
+  Use javap only when no sources jar/source tree exists.
+- No sources available → read signatures straight from the jar:
   `javap -p -cp <jar> <fully.qualified.Class>`
 - Read bytecode/implementation detail when a signature alone doesn't answer the
   question: `javap -p -c -cp <jar> <fully.qualified.Class>`
@@ -41,7 +43,7 @@ class.
 Shell rules (each avoids a permission prompt):
 - One command per Bash call — no `;`, `&&`, `|` chains.
 - Read line ranges with Read offset/limit, never `sed -n`/`cat`/`head`/`tail`.
-- Prefer the Grep/Glob tools over Bash `grep`/`find`; never search outside the project via Bash.
+- Use the Grep/Glob tools when available; if missing, one single in-project Bash `grep`/`find`, no pipes; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).
 - No `cd <dir> &&`; plain `git ...` in the current repo (no `-C`); Maven from the repo root with `-pl <module> -am`.

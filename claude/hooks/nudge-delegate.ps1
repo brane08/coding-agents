@@ -25,7 +25,7 @@ $first = $tok[0]
 if ($first -ceq 'psql') {
     if ($cmd -match '-c +["'']? *(select|explain|show|with)[ (]') {
         $cat = 'psql-readonly'
-        $msg = "psql: read-only query via plain psql prompts for permission; use 'powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 <same psql args>' (auto-approved)."
+        $msg = "psql: use 'powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 `"<sql>`"' for read-only queries (enforced read-only)."
     }
 }
 
@@ -43,7 +43,7 @@ if ($first -cmatch '^(grep|rg|find|ls|cat|head|tail|wc|sed|awk)$') {
     $unquoted = [regex]::Replace($unquoted, "'[^']*'", '')
     if ($unquoted -match '\||;|&&') {
         Add-Nudge $sid 'lookup-chain-deny'
-        Write-Decision deny 'Blocked: one command per call, no |, ; or &&. Use the Grep tool (head_limit, -n, -A/-B) or Read with offset/limit; for 3+ lookups dispatch one code-search.'
+        Write-Decision deny 'Blocked: one command per call, no |, ; or &&. Use Read with offset/limit or dispatch one code-search (Grep tool only for a single locate-before-edit).'
         exit 0
     }
 }

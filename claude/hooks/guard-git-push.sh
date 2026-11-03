@@ -7,9 +7,12 @@
 # `git push --force origin HEAD:main`, and `git push origin +main`. This resolves
 # the actual target ref instead of matching on spelling.
 #
-# Feature-branch force-pushes pass straight through.
+# Also denies any push whose target is a protected branch or the default branch (including
+# a plain `git push`/`git push origin` while standing on one) and `git branch -d/-D` of a
+# protected branch or the current branch. A plain push from a feature branch passes.
 #
-# Protected branches: $CLAUDE_PROTECTED_BRANCHES (space separated), default "main master".
+# Protected branches: $CLAUDE_PROTECTED_BRANCHES (space separated), default "main master",
+# plus origin's default branch (refs/remotes/origin/HEAD) when known.
 
 input=$(cat)
 if ! command -v jq >/dev/null 2>&1; then
@@ -25,9 +28,22 @@ emit() {
 }
 
 protected=${CLAUDE_PROTECTED_BRANCHES:-main master}
+default_branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)
+default_branch=${default_branch#origin/}
 is_protected() {
-  for b in $protected; do [ "$1" = "$b" ] && return 0; done
+  for b in $protected $default_branch; do [ "$1" = "$b" ] && return 0; done
   return 1
+}
+
+# First non-flag word after `git` (skips -C <dir>, -c <k=v> and other global flags).
+git_subcmd() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -C|-c) shift 2 ;;
+      -*) shift ;;
+      *) printf '%s' "$1"; return ;;
+    esac
+  done
 }
 
 # A compound line may hold several commands; check each git push separately.
@@ -37,6 +53,35 @@ printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
   set -- $seg
   while [ $# -gt 0 ] && printf '%s' "$1" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*='; do shift; done
   [ "${1:-}" = "git" ] || continue
+
+  # git branch -d/-D/--delete of a protected branch or the current branch
+  if [ "$(git_subcmd "${@:2}")" = "branch" ]; then
+    del=0
+    names=""
+    seen_branch=0
+    for w in "$@"; do
+      if [ "$seen_branch" = 0 ]; then
+        [ "$w" = "branch" ] && seen_branch=1
+        continue
+      fi
+      case "$w" in
+        --delete) del=1 ;;
+        --*) ;;
+        -[!-]*) case "$w" in *[dD]*) del=1 ;; esac ;;
+        *) names="$names $w" ;;
+      esac
+    done
+    if [ "$del" = 1 ]; then
+      cur=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || cur=""
+      for t in $names; do
+        if is_protected "$t" || { [ -n "$cur" ] && [ "$t" = "$cur" ]; }; then
+          emit deny "Refusing to delete the branch '$t' (protected or currently checked out). Protected: $protected${default_branch:+ $default_branch}."
+          exit 0
+        fi
+      done
+    fi
+    continue
+  fi
 
   # find the "push" subcommand, skipping global flags like -C <dir>
   saw_push=0
@@ -80,8 +125,6 @@ printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
     esac
   done
 
-  [ "$force" = 1 ] || [ "$delete" = 1 ] || continue
-
   # Resolve target branch names. First token after the flags is the remote;
   # anything after that is a refspec. With no refspec, the push targets the
   # current branch.
@@ -104,9 +147,10 @@ printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
   for t in $targets; do
     t=${t#refs/heads/}
     if is_protected "$t"; then
-      what="force-push"
+      what="push to"
+      [ "$force" = 1 ] && what="force-push"
       [ "$delete" = 1 ] && what="delete"
-      emit deny "Refusing to $what the protected branch '$t'. Protected: $protected."
+      emit deny "Refusing to $what the protected/default branch '$t'. Protected: $protected${default_branch:+ $default_branch}."
       exit 0
     fi
   done

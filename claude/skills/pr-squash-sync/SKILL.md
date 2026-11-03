@@ -15,14 +15,14 @@ Run each step as its own Bash call (no `cd`, no chains). Replace `<default>` wit
 
 3. **Merged → new branch from the latest default**
    - `git switch -c <new-branch> origin/<default>` (uncommitted edits carry over if the files match)
-   - To move already-committed work: `git checkout <old-branch> -- <paths>` then commit. Never merge or rebase the stale branch.
+   - To move already-committed work: `git restore --source=<old-branch> -- <paths>` then commit. Never merge or rebase the stale branch.
    - Verify: `git branch --show-current`, `git log --oneline -3`.
 
 4. **Squash** (one commit unless 2–3 are independently revertable)
    - Unpushed branch: `git merge-base HEAD origin/<default>` (own call), then `git reset --soft <sha>` and commit. No `$(...)` — it defeats permission matching.
-   - Already pushed/shared: ask before rewriting; use `git push --force-with-lease` only after the user agrees; never force-push `<default>`.
+   - Your own pushed PR branch: squash and `git push --force-with-lease` without asking; ask only if you didn't create the branch or others share it; never force-push `<default>`.
 
-5. **Commit message / PR text**: end with the single line `by Claude (<session id>)`; no trailers, URLs or "Generated with" line.
+5. **Commit message / PR text**: no attribution line, trailers, URLs or "Generated with" line.
 
 6. **Push / PR**
    - `git push -u origin <branch>`

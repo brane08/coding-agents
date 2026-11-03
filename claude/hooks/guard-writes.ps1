@@ -5,6 +5,7 @@
 #   agent scratchpad only   -> pass through (claude-<uid>/ dirs under a tmp root)
 #   ~/.claude (config)      -> pass through (normal permission rules apply)
 #   anywhere else           -> deny
+#   CLAUDE_AUTONOMOUS=1     -> additionally deny .claude/settings*.json, CLAUDE.md, .github/**
 #
 # Every existing path component that is a symlink/junction is followed, so a link inside
 # the project that points outside it is judged by its target. `..` is normalised lexically.
@@ -48,6 +49,16 @@ try {
     $projRaw = if ($env:CLAUDE_PROJECT_DIR) { $env:CLAUDE_PROJECT_DIR } else { (Get-Location).Path }
     $proj = Resolve-Abs $projRaw
     $cfg = Resolve-Abs (Get-ConfigDir)
+
+    if ($env:CLAUDE_AUTONOMOUS -eq '1') {
+        $fwd = ([string]$f) -replace '\\', '/'
+        foreach ($cand in @($fwd, $abs)) {
+            if ($cand -match '(^|/)\.claude/settings[^/]*\.json$' -or $cand -match '(^|/)CLAUDE\.md$' -or $cand -match '(^|/)\.github/') {
+                Write-Decision deny ("Protected during autonomous run: " + $abs + " (.claude/settings*.json, CLAUDE.md and .github/** are not editable)")
+                exit 0
+            }
+        }
+    }
 
     $roots = @($env:CLAUDE_CODE_TMPDIR, $env:TMPDIR, $env:TEMP, $env:TMP, [System.IO.Path]::GetTempPath())
     if (-not $win) { $roots += '/tmp' }
