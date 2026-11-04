@@ -16,7 +16,6 @@ hooks/guard-writes.sh
 hooks/chain-guard.sh
 hooks/nudge-delegate.sh
 hooks/log-ask.sh
-hooks/autonomous-deny.sh
 
 # Windows PowerShell 5.1 twins of the hooks, plus their shared module.
 lib/Common.psm1
@@ -26,7 +25,6 @@ hooks/guard-writes.ps1
 hooks/chain-guard.ps1
 hooks/nudge-delegate.ps1
 hooks/log-ask.ps1
-hooks/autonomous-deny.ps1
 
 # settings.json is profile-specific (settings.<profile>.json on Unix,
 # settings.<profile>.windows.json on Windows) and is handled by the sync/save scripts
@@ -58,9 +56,6 @@ memory/patterns/self-contained-data-module.md
 memory/patterns/workflow-async-events.md
 memory/patterns/workflow-mybatis-layer.md
 
-skills/await-user/SKILL.md
-skills/await-user/wait.sh
-skills/await-user/wait.ps1
 skills/caveman/SKILL.md
 skills/delegation-audit/SKILL.md
 skills/delegation-audit/audit.py

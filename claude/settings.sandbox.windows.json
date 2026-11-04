@@ -1,7 +1,7 @@
 {
   "agentPushNotifEnabled": false,
   "attribution": {
-    "commit": "",
+    "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
     "pr": "",
     "sessionUrl": false
   },
@@ -74,11 +74,6 @@
         "hooks": [
           {
             "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File @@HOME@@/.claude/hooks/log-ask.ps1",
-            "timeout": 15,
-            "type": "command"
-          },
-          {
-            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File @@HOME@@/.claude/hooks/autonomous-deny.ps1",
             "timeout": 15,
             "type": "command"
           }
@@ -235,8 +230,6 @@
       "Bash(ng test*)",
       "Bash(npx ng *)",
       "Bash(npx tsc *)",
-      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/await-user/wait.ps1*)",
-      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/await-user/wait.ps1*)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 *)",
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 *)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-build/build.ps1*)",

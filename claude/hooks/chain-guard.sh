@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 [ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
-# PreToolUse hook (main thread only; admin profile). Denies the 7th (12th when CLAUDE_AUTONOMOUS=1) consecutive lookup
+# PreToolUse hook (main thread only; admin profile). Denies the 7th consecutive lookup
 # (read-only Bash command, Grep or Glob) with no Edit/Write/Agent in between, and points at
 # a single code-search dispatch. Read and non-lookup Bash calls are neutral, including scripts
 # run with bash/zsh/ksh/sh/dash; `<shell> -c "<cmd>"` is judged by <cmd>. Per-session
@@ -53,7 +53,6 @@ n=$(cat "$f" 2>/dev/null)
 n=${n:-0}
 
 limit=7
-[ "${CLAUDE_AUTONOMOUS:-}" = "1" ] && limit=12
 
 if [ "$n" -ge "$((limit - 1))" ]; then
   printf '%s\t%s\t%s\t%s\n' "$(date +%s)" "$sid" "chain-deny" "$(basename "$PWD")" >> "$STATE/delegation-nudges.tsv" 2>/dev/null
