@@ -6,7 +6,6 @@
 #   agent scratchpad only   -> pass through (claude-<uid>/ dirs under a tmp root)
 #   ~/.claude (config)      -> pass through (normal permission rules apply)
 #   anywhere else           -> deny
-#   CLAUDE_AUTONOMOUS=1     -> additionally deny .claude/settings*.json, CLAUDE.md, .github/**
 #
 # Limitation: only covers Claude Code's file tools. A subprocess that opens files
 # itself (python, node, a build script) is not intercepted. For OS-level
@@ -82,16 +81,6 @@ emit() {
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":%s}}' \
     "$1" "$(printf '%s' "$2" | jq -Rs .)"
 }
-
-if [ "${CLAUDE_AUTONOMOUS:-}" = "1" ]; then
-  for cand in "$f" "$abs"; do
-    case "$cand" in
-      */.claude/settings*.json|.claude/settings*.json|*/CLAUDE.md|CLAUDE.md|*/.github/*|.github/*)
-        emit deny "Protected during autonomous run: $abs (.claude/settings*.json, CLAUDE.md and .github/** are not editable)"
-        exit 0 ;;
-    esac
-  done
-fi
 
 [ "$scratch_ok" = 1 ] && exit 0
 

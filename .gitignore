@@ -7,7 +7,6 @@ claude/*
 !claude/MANIFEST
 !claude/skills/
 claude/skills/*
-!claude/skills/await-user/
 !claude/skills/caveman/
 !claude/skills/delegation-audit/
 !claude/skills/pr-squash-sync/

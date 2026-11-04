@@ -10,7 +10,7 @@ Read before any commit, push or PR.
 - Before committing/pushing to an existing branch, check its PR isn't merged
   (`gh pr list --head <branch> --state all --json state`; `gh pr view` can be stale). If
   merged → `pr-squash-sync` skill (new branch from the latest default).
-- No attribution lines in commit messages or PR descriptions (no `by Claude (...)`, no Co-Authored-By/Claude-Session trailers, no URLs, no 'Generated with Claude Code').
+- Commit attribution is exactly one trailer, `Co-Authored-By: Claude <noreply@anthropic.com>` (injected by `attribution.commit` in settings; don't add it by hand). No `by Claude (...)`, no Claude-Session trailer, no URLs/session links, no 'Generated with Claude Code'. PR descriptions carry no attribution. When rewriting a commit (amend/squash), keep exactly one such trailer.
 - Before opening a PR, squash to a single commit (`git merge-base HEAD origin/<default>`, then
   `git reset --soft <sha>` and recommit — don't ask first). A PR has 1–2 commits max; 2 only
   for independent changes that must be revertable separately. Re-check the commit count before

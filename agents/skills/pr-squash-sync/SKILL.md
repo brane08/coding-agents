@@ -24,7 +24,7 @@ Run each step as its own command (no `cd`, no chains). Replace `<default>` with 
    - Unpushed branch: `git merge-base HEAD origin/<default>` (own call), then `git reset --soft <sha>` and commit. No `$(...)`: it defeats permission matching.
    - Already pushed or shared: ask before rewriting; use `git push --force-with-lease` only after the user agrees; never force-push `<default>`.
 
-5. **Commit message and PR text**: end with the single line `by <tool> (<session id>)` if a session id is available; no trailers, URLs or "Generated with" line.
+5. **Commit message and PR text**: a Claude commit carries exactly one `Co-Authored-By: Claude <noreply@anthropic.com>` trailer (keep one when squashing/amending); other tools add none. No session ids, URLs, other trailers or "Generated with" line; none in the PR body.
 
 6. **Push and PR**
    - `git push -u origin <branch>`

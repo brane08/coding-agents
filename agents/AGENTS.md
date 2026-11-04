@@ -45,8 +45,8 @@ Skill logs are written to `<project>/.agents/logs/<skill>.log` (self-ignoring di
   `origin/<default>`), start a new branch from `origin/<default>`; never merge or rebase the stale one.
 - Squash to a single commit before opening a PR (`git merge-base HEAD origin/<default>`, then `git reset --soft <sha>` and recommit).
   A PR has 1-2 commits, 2 only for independent changes that can be reverted separately.
-- Attribution in commit messages and PR descriptions is one last line, `by <tool> (<session id>)`, only if the tool exposes a session id.
-  No trailers, URLs or "Generated with" lines.
+- Attribution: a commit made by Claude carries exactly one trailer, `Co-Authored-By: Claude <noreply@anthropic.com>`; keep exactly one
+  when amending or squashing. Other tools add none. No session ids, URLs, other trailers or "Generated with" lines; PR descriptions carry none.
 - Force-push only your own branch and only with `--force-with-lease`; never force-push or delete `main`/`master`.
 
 ## Auth and role tests

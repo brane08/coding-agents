@@ -1,7 +1,7 @@
 {
   "agentPushNotifEnabled": false,
   "attribution": {
-    "commit": "",
+    "commit": "Co-Authored-By: Claude <noreply@anthropic.com>",
     "pr": "",
     "sessionUrl": false
   },
@@ -78,11 +78,6 @@
         "hooks": [
           {
             "command": "bash ~/.claude/hooks/log-ask.sh 2>/dev/null || true",
-            "timeout": 5,
-            "type": "command"
-          },
-          {
-            "command": "bash ~/.claude/hooks/autonomous-deny.sh 2>/dev/null || true",
             "timeout": 5,
             "type": "command"
           }
@@ -239,9 +234,6 @@
       "Bash(ng test*)",
       "Bash(npx ng *)",
       "Bash(npx tsc *)",
-      "Bash(bash ~/.claude/skills/await-user/wait.sh*)",
-      "Bash(zsh ~/.claude/skills/await-user/wait.sh*)",
-      "Bash(ksh ~/.claude/skills/await-user/wait.sh*)",
       "Bash(bash ~/.claude/skills/psql-select/select.sh *)",
       "Bash(zsh ~/.claude/skills/psql-select/select.sh *)",
       "Bash(ksh ~/.claude/skills/psql-select/select.sh *)",

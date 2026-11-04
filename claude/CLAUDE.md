@@ -10,46 +10,6 @@ long-form rules referenced below.
 - Pattern/template/doc requests ("give a pattern", "summary I can reuse"): reply with the raw
   markdown in one code block (use a 4-backtick fence if it contains fences), nothing rendered.
 
-## Autonomy
-- Work as an autonomous agent: take the repo's tracked items (`.claude/memory/tracking/`, see
-  `patterns/tracking-pattern.md`) and keep fixing them back to back — in file order within
-  DOING, then PARTIAL, then PENDING (files are Day-sorted; respect the project's Day gate, e.g. no
-  D2+ before D0/D1 gaps are closed, D5 only on request) — without asking between items. Update
-  each item per the tracking pattern (state, dates, finding status, `todo.md` row counts). Skip
-  BLOCKED/BACKLOG/DEFERRED/WONT-DO.
-- One repo per run, no cross-repo edits. Start: `sync-check.sh <default>`; on the default branch
-  or a dirty tree → `git switch -c fix/tracking-<date> origin/<default>`. Set the item DOING
-  (+date) before touching code; progress lives only in tracking. After any compaction or /clear:
-  Read `tracking/todo.md`, resume the DOING item, else the next PARTIAL/PENDING.
-- Items exhausted → stop, give a one-line status, then
-  `bash ~/.claude/skills/await-user/wait.sh 30` (load Monitor via ToolSearch and run it under
-  Monitor; foreground `sleep` is blocked). A user reply arrives as a new turn; none → end the turn.
-- Never call AskUserQuestion in the loop. Needs a decision/ambiguous → mark BLOCKED with
-  "blocked: needs user: <question>; default would be <x>" in the item text, continue. For
-  writing-plans' execution choice pick inline `executing-plans`.
-- A tool approval prompt stops the work, so avoid prompts: use only allow-listed command shapes
-  (see Don't), skill scripts, Read/Edit/Write. Denied by a permission rule, classifier or prompt
-  → don't retry or work around it: mark the item BLOCKED with the reason, move on, list the
-  blocked ones in the final status. A hook deny that says "dispatch code-search" or "drop the
-  prefix / one command per call" is guidance, not a block: comply once and carry on. If a
-  tracking edit itself is denied, stop and report.
-- With `CLAUDE_AUTONOMOUS=1` every residual prompt auto-denies (hook) and edits to
-  `.claude/settings*.json`, `CLAUDE.md`, `.github/**` are blocked.
-- Limits: per item max 3 fix+test cycles; same failure twice → BLOCKED (reason + failing test).
-  A PARTIAL goes PARTIAL at most once per run. Follow-ups found while fixing → BACKLOG, never
-  PENDING. Max 25 items per run; stop after 3 consecutive BLOCKED. Session-length notice is
-  suppressed during the loop.
-- Tracking state change = one `Edit` per row/block (item line, finding Status, `todo.md` row).
-- Commit per item: `git add <files you edited>` (never `-A`), then
-  `git commit -m "<ID>: <subject>"` — no attribution line, no heredoc/`$(...)`. Never
-  commit on the default branch, never push (one push at the end only if asked). Continue flows:
-  `git -c core.editor=true rebase --continue`.
-- Tests are scoped to the work just done (single class, or the touched module/spec), run via
-  `quick-triage` + `test.sh`/`verify.sh` (a single-class rerun right after a fix may run inline),
-  strictly one dispatch at a time. The full suite runs only when preparing a PR. Cloud sessions
-  need `-D` datasource flags `test.sh` rejects: inline `mvn -pl <module> -am -Dtest=<Class>` is
-  the allowed exception there.
-
 ## Delegation (token discipline)
 - Read-only search/nav (file discovery, grep, "where is X", log inspection,
   including `cat`/`ls`/`tail`/`head`/`wc`/`sed`/`awk` on files you didn't just
@@ -162,8 +122,9 @@ Rules (read before the task): config sync → `rules/config-sync.md` · audits/p
   branch already squash-merged → new branch from `origin/<default>`.
 - Before committing/pushing to an existing branch, check its PR isn't merged
   (`gh pr list --head <branch> --state all --json state`); merged → `pr-squash-sync` skill.
-- No attribution lines in commit messages or PR descriptions: no `by Claude (...)`, no
-  `Co-Authored-By:`/`Claude-Session:` trailers, no URLs, no "Generated with Claude Code".
+- Commit attribution is exactly one trailer: `Co-Authored-By: Claude <noreply@anthropic.com>`
+  (set via `attribution.commit`; don't hand-write it). Nothing else: no `by Claude (...)`, no
+  `Claude-Session:`, no URLs/session links, no "Generated with Claude Code". PR descriptions: none.
 - Squash to a single commit before opening a PR (1–2 commits max); a "pr"/"squash pr" request
   is the go-ahead, no follow-up question. Never force-push `main`/`master`.
 

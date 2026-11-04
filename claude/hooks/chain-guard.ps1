@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# PreToolUse hook (main thread only; admin profile). Denies the 7th (12th when CLAUDE_AUTONOMOUS=1) consecutive lookup
+# PreToolUse hook (main thread only; admin profile). Denies the 7th consecutive lookup
 # (read-only Bash command, Grep or Glob) with no Edit/Write/Agent in between, and points at
 # a single code-search dispatch. Read and non-lookup Bash calls are neutral, including scripts
 # run with bash/zsh/ksh/sh/dash/powershell/pwsh; `<shell> -c "<cmd>"` is judged by <cmd>.
@@ -53,7 +53,6 @@ if (Test-Path -LiteralPath $f) {
 }
 
 $limit = 7
-if ($env:CLAUDE_AUTONOMOUS -eq '1') { $limit = 12 }
 
 if ($n -ge ($limit - 1)) {
     Add-Utf8Line (Join-Path (Get-StateDir) 'delegation-nudges.tsv') ("{0}`t{1}`tchain-deny`t{2}" -f (Get-EpochSeconds), $sid, (Split-Path -Leaf (Get-Location).Path))
