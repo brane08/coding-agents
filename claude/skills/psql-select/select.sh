@@ -1,8 +1,13 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 # Auto-approved wrapper for read-only psql queries.
 # Allows a single SELECT, EXPLAIN, SHOW or WITH statement via one -c.
 # Exits 1 (blocked) for anything else; the server also enforces read-only.
-[ -n "${ZSH_VERSION-}" ] || exec zsh "$0" "$@"
+# Portable bash (works where zsh is not installed).
+if [ -z "${BASH_VERSION-}" ]; then
+  if command -v bash >/dev/null 2>&1; then exec bash "$0" "$@"; fi
+  echo "psql-select: bash not found; install bash (this script is bash-syntax only)" >&2
+  exit 127
+fi
 
 # Short form against the local Postgres: select.sh "<sql>" | select.sh <db> "<sql>"
 # (host localhost, user postgres, db prore unless given, unaligned tuples-only output).
@@ -19,13 +24,14 @@ fi
 sql=""
 nc=0
 args=("$@")
-i=1
-while (( i <= $# )); do
+n=$#
+i=0
+while (( i < n )); do
   a="${args[i]}"
   case "$a" in
     -c)
-      (( nc++ ))
-      (( i++ ))
+      nc=$(( nc + 1 ))
+      i=$(( i + 1 ))
       sql="${args[i]-}"
       ;;
     -c?*|--command|--command=*|-f|-f?*|--file|--file=*)
@@ -37,7 +43,7 @@ while (( i <= $# )); do
       exit 1
       ;;
   esac
-  (( i++ ))
+  i=$(( i + 1 ))
 done
 
 if (( nc != 1 )) || [[ -z "$sql" ]]; then
@@ -54,7 +60,8 @@ if [[ "$body" == *";"* ]]; then
   exit 1
 fi
 
-first_word="${${(U)body}%%[[:space:](]*}"
+upper="${body^^}"
+first_word="${upper%%[[:space:](]*}"
 
 case "$first_word" in
   SELECT|EXPLAIN|SHOW|WITH)
