@@ -69,7 +69,15 @@ while IFS= read -r rel; do
   fi
 done < "$MANIFEST"
 
-sed "s|${REPO_DIR}|@@REPO_DIR@@|g" "${SRC_DIR}/settings.json" | jq -S . > "${DEST_DIR}/settings.${PROFILE}.json"
+# `model` stays as the template has it and `modelSettings` is never saved: /model writes
+# both to ~/.claude/settings.json as per-machine state, not shared config.
+DEST_SETTINGS="${DEST_DIR}/settings.${PROFILE}.json"
+KEEP_MODEL=""
+[[ -f "$DEST_SETTINGS" ]] && KEEP_MODEL="$(jq -r '.model // empty' "$DEST_SETTINGS")"
+sed "s|${REPO_DIR}|@@REPO_DIR@@|g" "${SRC_DIR}/settings.json" \
+  | jq -S --arg m "$KEEP_MODEL" 'del(.modelSettings) | if $m != "" then .model = $m else . end' \
+  > "${DEST_SETTINGS}.tmp"
+mv "${DEST_SETTINGS}.tmp" "$DEST_SETTINGS"
 COUNT=$((COUNT + 1))
 
 echo "Saved ${COUNT} file(s), ${SKIPPED} listed-but-missing."

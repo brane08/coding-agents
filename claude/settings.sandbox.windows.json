@@ -522,18 +522,8 @@
     ]
   },
   "skillOverrides": {
-    "superpowers:brainstorming": "off",
-    "superpowers:dispatching-parallel-agents": "off",
-    "superpowers:finishing-a-development-branch": "off",
-    "superpowers:receiving-code-review": "off",
-    "superpowers:requesting-code-review": "off",
-    "superpowers:subagent-driven-development": "off",
-    "superpowers:systematic-debugging": "off",
-    "superpowers:test-driven-development": "off",
-    "superpowers:using-git-worktrees": "off",
-    "superpowers:using-superpowers": "off",
-    "superpowers:verification-before-completion": "off",
-    "superpowers:writing-skills": "off"
+    "caveman": "off"
   },
+  "syncClaudeAiSkills": false,
   "theme": "light"
 }
