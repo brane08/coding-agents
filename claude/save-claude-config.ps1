@@ -61,7 +61,18 @@ $homeFwd = ((Get-UserHome) -replace '\\', '/').TrimEnd('/')
 $text = [regex]::Replace($text, [regex]::Escape($repoFwd), '@@REPO_DIR@@', 'IgnoreCase')
 $text = [regex]::Replace($text, [regex]::Escape($homeFwd), '@@HOME@@', 'IgnoreCase')
 $obj = $text | ConvertFrom-Json
-Write-Utf8File (Join-Path $destDir "settings.$ProfileName.windows.json") ((ConvertTo-SortedJson $obj) + "`n")
+# `model` stays as the template has it and `modelSettings` is never saved: /model writes
+# both to ~/.claude/settings.json as per-machine state, not shared config.
+$destSettings = Join-Path $destDir "settings.$ProfileName.windows.json"
+if ($obj.PSObject.Properties['modelSettings']) { $obj.PSObject.Properties.Remove('modelSettings') }
+if (Test-Path -LiteralPath $destSettings) {
+    $prev = [System.IO.File]::ReadAllText($destSettings) | ConvertFrom-Json
+    if ($prev.PSObject.Properties['model']) {
+        if ($obj.PSObject.Properties['model']) { $obj.model = $prev.model }
+        else { $obj | Add-Member -NotePropertyName model -NotePropertyValue $prev.model }
+    }
+}
+Write-Utf8File $destSettings ((ConvertTo-SortedJson $obj) + "`n")
 $count++
 Write-Host "Saved $count file(s), $skipped listed-but-missing."
 

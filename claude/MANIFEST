@@ -104,6 +104,7 @@ memory/rules/hooks-and-guards.md
 memory/rules/config-sync.md
 memory/rules/session-scans.md
 memory/rules/git-prs.md
+memory/rules/conventions-detail.md
 memory/libs/shedlock.md
 memory/patterns/money-multi-country-postgres.md
 memory/patterns/pre-prod-schema-folding.md
