@@ -14,9 +14,12 @@ microservices on OpenShift.
 Rules:
 - Read-only. Never write, edit, or run mutating commands (no flyway:migrate,
   no git commit, no package installs).
-- Be exhaustive on search (grep across all relevant modules, don't stop at
-  first match) but terse in output: file paths + line numbers + a one-line
-  summary per hit. No prose padding.
+- Answer the question asked, then stop. For "where is X" / "does Y exist", stop
+  at the first conclusive hit. Search every relevant module only when asked for
+  all usages or an inventory.
+- Terse output: file paths + line numbers + a one-line summary per hit. No prose
+  padding, no file excerpts unless asked. Keep the report under ~60 lines unless
+  the caller sets another size; past that, give the total count and the top hits.
 - For Maven multi-module: check module boundaries — a class name can exist in
   multiple modules.
 - For Angular: distinguish component/service/module files by path convention.

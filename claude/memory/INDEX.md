@@ -4,7 +4,8 @@ Open only the note that matches the task; each note's first lines say what it co
 
 ## rules/ (detail moved out of CLAUDE.md)
 `hooks-and-guards` (what is denied/prompted and why) · `config-sync` (repo ↔ ~/.claude) ·
-`session-scans` (delegation/permission/context audits) · `git-prs` (squash, attribution, PR checks)
+`session-scans` (delegation/permission/context audits) · `git-prs` (squash, attribution, PR checks) ·
+`conventions-detail` (full delegation, stack, psql, don't lists)
 
 ## libs/
 `keepassjava2-2.2.4` (KeePass API, JPMS split-package) · `esbuild-esm` (exported `let`
