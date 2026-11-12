@@ -75,6 +75,9 @@ skills/pr-squash-sync/SKILL.md
 skills/pr-squash-sync/sync-check.sh
 skills/psql-select/select.sh
 skills/psql-select/SKILL.md
+skills/token-report/report.sh
+skills/token-report/usage.jq
+skills/token-report/SKILL.md
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md
 skills/flyway-check/flyway-check.ps1

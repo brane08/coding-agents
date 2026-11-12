@@ -6,7 +6,6 @@
     "sessionUrl": false
   },
   "autoCompactEnabled": true,
-  "autoCompactWindow": 250000,
   "autoMemoryEnabled": false,
   "autoMode": {
     "allow": [
@@ -237,6 +236,9 @@
       "Bash(bash ~/.claude/skills/psql-select/select.sh *)",
       "Bash(zsh ~/.claude/skills/psql-select/select.sh *)",
       "Bash(ksh ~/.claude/skills/psql-select/select.sh *)",
+      "Bash(bash ~/.claude/skills/token-report/report.sh*)",
+      "Bash(zsh ~/.claude/skills/token-report/report.sh*)",
+      "Bash(ksh ~/.claude/skills/token-report/report.sh*)",
       "Bash(bash ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(zsh ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(ksh ~/.claude/skills/mvn-build/build.sh*)",

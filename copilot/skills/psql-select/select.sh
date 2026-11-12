@@ -24,6 +24,10 @@ while (( i <= $# )); do
       echo "psql-select: blocked — combined short flags ending in -c; pass '-c' separately." >&2
       exit 1
       ;;
+    -o|-o?*|--output|--output=*|-L|-L?*|--log-file|--log-file=*)
+      echo "psql-select: blocked — -o/--output and -L/--log-file write to disk. Use plain psql." >&2
+      exit 1
+      ;;
   esac
   (( i++ ))
 done
@@ -42,11 +46,17 @@ if [[ "$body" == *";"* ]]; then
   exit 1
 fi
 
-first_word="${${(U)body}%%[[:space:](]*}"
+upper="${(U)body}"
+first_word="${upper%%[[:space:](]*}"
+
+if [[ "$upper" == *SET_CONFIG* || "$upper" == *PG_READ_* || "$upper" == *PG_TERMINATE_BACKEND* || "$upper" == *PG_CANCEL_BACKEND* || "$upper" == *LO_IMPORT* || "$upper" == *LO_EXPORT* ]]; then
+  echo "psql-select: blocked — function that can change settings, read server files or end sessions. Use plain psql." >&2
+  exit 1
+fi
 
 case "$first_word" in
   SELECT|EXPLAIN|SHOW|WITH)
-    PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c default_transaction_read_only=on" exec psql "$@"
+    PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c default_transaction_read_only=on" exec psql -X "$@"
     ;;
   *)
     echo "psql-select: blocked — SQL starts with '$first_word', not a read-only statement. Use plain psql." >&2
