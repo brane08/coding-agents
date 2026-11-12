@@ -41,6 +41,9 @@ long-form rules. Full delegation/stack/psql/don't detail: `rules/conventions-det
   transcript; read from an env var or file. Hooks/denies:
   `memory/rules/hooks-and-guards.md`. Don't edit CLAUDE.md mid-session (cached prefix); no
   concurrent Maven/test-DB use from subagents (`patterns/agent-context-cost.md`).
+- Cache cost = context × turns: send independent tool calls together in one response, batch
+  2+ lookups into one dispatch, never switch `/model` mid-session (rebuilds the cache), and
+  `/clear` between unrelated tasks.
 
 ## Session length
 - On a compaction summary at the start of context, or a shift to unrelated work: at the next

@@ -6,7 +6,6 @@
     "sessionUrl": false
   },
   "autoCompactEnabled": true,
-  "autoCompactWindow": 250000,
   "autoMemoryEnabled": false,
   "autoMode": {
     "allow": [

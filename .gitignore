@@ -16,6 +16,7 @@ claude/skills/*
 !claude/skills/mvn-test/
 !claude/skills/ng-verify/
 !claude/skills/psql-select/
+!claude/skills/token-report/
 !claude/skills/quarkus-dev/
 !claude/agents/
 !claude/memory/
