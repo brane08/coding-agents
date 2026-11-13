@@ -96,7 +96,7 @@ Assert-True ($log -notmatch '^\xEF\xBB\xBF') 'no BOM'
 
 Write-Host 'guard-git-push'
 $gp = Join-Path $hooks 'guard-git-push.ps1'
-foreach ($c in @('git push --force origin main', 'git push origin +main', 'git push origin :main', 'git push -fu origin master', 'git push --mirror', 'git push --delete origin main', 'echo hi; git push origin main --force-with-lease')) {
+foreach ($c in @('git push --force origin main', 'git push origin +main', 'git push origin :main', 'git push -fu origin master', 'git push --mirror', 'git push --delete origin main', 'echo hi; git push origin main --force-with-lease', 'git push origin main')) {
     $r = Invoke-Script $gp (Bash $c) $env1
     Assert-Match '"permissionDecision":"deny"' $r.Out "deny: $c"
 }
@@ -104,7 +104,7 @@ foreach ($c in @('git.exe push -f origin main', 'GIT push -f origin main', '"git
     $r = Invoke-Script $gp (Bash $c) $env1
     Assert-Match '"permissionDecision":"deny"' $r.Out "deny (spelling variant): $c"
 }
-foreach ($c in @('git push origin feature --force','git push origin main', 'git status', 'git push -u origin feat/x')) {
+foreach ($c in @('git push origin feature --force', 'git status', 'git push -u origin feat/x')) {
     $r = Invoke-Script $gp (Bash $c) $env1
     Assert-Equal '' $r.Out "pass: $c"
 }

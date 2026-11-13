@@ -24,7 +24,13 @@ The spec does not mandate skill locations; `.agents/skills/` is the documented c
 3. Project-only skills: copy the skill directory into `<repo>/.agents/skills/` instead of the user dir.
 
 ### Windows (PowerShell 5.1+)
-`powershell -NoProfile -ExecutionPolicy Bypass -File agents\install.ps1 [dest]` installs to `~\.agents` (step 1 equivalent). Markdown is rewritten to the `.ps1` commands, no `.sh` is copied, and the runners come from `claude/skills` plus `lib/Common.psm1`. Project dir: `AGENT_PROJECT_DIR` (or `CLAUDE_PROJECT_DIR`), else the current directory. Step 2 and 3: copy `AGENTS.md` as-is (it still names `.sh`; the installed skill docs do not). Allowlist rules must match `powershell -NoProfile -ExecutionPolicy Bypass -File $HOME/.agents/skills/...ps1` (installed docs use `$HOME`, not `~`).
+`powershell -NoProfile -ExecutionPolicy Bypass -File agents\install.ps1 [dest]` installs to `~\.agents` (step 1 equivalent). Markdown is rewritten to the `.ps1` commands, no `.sh` is copied, and the runners come from `claude/skills`. The shared helpers are registered once as the user module `AgentCommon` (`Documents\WindowsPowerShell\Modules` and `Documents\PowerShell\Modules`; `AGENT_MODULE_DIR` overrides) and imported with `Import-Module AgentCommon`; no per-tree `lib\` copy. Project dir: `AGENT_PROJECT_DIR` (or `CLAUDE_PROJECT_DIR`), else the current directory. `AGENTS.md`, the agent roles and the skill docs are all rewritten (`.ps1` commands, `$HOME` paths, `$env:VAR='x'; ` prefixes instead of `VAR=x bash`, a PowerShell shell note). Step 2 and 3: copy the installed `~\.agents\AGENTS.md` into the repo, not `agents/AGENTS.md`, which still names `.sh`. `agents\check-base.ps1` is the Windows `check-base.sh`. Allowlist rules must match `powershell -NoProfile -ExecutionPolicy Bypass -File $HOME/.agents/skills/...ps1` (installed docs use `$HOME`, not `~`).
+
+## Uninstall (rollback)
+Removes exactly the files the install copied, then empty directories; files you added are kept. `-DryRun` / `--dry-run` lists without deleting.
+- Unix: `bash agents/uninstall.sh [dest] [--dry-run]`
+- Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File agents\uninstall.ps1 [dest] [-DryRun]`
+Per-repo copies (`<repo>/AGENTS.md`, `<repo>/.agents/`) are yours to delete. The Windows uninstall also unregisters `AgentCommon`, but only when no PowerShell runner or hook remains under `~\.claude`, `~\.agents` or `~\.copilot`.
 
 Scripts resolve the project from `AGENT_PROJECT_DIR`, else the current directory, and write logs to `<project>/.agents/logs/`.
 Command allowlists must match `~/.agents/skills/...` as written (with `~`). Add the rules your tool needs; none are shipped here.

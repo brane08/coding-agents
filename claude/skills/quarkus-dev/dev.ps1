@@ -2,7 +2,8 @@
 # Starts `mvn quarkus:dev` in the background and waits up to 60s for startup.
 # Usage: dev.ps1 [port]. Env: CLAUDE_PROJECT_DIR (project root, default cwd), QUARKUS_PORT (default 8080).
 # Logs: <project>/.claude/logs/quarkus-dev.log (stdout), quarkus-dev.err.log (stderr).
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 $proj = Get-ProjectDir
 Set-Location -LiteralPath $proj

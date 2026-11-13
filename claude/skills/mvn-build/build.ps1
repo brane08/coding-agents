@@ -5,7 +5,8 @@
 #   build.ps1 -pl mono-quarkus     -> same
 #   build.ps1 --reactor            -> full reactor build
 # Extra -flags are passed to mvn as separate arguments (never evaluated by a shell).
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 $log = Get-SkillLog 'mvn-build'
 $start = Get-EpochSeconds

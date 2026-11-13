@@ -55,7 +55,8 @@ if ($first -cnotmatch '^(SELECT|EXPLAIN|SHOW|WITH)$') {
 
 $ro = '-c default_transaction_read_only=on'
 $env:PGOPTIONS = if ($env:PGOPTIONS) { $env:PGOPTIONS + ' ' + $ro } else { $ro }
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 $native = Format-NativeArgs $a
 & psql @native
 exit $LASTEXITCODE

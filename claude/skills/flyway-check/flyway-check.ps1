@@ -4,7 +4,8 @@
 # and the database argument is ignored. Local DBs use trust auth: no password handling.
 # Maven runs from the project root ($env:CLAUDE_PROJECT_DIR, else the current directory);
 # set FLYWAY_MODULE to a module path to pass -pl <module> -am.
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 $proj = Get-ProjectDir
 Set-Location -LiteralPath $proj

@@ -10,7 +10,8 @@
 # the project that points outside it is judged by its target. `..` is normalised lexically.
 # A path that cannot be normalised (illegal characters, too long for 5.1) is denied; an
 # unexpected failure asks. Limitation: only covers Claude Code's file tools.
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 $in = Read-HookInput
 if ($null -eq $in) { exit 0 }

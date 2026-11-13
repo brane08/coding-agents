@@ -14,6 +14,9 @@ Assert-Equal "run $ps `$HOME/.claude/skills/mvn-test/test.ps1 mod" (ConvertTo-Wi
 Assert-Equal "$ps `$HOME/.claude/skills/<skill>/<script>.ps1 x" (ConvertTo-WindowsPrompt 'bash|zsh|ksh ~/.claude/skills/<skill>/<script>.sh x') 'prompt: bash|zsh|ksh template rewritten'
 Assert-Equal "$ps `$HOME/.claude/skills/quarkus-dev/dev.ps1 8102" (ConvertTo-WindowsPrompt 'QUARKUS_PORT=8102 bash ~/.claude/skills/quarkus-dev/dev.sh') 'prompt: QUARKUS_PORT prefix becomes a port argument'
 Assert-Equal 'use select.ps1 only; bash scripting stays' (ConvertTo-WindowsPrompt 'use select.sh only; bash scripting stays') 'prompt: bare filename mention rewritten, plain "bash" untouched'
+Assert-Equal "`$env:FLYWAY_MODULE='mono-quarkus'; $ps `$HOME/.copilot/skills/flyway-check/flyway-check.ps1" (ConvertTo-WindowsPrompt 'FLYWAY_MODULE=mono-quarkus bash ~/.copilot/skills/flyway-check/flyway-check.sh') 'prompt: VAR=x bash prefix becomes $env: prefix'
+Assert-Equal "$ps `$HOME/.copilot/skills/mvn-build/build.ps1 <module>" (ConvertTo-WindowsPrompt '~/.copilot/skills/mvn-build/build.sh <module>') 'prompt: bare runner path gets the powershell prefix'
+Assert-Equal 'compatibility: Requires PowerShell 5.1+ and Maven' (ConvertTo-WindowsPrompt 'compatibility: Requires bash and Maven') 'prompt: compatibility line names PowerShell'
 Assert-True (Test-WindowsPromptFile 'skills/mvn-test/SKILL.md') 'prompt file: SKILL.md'
 Assert-True (-not (Test-WindowsPromptFile 'memory/libs/x.md')) 'prompt file: memory excluded'
 $leftover = @()
@@ -52,7 +55,7 @@ New-Item -ItemType Directory -Path (Join-Path $rc 'hooks'), (Join-Path $rc 'lib'
 [System.IO.File]::WriteAllText((Join-Path $home1 '.claude/hooks/a.ps1'), 'old')
 $fwd = $repo -replace '\\', '/'
 [System.IO.File]::WriteAllText((Join-Path $rc 'settings.sandbox.windows.json'), '{"z":"@@REPO_DIR@@/claude/x","a":[1],"h":"@@HOME@@/.claude/hooks/a.ps1"}')
-$env2 = @{ HOME = $home1; USERPROFILE = $home1; REPO_DIR = $repo }
+$env2 = @{ HOME = $home1; USERPROFILE = $home1; REPO_DIR = $repo; AGENT_MODULE_DIR = (Join-Path $tmp 'modules') }
 $sync = Join-Path $claudeDir 'sync-claude-config.ps1'
 $save = Join-Path $claudeDir 'save-claude-config.ps1'
 
@@ -127,6 +130,8 @@ Assert-Equal '' ($missingPs1 -join ',') 'every hook/skill .ps1 is listed in MANI
 
 Write-Host 'Tree installs (agents/, copilot/)'
 $repoRoot = Split-Path -Parent $claudeDir
+$savedModuleDir = $env:AGENT_MODULE_DIR
+$env:AGENT_MODULE_DIR = New-TempDir
 foreach ($t in @(@('agents', '.agents'), @('copilot', '.copilot'))) {
     $dest = Join-Path (New-TempDir) $t[1]
     & (Join-Path $repoRoot ($t[0] + '/install.ps1')) $dest | Out-Null
@@ -135,7 +140,7 @@ foreach ($t in @(@('agents', '.agents'), @('copilot', '.copilot'))) {
             [System.IO.File]::ReadAllText($_.FullName) -match '\bbash [~<$/]|\.sh\b|\b(zsh|ksh) [~<]' } | ForEach-Object { $_.Name })
     Assert-Equal '' ($bad -join ',') "$name install: no bash script references in installed markdown"
     Assert-Equal 0 @(Get-ChildItem -LiteralPath $dest -Recurse -File -Filter '*.sh').Count "$name install: no .sh copied"
-    Assert-True (Test-Path -LiteralPath (Join-Path $dest 'lib/Common.psm1')) "$name install: lib/Common.psm1 present"
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $dest 'lib/Common.psm1'))) "$name install: no per-tree lib/Common.psm1 (module is registered)"
     $missing = @(Get-ChildItem -LiteralPath (Join-Path $claudeDir 'skills') -Directory | ForEach-Object {
             $sk = $_.Name
             if (Test-Path -LiteralPath (Join-Path $repoRoot "$name/skills/$sk")) {
@@ -147,11 +152,24 @@ foreach ($t in @(@('agents', '.agents'), @('copilot', '.copilot'))) {
     Assert-Equal '' ($missing -join ',') "$name install: every skill has its .ps1 runner"
     Assert-True (Test-Path -LiteralPath (Join-Path $dest 'skills/mvn-test/SKILL.md')) "$name install: SKILL.md copied"
 }
-Assert-Equal '.claude' (Get-ToolDirName) 'tool dir name: repo/claude module logs under .claude'
+Assert-Equal '.claude' (Get-ToolDirName) 'tool dir name: repo scripts log under .claude'
 $agentsDest = Join-Path (New-TempDir) '.agents'
 & (Join-Path $repoRoot 'agents/install.ps1') $agentsDest | Out-Null
-$installed = Import-Module (Join-Path $agentsDest 'lib/Common.psm1') -Force -PassThru
-Assert-Equal '.agents' (& $installed { Get-ToolDirName }) 'tool dir name: module installed under ~/.agents logs under .agents'
+$probe = Join-Path $agentsDest 'skills/probe/probe.ps1'
+New-Item -ItemType Directory -Path (Split-Path -Parent $probe) -Force | Out-Null
+Write-Utf8File $probe "Get-ToolDirName`n"
+Assert-Equal '.agents' (& $probe) 'tool dir name: a runner installed under ~/.agents logs under .agents'
+$env:AGENT_TOOL_DIR = '.copilot'
+Assert-Equal '.copilot' (Get-ToolDirName) 'tool dir name: AGENT_TOOL_DIR overrides'
+$env:AGENT_TOOL_DIR = $null
+
+Write-Host 'Registered module AgentCommon'
+Assert-True (Test-Path -LiteralPath (Join-Path $env:AGENT_MODULE_DIR 'AgentCommon/Common.psm1')) 'AgentCommon: Common.psm1 registered'
+Assert-True (Test-Path -LiteralPath (Join-Path $env:AGENT_MODULE_DIR 'AgentCommon/AgentCommon.psd1')) 'AgentCommon: manifest registered'
+Assert-Equal 0 @(Get-ChildItem -LiteralPath $agentsDest -Recurse -File -Filter '*.psm1').Count 'agents install: no per-tree module copy'
+$reg = Test-ModuleManifest -Path (Join-Path $env:AGENT_MODULE_DIR 'AgentCommon/AgentCommon.psd1')
+Assert-Equal 'AgentCommon' $reg.Name 'AgentCommon: manifest is valid'
+$env:AGENT_MODULE_DIR = $savedModuleDir
 Import-Module (Join-Path $claudeDir 'lib/Common.psm1') -Force
 
 $s = Get-TestSummary

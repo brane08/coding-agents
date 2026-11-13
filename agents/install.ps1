@@ -7,3 +7,4 @@ Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'claude/lib/Common.p
 if (-not $Dest) { $Dest = Join-Path (Get-UserHome) '.agents' }
 $n = Install-SkillTree -TreeDir $PSScriptRoot -Dest $Dest
 Write-Host "Installed $n file(s) to $Dest"
+foreach ($m in (Install-AgentCommon)) { Write-Host "Registered module AgentCommon -> $m" }
