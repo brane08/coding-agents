@@ -5,7 +5,8 @@
 # Uses `gh pr list --head <branch> --state all` (API call, not the cached `gh pr view`).
 # Allows when: detached HEAD, protected/default branch, an OPEN PR exists, no PR found,
 # or gh/network is unavailable (fail open).
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 $in = Read-HookInput
 if ($null -eq $in) { exit 0 }

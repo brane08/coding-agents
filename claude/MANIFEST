@@ -19,6 +19,7 @@ hooks/log-ask.sh
 
 # Windows PowerShell 5.1 twins of the hooks, plus their shared module.
 lib/Common.psm1
+lib/AgentCommon.psd1
 hooks/guard-git-push.ps1
 hooks/guard-merged-pr.ps1
 hooks/guard-writes.ps1
@@ -76,6 +77,7 @@ skills/pr-squash-sync/sync-check.sh
 skills/psql-select/select.sh
 skills/psql-select/SKILL.md
 skills/token-report/report.sh
+skills/token-report/report.ps1
 skills/token-report/usage.jq
 skills/token-report/SKILL.md
 skills/quarkus-dev/dev.sh

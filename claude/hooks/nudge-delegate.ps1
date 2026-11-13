@@ -4,7 +4,8 @@
 # Injects a one-line reminder for: read-only psql queries, `git -C`, inlined secrets.
 # Every deny/nudge is appended (category only, never command text) to
 # $STATE/delegation-nudges.tsv.
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 $in = Read-HookInput
 if ($null -eq $in) { exit 0 }

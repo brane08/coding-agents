@@ -9,7 +9,8 @@
 #
 # Protected branches: $CLAUDE_PROTECTED_BRANCHES (space separated), default "main master",
 # plus origin's default branch (refs/remotes/origin/HEAD) when known.
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 $in = Read-HookInput
 if ($null -eq $in) { exit 0 }
@@ -21,7 +22,7 @@ $protected = @($protectedStr -split '\s+' | Where-Object { $_ -ne '' })
 $defaultBranch = ''
 $o = Invoke-NativeCapture 'git' @('symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD')
 if ($null -ne $o) { $defaultBranch = ($o.Trim() -replace '^origin/', '') }
-if ($defaultBranch -ne '') { $protected += $defaultBranch }
+if ($defaultBranch -ne '' -and $protected -cnotcontains $defaultBranch) { $protected += $defaultBranch }
 $protectedAll = ($protected -join ' ')
 
 # First non-flag word after `git` (skips -C <dir>, -c <k=v> and other global flags).
