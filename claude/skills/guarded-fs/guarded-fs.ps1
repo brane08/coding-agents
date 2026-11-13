@@ -7,7 +7,8 @@
 #   guarded-fs.ps1 rm <path>...
 #   guarded-fs.ps1 mv <src> <dst>
 #   guarded-fs.ps1 cp [-r] <src>... <dst>
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 function Stop-Blocked {
     param([string]$Message)

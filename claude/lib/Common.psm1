@@ -255,9 +255,79 @@ function ConvertTo-SortedJson {
 # read off where this module is installed: ~/.agents/lib -> .agents, ~/.copilot/lib -> .copilot,
 # anything else (~/.claude/lib, the repo) -> .claude.
 function Get-ToolDirName {
-    $leaf = Split-Path -Leaf (Split-Path -Parent $PSScriptRoot)
-    if ($leaf -match '^\.') { return $leaf }
+    if ($env:AGENT_TOOL_DIR -match '^\.[A-Za-z0-9_-]+$') { return $env:AGENT_TOOL_DIR }
+    foreach ($frame in @(Get-PSCallStack)) {
+        $s = $frame.ScriptName
+        if ([string]::IsNullOrEmpty($s) -or $s -eq $PSCommandPath) { continue }
+        $p = Split-Path -Parent $s
+        while ($p) {
+            $leaf = Split-Path -Leaf $p
+            if ($leaf -in @('.claude', '.agents', '.copilot')) { return $leaf }
+            $parent = Split-Path -Parent $p
+            if ($parent -eq $p) { break }
+            $p = $parent
+        }
+    }
     return '.claude'
+}
+
+# ---- Registered module -------------------------------------------------------------------
+# Common.psm1 is installed once, as the user module AgentCommon, so every tree's runners and
+# hooks share one copy: `Import-Module AgentCommon`. Scripts fall back to the path import when
+# the module is not registered (running from the repo).
+
+function Get-UserModuleDirs {
+    if ($env:AGENT_MODULE_DIR) { return , @($env:AGENT_MODULE_DIR) }
+    if (Test-WindowsHost) {
+        $docs = [Environment]::GetFolderPath('MyDocuments')
+        return , @((Join-Path $docs 'WindowsPowerShell/Modules'), (Join-Path $docs 'PowerShell/Modules'))
+    }
+    $data = if ($env:XDG_DATA_HOME) { $env:XDG_DATA_HOME } else { Join-Path (Get-UserHome) '.local/share' }
+    return , @((Join-Path $data 'powershell/Modules'))
+}
+
+# Copies Common.psm1 + AgentCommon.psd1 into <user modules>/AgentCommon (both Windows PowerShell 5.1
+# and PowerShell 7 locations on Windows). Returns the directories written.
+function Install-AgentCommon {
+    $manifest = Join-Path $PSScriptRoot 'AgentCommon.psd1'
+    $root = Join-Path $PSScriptRoot 'Common.psm1'
+    if (-not (Test-Path -LiteralPath $manifest)) { throw "AgentCommon.psd1 not found next to $root" }
+    $out = @()
+    foreach ($d in (Get-UserModuleDirs)) {
+        $target = Join-Path $d 'AgentCommon'
+        New-Item -ItemType Directory -Path $target -Force | Out-Null
+        Copy-Item -LiteralPath $root -Destination (Join-Path $target 'Common.psm1') -Force
+        Copy-Item -LiteralPath $manifest -Destination (Join-Path $target 'AgentCommon.psd1') -Force
+        $out += $target
+    }
+    return , $out
+}
+
+# True while any tree (~/.claude, ~/.agents, ~/.copilot) still has installed PowerShell runners or hooks.
+function Test-AgentCommonInUse {
+    foreach ($tool in '.claude', '.agents', '.copilot') {
+        foreach ($sub in 'skills', 'hooks') {
+            $p = Join-Path (Join-Path (Get-UserHome) $tool) $sub
+            if ((Test-Path -LiteralPath $p -PathType Container) -and
+                (Get-ChildItem -LiteralPath $p -Recurse -File -Filter '*.ps1' | Select-Object -First 1)) { return $true }
+        }
+    }
+    return $false
+}
+
+# Removes the registered module unless another tree still needs it. Returns the directories removed.
+function Remove-AgentCommonIfUnused {
+    param([switch]$DryRun)
+    if (Test-AgentCommonInUse) { return , @() }
+    $out = @()
+    foreach ($d in (Get-UserModuleDirs)) {
+        $target = Join-Path $d 'AgentCommon'
+        if (-not (Test-Path -LiteralPath $target -PathType Container)) { continue }
+        $out += $target
+        if ($DryRun) { Write-Host "  would remove: $target"; continue }
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
+    return , $out
 }
 
 function Get-ProjectDir {
@@ -338,9 +408,27 @@ function ConvertTo-WindowsPrompt {
     param([string]$Text)
     $ps = 'powershell -NoProfile -ExecutionPolicy Bypass -File'
     $t = [regex]::Replace($Text, '\bQUARKUS_PORT=(\d+) bash (\S+?)\.sh', ($ps + ' $2.ps1 $1'))
+    $t = [regex]::Replace($t, '\bQUARKUS_PORT=(\d+) (\S+?)\.sh\b', '$2.ps1 $1')
+    # VAR=value bash x.sh is not PowerShell: set it with $env: first (the Windows auto-approve regex allows that prefix).
+    $t = [regex]::Replace($t, '\b([A-Z][A-Z0-9_]*)=(\S+) bash (?=\S*?\.sh\b)', ('$$env:${1}=''${2}''; ' + $ps + ' '))
     $t = $t.Replace('bash|zsh|ksh ', $ps + ' ')
     $t = [regex]::Replace($t, '\bbash (?=\S*?\.sh\b)', ($ps + ' '))
+    # A bare installed runner path has no interpreter; .ps1 files do not run from the command line under the default policy.
+    $t = [regex]::Replace($t, '(?<!-File )(?<![\w/.$~\\-])(~/\.\w+/skills/[\w-]+/[\w-]+)\.sh\b', ($ps + ' ${1}.sh'))
     $t = [regex]::Replace($t, '\.sh\b', '.ps1')
+    $t = [regex]::Replace($t, '(?<=`)(AGENT_PROJECT_DIR|CLAUDE_PROJECT_DIR)=([^`]+)(?=`)', '$$env:${1}=''${2}''')
+    $t = [regex]::Replace($t, '\bset (AGENT_PROJECT_DIR|CLAUDE_PROJECT_DIR)=(\S+)', 'set $$env:${1}=''${2}''')
+    $t = [regex]::Replace($t, '`\$(?!HOME`)([A-Z][A-Z0-9_]*)`', '`$$env:${1}`')
+    $t = $t.Replace('(any of bash, zsh, ksh works). Always write the path with `~`.', '(Windows PowerShell 5.1+). Always write the path with `$HOME`.')
+    $t = $t.Replace('always `~`, never `$HOME` or an absolute path (auto-approve only matches `~`)', 'always `$HOME`, never `~` or an absolute path (auto-approve matches `$HOME` and `$env:USERPROFILE`)')
+    $shellNote = 'Shell: Windows PowerShell 5.1+, no bash-only syntax. Equivalents: grep = Select-String, find = Get-ChildItem -Recurse, head/tail = Select-Object -First/-Last, jq = ConvertFrom-Json.'
+    $t = $t.Replace('Shell: zsh, macOS or Ubuntu/Debian VM — no bash-only syntax unless asked.', $shellNote)
+    $t = $t.Replace('Shell: zsh on macOS or Ubuntu/Debian; no bash-only syntax unless asked.', $shellNote)
+    $t = [regex]::Replace($t, '(?m)^(compatibility: Requires )(?:bash|zsh|`zsh`)( \(the script re-execs itself into zsh\))?', '${1}PowerShell 5.1+')
+    $t = $t.Replace('Requires PowerShell 5.1+ and standard coreutils', 'Requires PowerShell 5.1+').Replace(', lsof,', ',')
+    $t = $t.Replace('Requires `zsh` and', 'Requires PowerShell 5.1+ and')
+    $t = [regex]::Replace($t, 'via `PIPESTATUS\[0\]`', 'by capturing the exit code itself')
+    $t = $t.Replace('or use `jq`', 'or use `ConvertFrom-Json`').Replace('`unzip -l <jar>`', '`jar tf <jar>`')
     # $HOME is set in Windows PowerShell 5.1, 7.x and Git Bash; a bare ~ is not expanded in a native -File argument on 5.1.
     $t = $t.Replace($ps + ' ~/', $ps + ' $HOME/')
     return $t
@@ -352,39 +440,80 @@ function Copy-WindowsMarkdown {
     Write-Utf8File $Destination (ConvertTo-WindowsPrompt ([System.IO.File]::ReadAllText($Source)))
 }
 
-# Installs <TreeDir>/skills (agents/ or copilot/) into <Dest>/skills: markdown rewritten to the .ps1
-# commands, runners taken from claude/skills (single source), plus <Dest>/lib/Common.psm1.
-# Returns the number of files written.
-function Install-SkillTree {
-    param([Parameter(Mandatory)][string]$TreeDir, [Parameter(Mandatory)][string]$Dest)
+# Every file Install-SkillTree writes for <TreeDir> (agents/ or copilot/): Rel is the path under
+# <Dest>, Source the repo file, Rewrite true for markdown. Shared by install and uninstall so the
+# two cannot drift.
+function Get-SkillTreeFiles {
+    param([Parameter(Mandatory)][string]$TreeDir)
     $claudeDir = Join-Path (Split-Path -Parent $TreeDir) 'claude'
-    $n = 0
     $root = (Resolve-Path -LiteralPath $TreeDir).ProviderPath.TrimEnd('\', '/')
+    $out = New-Object System.Collections.Generic.List[object]
     foreach ($f in @(Get-ChildItem -LiteralPath $root -File -Recurse | Where-Object {
-                $_.Extension -ne '.sh' -and $_.Name -ne 'INSTALL.md' -and $_.Name -notlike '*.snippet.json' })) {
-        $rel = $f.FullName.Substring($root.Length).TrimStart('\', '/')
-        $target = Join-Path $Dest $rel
-        if ($f.Extension -eq '.md') { Copy-WindowsMarkdown $f.FullName $target }
-        else {
-            New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
-            Copy-Item -LiteralPath $f.FullName -Destination $target -Force
-        }
-        $n++
+                $_.Extension -ne '.sh' -and $_.Name -ne 'INSTALL.md' -and $_.Name -notlike '*.snippet.json' -and
+                -not ($_.DirectoryName -eq $root -and $_.Name -in @('install.ps1', 'uninstall.ps1', 'check-base.ps1')) })) {
+        $rel = ($f.FullName.Substring($root.Length).TrimStart('\', '/')) -replace '\\', '/'
+        $out.Add([pscustomobject]@{ Rel = $rel; Source = $f.FullName; Rewrite = ($f.Extension -eq '.md') })
     }
     foreach ($skill in @(Get-ChildItem -LiteralPath (Join-Path $TreeDir 'skills') -Directory)) {
-        $out = Join-Path $Dest ('skills/' + $skill.Name)
-        New-Item -ItemType Directory -Path $out -Force | Out-Null
         $runners = Join-Path $claudeDir ('skills/' + $skill.Name)
         if (Test-Path -LiteralPath $runners) {
             foreach ($r in @(Get-ChildItem -LiteralPath $runners -File -Filter '*.ps1')) {
-                Copy-Item -LiteralPath $r.FullName -Destination $out -Force
-                $n++
+                $out.Add([pscustomobject]@{ Rel = ('skills/' + $skill.Name + '/' + $r.Name); Source = $r.FullName; Rewrite = $false })
             }
         }
     }
-    New-Item -ItemType Directory -Path (Join-Path $Dest 'lib') -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $claudeDir 'lib/Common.psm1') -Destination (Join-Path $Dest 'lib') -Force
-    return ($n + 1)
+    return , $out.ToArray()
+}
+
+# Installs <TreeDir>/skills (agents/ or copilot/) into <Dest>/skills: markdown rewritten to the .ps1
+# commands, runners taken from claude/skills (single source). The shared module is registered
+# separately (Install-AgentCommon). Returns the number of files written.
+function Install-SkillTree {
+    param([Parameter(Mandatory)][string]$TreeDir, [Parameter(Mandatory)][string]$Dest)
+    $n = 0
+    foreach ($e in (Get-SkillTreeFiles -TreeDir $TreeDir)) {
+        $target = Join-Path $Dest $e.Rel
+        if ($e.Rewrite) { Copy-WindowsMarkdown $e.Source $target }
+        else {
+            New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
+            Copy-Item -LiteralPath $e.Source -Destination $target -Force
+        }
+        $n++
+    }
+    return $n
+}
+
+# Removes the empty directories in $Dirs (deepest first) and then $Stop itself if it ends up empty.
+function Remove-EmptyDirs {
+    param([string[]]$Dirs, [string]$Stop)
+    foreach ($d in ($Dirs | Sort-Object -Property Length -Descending)) {
+        if ((Test-Path -LiteralPath $d -PathType Container) -and -not (Get-ChildItem -LiteralPath $d -Force | Select-Object -First 1)) {
+            Remove-Item -LiteralPath $d -Force
+        }
+    }
+    if ($Stop -and (Test-Path -LiteralPath $Stop -PathType Container) -and -not (Get-ChildItem -LiteralPath $Stop -Force | Select-Object -First 1)) {
+        Remove-Item -LiteralPath $Stop -Force
+    }
+}
+
+# Reverses Install-SkillTree: deletes exactly the files it writes into <Dest>, then prunes the
+# directories that become empty. Files the user added under <Dest> are left alone.
+# Returns the number of files removed (or that would be, with -DryRun).
+function Uninstall-SkillTree {
+    param([Parameter(Mandatory)][string]$TreeDir, [Parameter(Mandatory)][string]$Dest, [switch]$DryRun)
+    $n = 0
+    $dirs = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($e in (Get-SkillTreeFiles -TreeDir $TreeDir)) {
+        $target = Join-Path $Dest $e.Rel
+        if (-not (Test-Path -LiteralPath $target -PathType Leaf)) { continue }
+        $n++
+        if ($DryRun) { Write-Host "  would remove: $target"; continue }
+        Remove-Item -LiteralPath $target -Force
+        $p = Split-Path -Parent $target
+        while ($p -and $p.Length -gt $Dest.Length) { [void]$dirs.Add($p); $p = Split-Path -Parent $p }
+    }
+    if (-not $DryRun) { Remove-EmptyDirs -Dirs @($dirs) -Stop $Dest }
+    return $n
 }
 
 function Get-EpochMinute {
@@ -402,4 +531,4 @@ function Read-Manifest {
     return , $out
 }
 
-Export-ModuleMember -Function Get-Prop, Read-HookInput, Write-Stdout, ConvertTo-JsonString, Write-Decision, Write-Context, Test-WindowsHost, Get-UserHome, ConvertTo-PosixPath, Get-ConfigDir, Get-StateDir, Get-SafeSid, Get-EpochSeconds, Add-Utf8Line, Write-Utf8File, Add-Nudge, Read-Manifest, Invoke-NativeCapture, Get-CurrentBranch, Split-CommandSegments, Get-CommandWords, ConvertTo-JsonLiteral, ConvertTo-SortedJson, Get-EpochMinute, Get-SkillLog, Invoke-Logged, Resolve-RealPath, Format-NativeArgs, ConvertTo-ProcessArg, Test-WindowsPromptFile, ConvertTo-WindowsPrompt, Get-ToolDirName, Get-ProjectDir, Copy-WindowsMarkdown, Install-SkillTree
+Export-ModuleMember -Function Get-Prop, Read-HookInput, Write-Stdout, ConvertTo-JsonString, Write-Decision, Write-Context, Test-WindowsHost, Get-UserHome, ConvertTo-PosixPath, Get-ConfigDir, Get-StateDir, Get-SafeSid, Get-EpochSeconds, Add-Utf8Line, Write-Utf8File, Add-Nudge, Read-Manifest, Invoke-NativeCapture, Get-CurrentBranch, Split-CommandSegments, Get-CommandWords, ConvertTo-JsonLiteral, ConvertTo-SortedJson, Get-EpochMinute, Get-SkillLog, Invoke-Logged, Resolve-RealPath, Format-NativeArgs, ConvertTo-ProcessArg, Test-WindowsPromptFile, ConvertTo-WindowsPrompt, Get-ToolDirName, Get-ProjectDir, Copy-WindowsMarkdown, Install-SkillTree, Get-SkillTreeFiles, Uninstall-SkillTree, Remove-EmptyDirs, Get-UserModuleDirs, Install-AgentCommon, Test-AgentCommonInUse, Remove-AgentCommonIfUnused

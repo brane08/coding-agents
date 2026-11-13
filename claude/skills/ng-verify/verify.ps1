@@ -5,7 +5,8 @@
 #   verify.ps1 <angular-dir> --include=<spec-glob>   -> scope tests to matching specs
 #   verify.ps1 <angular-dir> --summary               -> print only the digest:
 #                                                       TOTAL lines, error TS, failing specs + first error line
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 $log = Get-SkillLog 'ng-verify'
 $start = Get-EpochSeconds

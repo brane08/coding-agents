@@ -50,6 +50,11 @@ fi
 
 mkdir -p "$DEST_DIR"
 
+# PowerShell files (*.ps1, *.psm1, *.psd1) are only installed by sync-claude-config.ps1.
+skip_rel() {
+  [[ -z "$1" || "$1" == \#* || "$1" == *.ps1 || "$1" == *.psm1 || "$1" == *.psd1 ]]
+}
+
 SETTINGS_SRC="${SRC_DIR}/settings.${PROFILE}.json"
 if [[ ! -f "$SETTINGS_SRC" ]]; then
   echo "Error: settings profile not found: $SETTINGS_SRC" >&2
@@ -68,7 +73,7 @@ BACKUP_DIR="${BACKUP_ROOT}/$((NOW / 60 * 60))"
 if [[ ! -d "$BACKUP_DIR" ]]; then
   BACKED=0
   while IFS= read -r rel; do
-    [[ -z "$rel" || "$rel" == \#* ]] && continue
+    skip_rel "$rel" && continue
     if [[ -f "${DEST_DIR}/${rel}" ]]; then
       mkdir -p "${BACKUP_DIR}/$(dirname "$rel")"
       cp -p "${DEST_DIR}/${rel}" "${BACKUP_DIR}/${rel}"
@@ -90,7 +95,7 @@ fi
 COUNT=0
 MISSING=0
 while IFS= read -r rel; do
-  [[ -z "$rel" || "$rel" == \#* ]] && continue
+  skip_rel "$rel" && continue
   if [[ -f "${SRC_DIR}/${rel}" ]]; then
     mkdir -p "${DEST_DIR}/$(dirname "$rel")"
     cp -p "${SRC_DIR}/${rel}" "${DEST_DIR}/${rel}"

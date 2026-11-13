@@ -4,7 +4,8 @@
 # a single code-search dispatch. Read and non-lookup Bash calls are neutral, including scripts
 # run with bash/zsh/ksh/sh/dash/powershell/pwsh; `<shell> -c "<cmd>"` is judged by <cmd>.
 # Per-session counter lives in $STATE/chain/<session>.
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 $in = Read-HookInput
 if ($null -eq $in) { exit 0 }

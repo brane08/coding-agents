@@ -3,7 +3,8 @@
 # $STATE/permission-log.jsonl for skills/delegation-audit/permissions.py. Log-only: prints
 # nothing and always exits 0, so it can never approve or deny a request.
 # Inputs are cut to 500 chars with tokens, passwords and JWTs redacted. Rotates to .1 at 5 MB.
-Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent $PSScriptRoot) 'lib/Common.psm1') -Force }
 
 function Protect-Secrets {
     param([string]$Text)

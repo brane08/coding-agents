@@ -3,7 +3,8 @@
 #   test.ps1                                -> tests current dir module
 #   test.ps1 mono-quarkus                   -> tests named module (with -am)
 #   test.ps1 mono-quarkus UserServiceTest   -> specific test class in module
-Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force
+Import-Module AgentCommon -Force -ErrorAction SilentlyContinue
+if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib/Common.psm1') -Force }
 
 $log = Get-SkillLog 'mvn-test'
 $start = Get-EpochSeconds

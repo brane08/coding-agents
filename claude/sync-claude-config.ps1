@@ -37,7 +37,8 @@ $settingsSrc = Join-Path $srcDir "settings.$ProfileName.windows.json"
 if (-not (Test-Path -LiteralPath $settingsSrc)) { [Console]::Error.WriteLine("Error: settings profile not found: $settingsSrc"); exit 1 }
 
 New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-$manifest = Read-Manifest $manifestFile
+# Shell scripts (*.sh) and their jq helper (*.jq) are only installed by sync-claude-config.sh; Windows may have no bash.
+$manifest = @(foreach ($m in (Read-Manifest $manifestFile)) { if ($m -notlike '*.sh' -and $m -notlike '*.jq') { $m } })
 Write-Host "Syncing (per MANIFEST, profile: $ProfileName): $srcDir  ->  $destDir"
 
 $keep = 5
@@ -90,6 +91,7 @@ Write-Utf8File (Join-Path $destDir 'settings.json') $settings
 Write-Utf8File $marker ($ProfileName + "`n")
 $count++
 Write-Host "Synced $count file(s), $missing listed-but-missing."
+foreach ($m in (Install-AgentCommon)) { Write-Host "Registered module AgentCommon -> $m" }
 
 $skillDirs = @($manifest | Where-Object { $_ -like 'skills/*/*' } | ForEach-Object { ($_ -split '/')[1] } | Sort-Object -Unique)
 $agentNames = @($manifest | Where-Object { $_ -match '^agents/.+\.md$' } | ForEach-Object { ($_ -replace '^agents/', '') -replace '\.md$', '' } | Sort-Object -Unique)

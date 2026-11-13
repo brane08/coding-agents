@@ -24,7 +24,12 @@ Recommended setup: keep one canonical dir, `~/.copilot/`, as a copy of `copilot/
 2. JetBrains: symlink `global-copilot-instructions.md` to `~/.copilot/copilot-instructions.md`.
 3. Copy into a repo's `.github/` only for project-specific rules.
 
-The terminal auto-approve regex in `vscode-settings.snippet.json` matches `bash ~/.copilot/skills/...`; widen it for repo-relative `.github/skills/...` copies. **Windows (PowerShell 5.1+):** `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\install.ps1 [dest]` installs to `~\.copilot` with markdown rewritten to the `.ps1` commands and runners taken from `claude/skills`; merge `vscode-settings.windows.snippet.json` instead of the Unix snippet. Installed docs use `$HOME/.copilot/...` (a bare `~` is not expanded for native `-File` arguments on 5.1). No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
+The terminal auto-approve regex in `vscode-settings.snippet.json` matches `bash ~/.copilot/skills/...`; widen it for repo-relative `.github/skills/...` copies. **Windows (PowerShell 5.1+):** `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\install.ps1 [dest]` installs to `~\.copilot` with markdown rewritten to the `.ps1` commands and runners taken from `claude/skills`, and registers the shared user module `AgentCommon` (see `agents/INSTALL.md`); merge `vscode-settings.windows.snippet.json` instead of the Unix snippet. Installed docs use `$HOME/.copilot/...` (a bare `~` is not expanded for native `-File` arguments on 5.1) and `$env:VAR='x'; powershell ...` instead of `VAR=x bash ...`; the Windows snippet's auto-approve regex allows that `$env:` prefix. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
+
+## Uninstall (rollback)
+Removes exactly the files copied into `~/.copilot` (instructions, skills, agents, memory), then empty directories; files you added are kept. `-DryRun` / `--dry-run` lists without deleting. Remove the merged `chat.tools.terminal.autoApprove` entries from VS Code `settings.json` by hand, and delete any `<repo>/.github/` copies you made.
+- Unix: `bash copilot/uninstall.sh [dest] [--dry-run]`
+- Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\uninstall.ps1 [dest] [-DryRun]`
 
 ## VS Code settings
 Merge `vscode-settings.snippet.json` into user `settings.json` (terminal auto-approve: allow = true, deny = false; everything else prompts).
