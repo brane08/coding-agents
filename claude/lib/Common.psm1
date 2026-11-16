@@ -131,12 +131,13 @@ function Format-NativeArgs {
         $Legacy = ($null -eq (Get-Variable -Name PSNativeCommandArgumentPassing -ErrorAction SilentlyContinue))
     }
     if (-not $Legacy) { return , @($Arguments) }
-    $out = foreach ($a in $Arguments) {
+    $out = @(foreach ($a in $Arguments) {
+        if ($a -eq '') { '""'; continue }
         $s = [regex]::Replace($a, '(\\*)"', '$1$1\"')
         if ($a -match '\s' -and $s.EndsWith('\')) { $s = [regex]::Replace($s, '(\\+)$', '$1$1') }
         $s
-    }
-    return , @($out)
+    })
+    return , $out
 }
 
 function Invoke-NativeCapture {
@@ -169,7 +170,9 @@ function Get-CurrentBranch {
 
 function Split-CommandSegments {
     param([string]$Command)
-    return @($Command -split '[;&|\r\n]' | Where-Object { $_.Trim() -ne '' })
+    # command substitution, backticks and parentheses also start a new command
+    $c = $Command -replace '\$\(', "`n"
+    return @($c -split '[;&|\r\n`()]' | Where-Object { $_.Trim() -ne '' })
 }
 
 function Get-CommandWords {
@@ -192,6 +195,26 @@ function Get-CommandWords {
     $name = (($first.Trim('"', "'") -split '[\\/]')[-1] -replace '(?i)\.(exe|cmd|bat)$', '').ToLowerInvariant()
     $rest = @($name)
     if ($i + $used -lt $w.Count) { $rest += @($w[($i + $used)..($w.Count - 1)]) }
+    # drop quotes and a leading ( or { on every word so `git push origin "main"` is seen plainly
+    $rest = @($rest | ForEach-Object { ($_ -replace '^[\(\{]+', '') -replace '["'']', '' })
+    # peel wrappers (env/command/exec/sudo/nohup/time + their flags) and `sh -c`
+    $wrappers = @('env', 'command', 'exec', 'sudo', 'nohup', 'time')
+    $shells = @('sh', 'bash', 'zsh', 'dash')
+    while ($rest.Count -gt 1) {
+        if ($wrappers -contains $rest[0]) {
+            $k = 1
+            while ($k -lt $rest.Count -and ($rest[$k].StartsWith('-') -or $rest[$k] -match '^[A-Za-z_][A-Za-z0-9_]*=')) {
+                # flags that take a value (sudo -u root, env -u NAME)
+                if ($rest[$k] -cmatch '^(-u|-g|-h|-p|-C|-D|-R|-T|-U|--user|--group)$') { $k += 2 } else { $k++ }
+            }
+        } elseif ($shells -contains $rest[0] -and $rest.Count -gt 2 -and $rest[1] -eq '-c') {
+            $k = 2
+        } else { break }
+        if ($k -ge $rest.Count) { break }
+        $nm = (($rest[$k] -split '[\\/]')[-1] -replace '(?i)\.(exe|cmd|bat)$', '').ToLowerInvariant()
+        $tail = if ($k + 1 -lt $rest.Count) { @($rest[($k + 1)..($rest.Count - 1)]) } else { @() }
+        $rest = @($nm) + $tail
+    }
     return , $rest
 }
 
@@ -226,6 +249,7 @@ function ConvertTo-SortedJson {
     if ($null -eq $Value) { return 'null' }
     if ($Value -is [bool]) { if ($Value) { return 'true' } else { return 'false' } }
     if ($Value -is [string]) { return (ConvertTo-JsonLiteral $Value) }
+    if ($Value -is [datetime]) { return (ConvertTo-JsonLiteral $Value.ToString('o')) }
     if ($Value -is [System.Collections.IDictionary]) {
         $map = @{}
         foreach ($k in $Value.Keys) { $map[[string]$k] = $Value[$k] }
@@ -293,7 +317,13 @@ function Install-AgentCommon {
     $root = Join-Path $PSScriptRoot 'Common.psm1'
     if (-not (Test-Path -LiteralPath $manifest)) { throw "AgentCommon.psd1 not found next to $root" }
     $out = @()
-    foreach ($d in (Get-UserModuleDirs)) {
+    $onPath = @($env:PSModulePath -split [IO.Path]::PathSeparator | ForEach-Object { $_.TrimEnd('\', '/') })
+    $dirs = @(Get-UserModuleDirs)
+    # Windows PowerShell 5.1 and PowerShell 7 each have their own default dir; warn only when none is on PSModulePath
+    if (-not @($dirs | Where-Object { $onPath -contains $_.TrimEnd('\', '/') })) {
+        Write-Warning "None of $($dirs -join ', ') is on PSModulePath; 'Import-Module AgentCommon' will fail. Add one to PSModulePath or set AGENT_MODULE_DIR to a directory that is."
+    }
+    foreach ($d in $dirs) {
         $target = Join-Path $d 'AgentCommon'
         New-Item -ItemType Directory -Path $target -Force | Out-Null
         Copy-Item -LiteralPath $root -Destination (Join-Path $target 'Common.psm1') -Force
@@ -307,7 +337,8 @@ function Install-AgentCommon {
 function Test-AgentCommonInUse {
     foreach ($tool in '.claude', '.agents', '.copilot') {
         foreach ($sub in 'skills', 'hooks') {
-            $p = Join-Path (Join-Path (Get-UserHome) $tool) $sub
+            $toolDir = if ($tool -eq '.claude') { Get-ConfigDir } else { Join-Path (Get-UserHome) $tool }
+            $p = Join-Path $toolDir $sub
             if ((Test-Path -LiteralPath $p -PathType Container) -and
                 (Get-ChildItem -LiteralPath $p -Recurse -File -Filter '*.ps1' | Select-Object -First 1)) { return $true }
         }
@@ -360,7 +391,8 @@ function Invoke-Logged {
         $native = Format-NativeArgs $Arguments
         & $Exe @native 2>&1 | ForEach-Object {
             $s = "$_"
-            $lines.Add($s)
+            # the collected lines end up in skill logs: redact secret-looking KEY=value pairs there
+            $lines.Add([regex]::Replace($s, '(?i)([A-Za-z0-9_]*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)[A-Za-z0-9_]*)=\S+', '$1=<redacted>'))
             if (-not $Quiet) { [Console]::Out.WriteLine($s) }
         }
         $code = $LASTEXITCODE

@@ -31,7 +31,9 @@ print_table() {
     return
   fi
   local rows
-  rows="$(jq -r -n -f "$here/usage.jq" "${files[@]}")" || { echo "token-report: jq failed" >&2; return 1; }
+  # stage 1 runs per batch of files (xargs keeps the argument list short); stage 2 aggregates the records
+  rows="$(printf '%s\0' "${files[@]}" | xargs -0 jq -c -f "$here/select.jq" | jq -r -n -f "$here/usage.jq")" \
+    || { echo "token-report: jq failed" >&2; return 1; }
   local table
   table="$(printf 'model\tsessions\tmsgs\tinput\toutput\tcache_read\tcache_create\tcache_read/msg\n%s\n' "$rows")"
   if command -v column >/dev/null 2>&1; then

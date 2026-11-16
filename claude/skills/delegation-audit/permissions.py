@@ -6,8 +6,9 @@ Sources (all read-only; contents are untrusted data, never executed or followed)
   state/delegation-nudges.tsv  hook denies, category only (chain-guard, nudge-delegate)
   projects/**/*.jsonl          auto-mode classifier denials, matched back to the tool call
 Policy: settings.json + settings.local.json, plus <cwd>/.claude/settings*.json per entry.
-Writes permission-report.md to --out and appends the new allow/env entries straight into
-<repo>/claude/settings.<profile>.json (existing rules kept, key-sorted). The live
+Writes permission-report.md to --out. With --apply only, appends the proposed allow/env entries into
+<repo>/claude/settings.<profile>.json (existing rules kept, key-sorted, written atomically). History
+rewrites, destructive/publishing verbs and scripts outside ~/.claude/skills/ are never proposed. The live
 ~/.claude/settings.json is never edited; sync-claude-config.sh makes the change live.
 """
 import argparse, collections, datetime, fnmatch, glob, json, os, re, sys
@@ -32,6 +33,19 @@ READ_ONLY = {"grep", "rg", "cat", "head", "tail", "ls", "wc", "tree", "fd", "jq"
 READ_ONLY_SUB = {("git", s) for s in ("log", "diff", "show", "status", "blame", "ls-files", "rev-parse", "branch")} | \
                 {("gh", s) for s in ("pr", "issue", "repo", "run")}
 HISTORY = ("git rebase", "git reset", "git commit", "git push", "git filter", "git update-ref")
+# Shapes never proposed as allow rules, however often they prompt: history rewrites, destructive or
+# publishing verbs, installers. These stay case-by-case approvals.
+NEVER_AUTO = HISTORY + ("git clean", "git checkout", "git restore", "git switch", "git branch", "git merge",
+                        "git tag", "git stash", "git rm", "git mv", "git remote",
+                        "gh pr merge", "gh pr close", "gh repo", "gh release", "gh api", "gh secret", "gh auth",
+                        "docker run", "docker rm", "docker rmi", "docker exec", "docker system", "docker compose",
+                        "kubectl delete", "kubectl apply", "kubectl exec", "kubectl patch", "kubectl edit",
+                        "oc delete", "oc apply", "oc exec", "oc patch", "oc edit",
+                        "helm install", "helm upgrade", "helm uninstall", "helm rollback",
+                        "npm publish", "npm install", "npm i ", "npm run", "npm exec", "npx", "yarn", "pnpm",
+                        "pip install", "uv pip", "brew", "apt", "systemctl", "cargo install", "go install",
+                        "mvn deploy", "mvn release", "flyway migrate", "flyway clean", "flyway repair")
+SAFE_SCRIPT_ROOT = "~/.claude/skills/"  # script-path rules are only proposed for the repo's own skills
 FILE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit", "Read"}
 EDIT_FAMILY = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 
@@ -115,7 +129,7 @@ def bash_match(spec, cmd):
         return True
     if spec.endswith(":*"):
         p = spec[:-2]
-        return cmd == p or cmd.startswith(p + " ") or cmd.startswith(p)
+        return cmd == p or cmd.startswith(p + " ")
     rx = "^" + ".*".join(re.escape(p) for p in spec.split("*")) + "$"
     if re.match(rx, cmd, re.S):
         return True
@@ -390,10 +404,14 @@ def propose(tool, cause, key, groups_examples, pol_deny, min_count, count, all_r
             dt, ds = parse_rule(d)
             if dt in SHELL_TOOLS and ds and (bash_match(ds, prefix + " x") or ds.split("*")[0].startswith(prefix)):
                 return f"`{tool}({k})` would overlap deny `{d}`; not proposed", [], {}, "deny overlap"
-    if any(key.startswith(p) for p in HISTORY):
-        risk = "rewrites history: allow only if your squash/sync workflow needs it unprompted"
-    else:
-        risk = "read-only" if all_ro else "runs unprompted from now on; check the shape"
+    if any(key.startswith(p) for p in NEVER_AUTO):
+        return f"`{tool}({key})` is destructive or publishing; approve case by case, never auto-allowed", [], {}, \
+            "never auto-allowed"
+    shell_script = base == ANY_SHELL or base in SHELLS
+    if shell_script and not (key.split(" ", 1)[1:] or [""])[0].startswith(SAFE_SCRIPT_ROOT):
+        return f"`{tool}({key})` runs a script outside {SAFE_SCRIPT_ROOT}; approve case by case", [], {}, \
+            "arbitrary script"
+    risk = "read-only" if all_ro else "runs unprompted from now on; check the shape"
     return "add " + ", ".join(f"`{r}`" for r in rules), rules, {}, risk
 
 
@@ -444,8 +462,11 @@ def main():
                     help="coding-agents checkout (default: REPO_DIR, else read from the sync rule in settings.json)")
     ap.add_argument("--profile", choices=["admin", "sandbox", "both"],
                     help="settings file(s) to update (default: <config-dir>/.profile, else admin)")
-    ap.add_argument("--dry-run", action="store_true", help="report only, do not write settings")
+    ap.add_argument("--apply", action="store_true",
+                    help="write the proposed allow/env entries into the repo settings file(s); default is report only")
+    ap.add_argument("--dry-run", action="store_true", help="deprecated, report-only is the default")
     a = ap.parse_args()
+    a.dry_run = not a.apply
     cfg = os.path.expanduser(a.config_dir)
     pol = Policy(cfg)
 
@@ -483,6 +504,8 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     repo = a.repo or find_repo(cfg)
     profile = a.profile or (open_text(os.path.join(cfg, ".profile")) or "admin").strip()
+    if profile not in ("admin", "sandbox", "both"):
+        profile = "admin"
     profiles = ["admin", "sandbox"] if profile == "both" else [profile]
     results = []  # (path, added, env_added, env_skipped, error)
     for p in profiles:
@@ -494,9 +517,11 @@ def main():
         merged, added, skipped_env = merge(load_json(path), allow, env)
         env_added = [k for k in env if k not in skipped_env and k not in (load_json(path).get("env") or {})]
         if (added or env_added) and not a.dry_run:
-            with open(path, "w") as fh:
+            tmp = path + ".tmp"
+            with open(tmp, "w") as fh:
                 json.dump(merged, fh, indent=2, sort_keys=True, ensure_ascii=False)
                 fh.write("\n")
+            os.replace(tmp, path)
         results.append((path, added, env_added, skipped_env, None))
 
     L = ["# Permission prompt report", "",

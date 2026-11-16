@@ -31,6 +31,10 @@ claude/skills/*
 !claude/lib/
 !claude/tests/
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # OS junk
 .DS_Store
 **/.DS_Store

@@ -48,11 +48,38 @@ git_subcmd() {
 
 # A compound line may hold several commands; check each git push separately.
 # Split on ; && || and newlines.
-printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
+# Command substitution, backticks and parentheses also start a new command: split on those too.
+split_cmd=${cmd//\$\(/$'\n'}
+printf '%s\n' "$split_cmd" | tr ';&|`()' '\n\n\n\n\n\n' | while IFS= read -r seg; do
   # shellcheck disable=SC2086
+  set -f
   set -- $seg
-  while [ $# -gt 0 ] && printf '%s' "$1" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*='; do shift; done
-  [ "${1:-}" = "git" ] || continue
+  set +f
+  # drop quotes and a leading ( or { so `git push origin "main"` / `(git push ...)` are seen plainly
+  args=()
+  for w in "$@"; do w=${w#[\(\{]}; w=${w//[\"\']/}; args+=("$w"); done
+  set -- "${args[@]}"
+  # skip VAR=x assignments, wrappers (env/command/exec/sudo/nohup/time + their flags) and `sh -c`
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      [A-Za-z_]*=*) shift ;;
+      env|command|exec|sudo|nohup|time)
+        shift
+        while [ $# -gt 0 ]; do
+          case "$1" in
+            -u|-g|-h|-p|-C|-D|-R|-T|-U|--user|--group) shift 2 ;;   # flag taking a value (sudo -u root, env -u NAME)
+            -*|[A-Za-z_]*=*) shift ;;
+            *) break ;;
+          esac
+        done ;;
+      sh|bash|zsh|dash|*/sh|*/bash|*/zsh|*/dash) if [ "${2:-}" = "-c" ]; then shift 2; else break; fi ;;
+      *) break ;;
+    esac
+  done
+  [ $# -gt 0 ] || continue
+  [ "${1##*/}" = "git" ] || continue
+  shift
+  set -- git "$@"
 
   # git branch -d/-D/--delete of a protected branch or the current branch
   if [ "$(git_subcmd "${@:2}")" = "branch" ]; then
@@ -83,12 +110,8 @@ printf '%s\n' "$cmd" | tr ';&|' '\n\n\n' | while IFS= read -r seg; do
     continue
   fi
 
-  # find the "push" subcommand, skipping global flags like -C <dir>
-  saw_push=0
-  for w in "$@"; do
-    [ "$w" = "push" ] && { saw_push=1; break; }
-  done
-  [ "$saw_push" = 1 ] || continue
+  # only the "push" subcommand counts (not `git stash push`, `git commit -m push`)
+  [ "$(git_subcmd "${@:2}")" = "push" ] || continue
 
   force=0
   delete=0

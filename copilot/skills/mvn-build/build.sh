@@ -9,13 +9,13 @@ set -euo pipefail
 #   build.sh --reactor            → full reactor build
 # Extra -flags are passed to mvn as separate arguments (never evaluated by a shell).
 
-LOGDIR="$(cd "${CLAUDE_PROJECT_DIR:-.}" && pwd)/.copilot/logs"
+LOGDIR="$(cd "${COPILOT_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-.}}" && pwd)/.copilot/logs"
 mkdir -p "$LOGDIR"
 [ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
 LOG="$LOGDIR/mvn-build.log"
 START=$(date +%s)
 
-cd "${CLAUDE_PROJECT_DIR:-.}"
+cd "${COPILOT_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-.}}"
 
 IS_REACTOR=false
 if grep -q "<modules>" pom.xml 2>/dev/null; then
@@ -29,7 +29,7 @@ FULL_REACTOR=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --reactor) FULL_REACTOR=true ;;
-    -pl) shift; MODULE="${1:-}" ;;
+    -pl) [ $# -ge 2 ] || { echo "ERROR: -pl needs a module name"; exit 2; }; shift; MODULE="$1" ;;
     -*) EXTRA_ARGS+=("$1") ;;
     *) MODULE="$1" ;;
   esac

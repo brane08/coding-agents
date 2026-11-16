@@ -1,8 +1,13 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 # Auto-approved wrapper for read-only psql queries.
 # Allows a single SELECT, EXPLAIN, SHOW or WITH statement via one -c.
 # Exits 1 (blocked) for anything else; the server also enforces read-only.
-[ -n "${ZSH_VERSION-}" ] || exec zsh "$0" "$@"
+# Portable bash (works where zsh is not installed).
+if [ -z "${BASH_VERSION-}" ]; then
+  if command -v bash >/dev/null 2>&1; then exec bash "$0" "$@"; fi
+  echo "psql-select: bash not found; install bash (this script is bash-syntax only)" >&2
+  exit 127
+fi
 
 # Short form against the local Postgres: select.sh "<sql>" | select.sh <db> "<sql>"
 # (host localhost, user postgres, db prore unless given, unaligned tuples-only output).
@@ -16,16 +21,38 @@ if (( $# >= 1 )) && [[ "$1" != -* ]]; then
   esac
 fi
 
+block() { echo "psql-select: blocked — $1" >&2; exit 1; }
+check_host() {
+  case "$1" in
+    localhost|127.0.0.1|::1|/*) ;;
+    *) block "host '$1' is not local; this wrapper only queries the local Postgres. Use plain psql." ;;
+  esac
+}
+check_db() {
+  case "$1" in
+    *=*|*://*) block "-d/--dbname must be a plain database name (no conninfo string or URI)." ;;
+  esac
+}
+
 sql=""
 nc=0
 args=("$@")
-i=1
-while (( i <= $# )); do
+n=$#
+i=0
+while (( i < n )); do
   a="${args[i]}"
   case "$a" in
+    -h|--host) check_host "${args[i+1]-}" ;;
+    --host=*) check_host "${a#--host=}" ;;
+    -h?*) check_host "${a#-h}" ;;
+    -d|--dbname) check_db "${args[i+1]-}" ;;
+    --dbname=*) check_db "${a#--dbname=}" ;;
+    -d?*) check_db "${a#-d}" ;;
+  esac
+  case "$a" in
     -c)
-      (( nc++ ))
-      (( i++ ))
+      nc=$(( nc + 1 ))
+      i=$(( i + 1 ))
       sql="${args[i]-}"
       ;;
     -c?*|--command|--command=*|-f|-f?*|--file|--file=*)
@@ -41,7 +68,7 @@ while (( i <= $# )); do
       exit 1
       ;;
   esac
-  (( i++ ))
+  i=$(( i + 1 ))
 done
 
 if (( nc != 1 )) || [[ -z "$sql" ]]; then
@@ -58,13 +85,16 @@ if [[ "$body" == *";"* ]]; then
   exit 1
 fi
 
-upper="${(U)body}"
+upper=$(printf '%s' "$body" | tr '[:lower:]' '[:upper:]')
 first_word="${upper%%[[:space:](]*}"
 
-if [[ "$upper" == *SET_CONFIG* || "$upper" == *PG_READ_* || "$upper" == *PG_TERMINATE_BACKEND* || "$upper" == *PG_CANCEL_BACKEND* || "$upper" == *LO_IMPORT* || "$upper" == *LO_EXPORT* ]]; then
-  echo "psql-select: blocked — function that can change settings, read server files or end sessions. Use plain psql." >&2
-  exit 1
-fi
+for bad in SET_CONFIG PG_READ_ PG_LS_ PG_STAT_FILE PG_TERMINATE_BACKEND PG_CANCEL_BACKEND PG_RELOAD_CONF \
+           PG_ROTATE_LOGFILE PG_SWITCH_WAL PG_PROMOTE LO_IMPORT LO_EXPORT DBLINK; do
+  if [[ "$upper" == *"$bad"* ]]; then
+    echo "psql-select: blocked — function that can change settings, read server files, reach other servers or end sessions ($bad). Use plain psql." >&2
+    exit 1
+  fi
+done
 
 case "$first_word" in
   SELECT|EXPLAIN|SHOW|WITH)

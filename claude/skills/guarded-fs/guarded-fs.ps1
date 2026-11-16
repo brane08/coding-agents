@@ -39,13 +39,14 @@ function Resolve-Guarded {
 }
 
 function Test-Inside {
-    param([string]$Resolved, [string]$Label)
+    param([string]$Resolved, [string]$Label, [bool]$AllowRoot = $false)
+    if (-not $AllowRoot -and $Label -match '(^|[\\/])\.{1,2}$') { Stop-Blocked "'$Label' ends in . or .., name the path explicitly" }
     if ($Resolved -eq '__NOPARENT__') { Stop-Blocked "parent directory of '$Label' does not exist" }
     $isRoot = $Resolved.Equals($root, $cmp)
     if (-not ($isRoot -or $Resolved.StartsWith($root.TrimEnd('/') + '/', $cmp))) {
         Stop-Blocked "'$Label' resolves to '$Resolved', outside working dir '$root'"
     }
-    if ($isRoot) { Stop-Blocked 'refusing to operate on the working dir root itself' }
+    if ($isRoot -and -not $AllowRoot) { Stop-Blocked 'refusing to operate on the working dir root itself' }
     if ($Resolved -match '(^|/)\.git(/|$)') { Stop-Blocked "refusing to touch .git ('$Resolved')" }
     if ($Resolved -match '(?i)(^|/)git~\d+(/|$)') { Stop-Blocked "refusing to touch what may be the 8.3 short name of .git ('$Resolved')" }
 }
@@ -82,10 +83,12 @@ switch ($cmd) {
     'mv' {
         if ($rest.Count -ne 2) { [Console]::Error.WriteLine('usage: guarded-fs.ps1 mv <src> <dst>'); exit 1 }
         Test-Inside (Resolve-Guarded $rest[0]) $rest[0]
-        Test-Inside (Resolve-Guarded $rest[1] $true) $rest[1]
         if (Test-Path -LiteralPath $rest[1] -PathType Container) {
+            Test-Inside (Resolve-Guarded $rest[1] $true) $rest[1] $true
             $t = Join-Path $rest[1] (Split-Path -Leaf $rest[0])
             Test-Inside (Resolve-Guarded $t $true) $t
+        } else {
+            Test-Inside (Resolve-Guarded $rest[1] $true) $rest[1]
         }
         Move-Item -LiteralPath $rest[0] -Destination $rest[1] -Force
         exit 0
@@ -94,7 +97,7 @@ switch ($cmd) {
         $recursive = $false
         $paths = @()
         foreach ($a in $rest) {
-            if ($a -cmatch '^-[rRpPfinavL]' -or $a -ceq '--recursive') {
+            if ($a -cmatch '^-[rRpPfnavL]{1,3}$' -or $a -ceq '--recursive') {
                 if ($a -ceq '--recursive' -or $a -cmatch '^-[^-]*[rR]') { $recursive = $true }
             } elseif ($a.StartsWith('-')) {
                 Stop-Blocked "unsupported cp flag '$a'"
@@ -104,13 +107,13 @@ switch ($cmd) {
         $dst = $paths[$paths.Count - 1]
         $srcs = @($paths[0..($paths.Count - 2)])
         foreach ($p in $srcs) {
-            Test-Inside (Resolve-Guarded $p) $p
+            Test-Inside (Resolve-Guarded $p $true) $p
             if (Test-Path -LiteralPath $dst -PathType Container) {
                 $t = Join-Path $dst (Split-Path -Leaf $p)
                 Test-Inside (Resolve-Guarded $t $true) $t
             }
         }
-        Test-Inside (Resolve-Guarded $dst $true) $dst
+        Test-Inside (Resolve-Guarded $dst $true) $dst (Test-Path -LiteralPath $dst -PathType Container)
         foreach ($p in $srcs) {
             if ((Test-Path -LiteralPath $p -PathType Container) -and -not $recursive) {
                 [Console]::Error.WriteLine("cp: -r not specified; omitting directory '$p'")

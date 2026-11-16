@@ -65,6 +65,7 @@ foreach ($seg in (Split-CommandSegments $cmd)) {
         continue
     }
 
+    if ((Get-GitSubcommand $w) -cne 'push') { continue }
     $pushIdx = [Array]::IndexOf($w, 'push')
     if ($pushIdx -lt 0) { continue }
 

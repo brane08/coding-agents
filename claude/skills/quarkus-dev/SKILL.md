@@ -6,13 +6,15 @@ description: >
 ---
 # Quarkus Dev Mode
 
-Run: QUARKUS_PORT=8102 bash ~/.claude/skills/quarkus-dev/dev.sh
+Run: bash ~/.claude/skills/quarkus-dev/dev.sh 8102   (port is optional, default 8080; `QUARKUS_PORT` also works)
 
 App runs at: http://localhost:8102
 Dev UI at:   http://localhost:8102/q/dev
 
 Note: runs `mvn quarkus:dev` in `$CLAUDE_PROJECT_DIR` (else cwd); set `CLAUDE_PROJECT_DIR=<abs>/mono-quarkus` rather than `cd`.
-Stale JARs → NoSuchMethodError — always full rebuild after module changes.
+An existing quarkus/maven process on the port is stopped first; any other process on the port aborts the run.
+Stale JARs → NoSuchMethodError — `build.sh` (package) installs nothing to `~/.m2`, so rebuild changed modules with
+`mvn install -DskipTests -pl <module> -am` (see mvn-build) before starting.
 
 Report:
 - PID

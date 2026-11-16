@@ -12,7 +12,7 @@ agent (pinned to haiku; no `model:` override) and have it return the Report sect
 Run one of:
   bash ~/.claude/skills/ng-verify/verify.sh                              # current dir
   bash ~/.claude/skills/ng-verify/verify.sh ui-angular                   # named app dir
-  bash ~/.claude/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
+  bash ~/.claude/skills/ng-verify/verify.sh ui-angular '--include=**/cart.*.spec.ts'   # quote the glob (zsh aborts on no match)
   bash ~/.claude/skills/ng-verify/verify.sh ui-angular --summary         # digest only
 
 Prefer `--summary` when dispatching: it prints just the verdict line, `error TS` lines and

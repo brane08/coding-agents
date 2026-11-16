@@ -12,7 +12,7 @@ Run one of (from the repo root; at a reactor root a module or --reactor is requi
   bash ~/.claude/skills/mvn-build/build.sh data-ebean        # data module
   bash ~/.claude/skills/mvn-build/build.sh --reactor         # full reactor (when asked, or after data-ebean/workflow-core changes)
 
-Module names: core-api, data-ebean, data-hibernate, mono-quarkus, workflow-core
+Module names (examples; the real list is the root pom's `<modules>`): core-api, data-ebean, data-hibernate, mono-quarkus, workflow-core
 
 After changes to data-ebean or workflow-core, run the full reactor (package only, nothing is installed to ~/.m2):
   bash ~/.claude/skills/mvn-build/build.sh --reactor

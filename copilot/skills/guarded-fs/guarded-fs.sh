@@ -44,7 +44,15 @@ resolve() {
 }
 
 check_inside() {
-  local resolved="$1" label="$2"
+  local resolved="$1" label="$2" allow_root="${3:-0}"
+  if [[ "$allow_root" != 1 ]]; then
+    case "$label" in
+      .|..|*/.|*/..)
+        echo "guarded-fs: blocked — '$label' ends in . or .., name the path explicitly" >&2
+        exit 1
+        ;;
+    esac
+  fi
   if [[ "$resolved" == "__NOPARENT__" ]]; then
     echo "guarded-fs: blocked — parent directory of '$label' does not exist" >&2
     exit 1
@@ -53,12 +61,12 @@ check_inside() {
     echo "guarded-fs: blocked — '$label' resolves to '$resolved', outside working dir '$root'" >&2
     exit 1
   fi
-  if [[ "$resolved" == "$root" ]]; then
+  if [[ "$resolved" == "$root" && "$allow_root" != 1 ]]; then
     echo "guarded-fs: blocked — refusing to operate on the working dir root itself" >&2
     exit 1
   fi
   case "$resolved" in
-    */.git|*/.git/*)
+    */[.][gG][iI][tT]|*/[.][gG][iI][tT]/*)
       echo "guarded-fs: blocked — refusing to touch .git ('$resolved')" >&2
       exit 1
       ;;
@@ -82,9 +90,11 @@ case "$cmd" in
     src_r=$(resolve "$1")
     dst_r=$(resolve "$2" 1)
     check_inside "$src_r" "$1"
-    check_inside "$dst_r" "$2"
     if [[ -d "$2" ]]; then
+      check_inside "$dst_r" "$2" 1
       check_inside "$(resolve "$2/$(basename "$1")" 1)" "$2/$(basename "$1")"
+    else
+      check_inside "$dst_r" "$2"
     fi
     exec mv -- "$1" "$2"
     ;;
@@ -93,7 +103,8 @@ case "$cmd" in
     paths=()
     for a in "$@"; do
       case "$a" in
-        -[rRpPfinavL]*|--recursive) flags+=("$a") ;;
+        --recursive) flags+=("$a") ;;
+        -[rRpPfnavL]|-[rRpPfnavL][rRpPfnavL]|-[rRpPfnavL][rRpPfnavL][rRpPfnavL]) flags+=("$a") ;;
         -*) echo "guarded-fs: blocked — unsupported cp flag '$a'" >&2; exit 1 ;;
         *) paths+=("$a") ;;
       esac
@@ -103,14 +114,18 @@ case "$cmd" in
     dst="${paths[$((n-1))]}"
     for ((i=0; i<n-1; i++)); do
       p="${paths[$i]}"
-      r=$(resolve "$p")
+      r=$(resolve "$p" 1)
       check_inside "$r" "$p"
       if [[ -d "$dst" ]]; then
         check_inside "$(resolve "$dst/$(basename "$p")" 1)" "$dst/$(basename "$p")"
       fi
     done
     dst_r=$(resolve "$dst" 1)
-    check_inside "$dst_r" "$dst"
+    if [[ -d "$dst" ]]; then
+      check_inside "$dst_r" "$dst" 1
+    else
+      check_inside "$dst_r" "$dst"
+    fi
     exec cp ${flags[@]+"${flags[@]}"} -- "${paths[@]}"
     ;;
   *)

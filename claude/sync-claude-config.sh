@@ -26,7 +26,7 @@
 
 set -euo pipefail
 
-PROFILE_MARKER="${HOME}/.claude/.profile"
+PROFILE_MARKER="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}/.profile"
 PROFILE="${1:-$(cat "$PROFILE_MARKER" 2>/dev/null || echo admin)}"
 case "$PROFILE" in
   admin|sandbox) ;;
@@ -36,7 +36,7 @@ esac
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${REPO_DIR:-$(dirname "$SCRIPT_DIR")}"
 SRC_DIR="${REPO_DIR}/claude"
-DEST_DIR="${HOME}/.claude"
+DEST_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"   # same dir the hooks read state from
 MANIFEST="${SRC_DIR}/MANIFEST"
 
 if [[ ! -d "$SRC_DIR" ]]; then

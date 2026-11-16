@@ -25,7 +25,7 @@ if ($module -ne '' -and $module -cnotmatch '^[A-Za-z0-9._,:/-]+$') { Write-Host 
 if ($pattern -ne '' -and $pattern -cnotmatch '^[A-Za-z0-9._,#*?+!-]+$') { Write-Host "ERROR: invalid test pattern: $pattern"; exit 2 }
 
 if ($module -ne '' -and $pattern -ne '') {
-    $mvnArgs = @('verify', '-pl', $module, '-am', "-Dtest=$pattern", '-DfailIfNoTests=false', '-Dsurefire.failIfNoSpecifiedTests=false')
+    $mvnArgs = @('verify', '-pl', $module, '-am', "-Dtest=$pattern", "-Dit.test=$pattern", '-DfailIfNoTests=false', '-Dsurefire.failIfNoSpecifiedTests=false', '-Dfailsafe.failIfNoSpecifiedTests=false')
 } elseif ($module -ne '') {
     $mvnArgs = @('verify', '-pl', $module, '-am')
 } elseif ($isReactor) {
@@ -47,14 +47,16 @@ Write-Host ''
 
 @($r.Lines | Where-Object { $_ -match 'Tests run:' } | Select-Object -Last 5) | ForEach-Object { Write-Host $_ }
 
-$failures = @($r.Lines | Where-Object { $_ -cmatch 'FAILED|<<< ERROR' })
+$failures = @($r.Lines | Where-Object { $_ -cmatch 'FAILED|<<< (FAILURE|ERROR)' })
 if ($failures.Count -gt 0) {
     Write-Host ''
     Write-Host 'Failed:'
     $failures | ForEach-Object { Write-Host $_ }
     Write-Host ''
-    Write-Host 'Details (first 6 lines after each failure):'
-    $reports = @(Get-ChildItem -Path '*/target/surefire-reports/*.txt', 'target/surefire-reports/*.txt' -File -ErrorAction SilentlyContinue)
+    Write-Host 'Details (up to 6 lines after each failure, reports from this run only):'
+    $startUtc = [DateTimeOffset]::FromUnixTimeSeconds($start).UtcDateTime
+    $reports = @(Get-ChildItem -Path '*/target/surefire-reports/*.txt', '*/target/failsafe-reports/*.txt', 'target/surefire-reports/*.txt', 'target/failsafe-reports/*.txt' -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTimeUtc -ge $startUtc })
     foreach ($f in $reports) {
         $lines = [System.IO.File]::ReadAllLines($f.FullName)
         $out = New-Object System.Collections.Generic.List[string]

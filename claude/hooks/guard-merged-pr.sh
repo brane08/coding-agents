@@ -13,16 +13,29 @@ cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
 
 protected=${CLAUDE_PROTECTED_BRANCHES:-main master}
 
+# First non-flag word after `git` (skips -C <dir>, -c <k=v> and other global flags).
+git_subcmd() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -C|-c) shift 2 ;;
+      -*) shift ;;
+      *) printf '%s' "$1"; return ;;
+    esac
+  done
+}
+
 hit=0
 pushed=""
 while IFS= read -r seg; do
   # shellcheck disable=SC2086
+  set -f
   set -- $seg
+  set +f
   while [ $# -gt 0 ] && printf '%s' "$1" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*='; do shift; done
   case "${1:-}" in
     git)
-      case " $* " in
-        *" push "*)
+      case "$(git_subcmd "${@:2}")" in
+        push)
           hit=1
           # first non-flag word after `push` is the remote, the next is the refspec
           seen=0; n=0
@@ -33,7 +46,7 @@ while IFS= read -r seg; do
             if [ "$n" = 2 ]; then w=${w#+}; pushed=${w##*:}; fi
           done ;;
       esac ;;
-    gh)  case " $* " in *" pr create"*|*" pr  create"*) hit=1 ;; esac ;;
+    gh)  case " $* " in *" pr create"*) hit=1 ;; esac ;;
   esac
 done <<EOF
 $(printf '%s\n' "$cmd" | tr ';&|' '\n\n\n')

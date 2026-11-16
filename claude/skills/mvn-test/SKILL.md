@@ -1,7 +1,7 @@
 ---
 name: mvn-test
 description: >
-  Use when asked to run tests, verify, or check test results.
+  Use when asked to run Java/Maven tests, verify, or check test results (Angular: use ng-verify).
   All integration and E2E tests live in mono-quarkus. Unit tests
   for data-hibernate live in data-hibernate.
 ---
