@@ -28,8 +28,26 @@ if [ -n "${FLYWAY_MODULE:-}" ]; then
   mod_args=(-pl "$FLYWAY_MODULE" -am)
 fi
 
+LOGDIR="$(pwd)/.agents/logs"
+mkdir -p "$LOGDIR"
+[ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
+LOG="$LOGDIR/flyway-check.log"
+
+set +e
 mvn flyway:info \
   ${mod_args[@]+"${mod_args[@]}"} \
   -Dflyway.url="$DB_URL" \
   -Dflyway.user="$DB_USER" \
-  2>&1 | grep -E "Version|State|Pending|current|Failed|Checksum" | grep -v "^\[INFO\] ---"
+  > "$LOG" 2>&1
+EXIT=$?
+set -e
+
+OUT=$(grep -Ei "Version|State|Pending|current|Failed|Checksum|Migrations|Validate" "$LOG" | grep -v "^\[INFO\] ---" || true)
+[ -z "$OUT" ] || printf '%s\n' "$OUT"
+if [ "$EXIT" -ne 0 ]; then
+  echo "flyway-check: mvn exited $EXIT; errors:"
+  grep -E "^\[ERROR\]" "$LOG" | head -20 || true
+  echo "(full log: $LOG)"
+  exit "$EXIT"
+fi
+[ -n "$OUT" ] || { echo "flyway-check: no migration info in output (full log: $LOG)"; exit 1; }

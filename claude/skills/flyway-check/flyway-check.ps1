@@ -26,8 +26,14 @@ if ($env:FLYWAY_MODULE) {
 $mvnArgs += @("-Dflyway.url=$dbUrl", "-Dflyway.user=$dbUser")
 
 $r = Invoke-Logged 'mvn' $mvnArgs -Quiet
-$out = @($r.Lines | Where-Object { $_ -cmatch 'Version|State|Pending|current|Failed|Checksum' } | Where-Object { $_ -cnotmatch '^\[INFO\] ---' })
+Write-Utf8File (Get-SkillLog 'flyway-check') (($r.Lines -join "`n") + "`n")
+$out = @($r.Lines | Where-Object { $_ -match 'Version|State|Pending|current|Failed|Checksum|Migrations|Validate' } | Where-Object { $_ -cnotmatch '^\[INFO\] ---' })
 $out | ForEach-Object { Write-Host $_ }
-if ($r.Code -ne 0) { exit $r.Code }
-if ($out.Count -eq 0) { exit 1 }
+if ($r.Code -ne 0) {
+    Write-Host "flyway-check: mvn exited $($r.Code); errors:"
+    @($r.Lines | Where-Object { $_ -cmatch '^\[ERROR\]' } | Select-Object -First 20) | ForEach-Object { Write-Host $_ }
+    Write-Host "(full log: $(Get-SkillLog 'flyway-check'))"
+    exit $r.Code
+}
+if ($out.Count -eq 0) { Write-Host 'flyway-check: no migration info in output'; exit 1 }
 exit 0

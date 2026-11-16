@@ -79,6 +79,7 @@ skills/psql-select/SKILL.md
 skills/token-report/report.sh
 skills/token-report/report.ps1
 skills/token-report/usage.jq
+skills/token-report/select.jq
 skills/token-report/SKILL.md
 skills/quarkus-dev/dev.sh
 skills/quarkus-dev/SKILL.md

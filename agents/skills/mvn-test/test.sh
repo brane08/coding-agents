@@ -12,6 +12,8 @@ mkdir -p "$LOGDIR"
 [ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
 LOG="$LOGDIR/mvn-test.log"
 START=$(date +%s)
+MARK="$LOGDIR/.mvn-test.start"
+: > "$MARK"
 
 cd "${AGENT_PROJECT_DIR:-.}"
 
@@ -38,7 +40,7 @@ if [ -n "$PATTERN" ] && ! [[ "$PATTERN" =~ ^[A-Za-z0-9._,#*?+!-]+$ ]]; then
 fi
 
 if [ -n "$MODULE" ] && [ -n "$PATTERN" ]; then
-  CMD=(mvn verify -pl "$MODULE" -am "-Dtest=$PATTERN" -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false)
+  CMD=(mvn verify -pl "$MODULE" -am "-Dtest=$PATTERN" "-Dit.test=$PATTERN" -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false)
 elif [ -n "$MODULE" ]; then
   CMD=(mvn verify -pl "$MODULE" -am)
 elif [ "$IS_REACTOR" = true ]; then
@@ -63,15 +65,15 @@ echo ""
 
 grep -E "Tests run:" "$LOG" | tail -5 || true
 
-FAILURES=$(grep -E "FAILED|<<< ERROR" "$LOG" || true)
+FAILURES=$(grep -E "FAILED|<<< (FAILURE|ERROR)" "$LOG" || true)
 if [ -n "$FAILURES" ]; then
   echo ""
   echo "Failed:"
   echo "$FAILURES"
   echo ""
-  echo "Details (first 6 lines after each failure):"
-  for f in */target/surefire-reports/*.txt target/surefire-reports/*.txt; do
-    [ -f "$f" ] || continue
+  echo "Details (up to 6 lines after each failure, reports from this run only):"
+  for f in */target/surefire-reports/*.txt */target/failsafe-reports/*.txt target/surefire-reports/*.txt target/failsafe-reports/*.txt; do
+    [ -f "$f" ] && [ "$f" -nt "$MARK" ] || continue
     grep -A6 -E "<<< (FAILURE|ERROR)" "$f" | head -40 || true
   done
 fi

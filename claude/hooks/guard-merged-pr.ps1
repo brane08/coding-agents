@@ -21,7 +21,15 @@ $pushed = ''
 foreach ($seg in (Split-CommandSegments $cmd)) {
     $w = Get-CommandWords $seg
     if ($w.Count -eq 0) { continue }
-    if ($w[0] -ceq 'git' -and ($w -ccontains 'push')) {
+    $gitSub = ''
+    if ($w[0] -ceq 'git') {
+        for ($k = 1; $k -lt $w.Count; $k++) {
+            if ($w[$k] -ceq '-C' -or $w[$k] -ceq '-c') { $k++; continue }
+            if ($w[$k].StartsWith('-')) { continue }
+            $gitSub = $w[$k]; break
+        }
+    }
+    if ($gitSub -ceq 'push') {
         $hit = $true
         $seen = $false
         $n = 0

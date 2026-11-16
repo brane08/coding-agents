@@ -51,6 +51,8 @@ for f in glob.glob(root + "/*/*.jsonl") + glob.glob(root + "/*/*/subagents/*.jso
 
 rows.sort(key=lambda r: -r[2])
 print("sessions", len(rows))
+if not rows:
+    raise SystemExit("no sessions with 5+ main-thread turns found under " + root)
 mx = [r[2] for r in rows]
 q = lambda p: sorted(mx)[min(len(mx) - 1, int(len(mx) * p))]
 print("peak ctx: median %d p75 %d p90 %d max %d" % (st.median(mx), q(.75), q(.9), max(mx)))

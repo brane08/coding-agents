@@ -7,13 +7,15 @@ set -euo pipefail
 #   test.sh mono-quarkus                   → tests named module (with -am)
 #   test.sh mono-quarkus UserServiceTest   → specific test class in module
 
-LOGDIR="$(cd "${CLAUDE_PROJECT_DIR:-.}" && pwd)/.copilot/logs"
+LOGDIR="$(cd "${COPILOT_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-.}}" && pwd)/.copilot/logs"
 mkdir -p "$LOGDIR"
 [ -f "$LOGDIR/.gitignore" ] || printf '*\n' > "$LOGDIR/.gitignore"
 LOG="$LOGDIR/mvn-test.log"
 START=$(date +%s)
+MARK="$LOGDIR/.mvn-test.start"
+: > "$MARK"
 
-cd "${CLAUDE_PROJECT_DIR:-.}"
+cd "${COPILOT_PROJECT_DIR:-${CLAUDE_PROJECT_DIR:-.}}"
 
 IS_REACTOR=false
 if grep -q "<modules>" pom.xml 2>/dev/null; then
@@ -22,6 +24,11 @@ fi
 
 MODULE="${1:-}"
 PATTERN="${2:-}"
+
+if [ $# -gt 2 ] || [[ "$MODULE" == -* || "$PATTERN" == -* ]]; then
+  echo "ERROR: usage: test.sh [<module> [TestClass]] — no flags (--summary belongs to ng-verify/verify.sh)"
+  exit 2
+fi
 
 if [ -n "$MODULE" ] && ! [[ "$MODULE" =~ ^[A-Za-z0-9._,:/-]+$ ]]; then
   echo "ERROR: invalid module name: $MODULE"
@@ -33,7 +40,7 @@ if [ -n "$PATTERN" ] && ! [[ "$PATTERN" =~ ^[A-Za-z0-9._,#*?+!-]+$ ]]; then
 fi
 
 if [ -n "$MODULE" ] && [ -n "$PATTERN" ]; then
-  CMD=(mvn verify -pl "$MODULE" -am "-Dtest=$PATTERN" -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false)
+  CMD=(mvn verify -pl "$MODULE" -am "-Dtest=$PATTERN" "-Dit.test=$PATTERN" -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false)
 elif [ -n "$MODULE" ]; then
   CMD=(mvn verify -pl "$MODULE" -am)
 elif [ "$IS_REACTOR" = true ]; then
@@ -58,15 +65,15 @@ echo ""
 
 grep -E "Tests run:" "$LOG" | tail -5 || true
 
-FAILURES=$(grep -E "FAILED|<<< ERROR" "$LOG" || true)
+FAILURES=$(grep -E "FAILED|<<< (FAILURE|ERROR)" "$LOG" || true)
 if [ -n "$FAILURES" ]; then
   echo ""
   echo "Failed:"
   echo "$FAILURES"
   echo ""
-  echo "Details (first 6 lines after each failure):"
-  for f in */target/surefire-reports/*.txt target/surefire-reports/*.txt; do
-    [ -f "$f" ] || continue
+  echo "Details (up to 6 lines after each failure, reports from this run only):"
+  for f in */target/surefire-reports/*.txt */target/failsafe-reports/*.txt target/surefire-reports/*.txt target/failsafe-reports/*.txt; do
+    [ -f "$f" ] && [ "$f" -nt "$MARK" ] || continue
     grep -A6 -E "<<< (FAILURE|ERROR)" "$f" | head -40 || true
   done
 fi

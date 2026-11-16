@@ -9,7 +9,7 @@ description: >
 Run one of:
   bash ~/.copilot/skills/ng-verify/verify.sh                              # current dir
   bash ~/.copilot/skills/ng-verify/verify.sh ui-angular                   # named app dir
-  bash ~/.copilot/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
+  bash ~/.copilot/skills/ng-verify/verify.sh ui-angular '--include=**/cart.*.spec.ts'   # quote the glob (zsh aborts on no match)
   bash ~/.copilot/skills/ng-verify/verify.sh ui-angular --summary         # digest only
 
 Prefer `--summary`: it prints just the verdict line, `error TS` lines and

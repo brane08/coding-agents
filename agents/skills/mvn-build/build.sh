@@ -29,7 +29,7 @@ FULL_REACTOR=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --reactor) FULL_REACTOR=true ;;
-    -pl) shift; MODULE="${1:-}" ;;
+    -pl) [ $# -ge 2 ] || { echo "ERROR: -pl needs a module name"; exit 2; }; shift; MODULE="$1" ;;
     -*) EXTRA_ARGS+=("$1") ;;
     *) MODULE="$1" ;;
   esac

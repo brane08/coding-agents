@@ -12,7 +12,7 @@ Run one of:
 ```
 bash ~/.agents/skills/ng-verify/verify.sh                              # current dir
 bash ~/.agents/skills/ng-verify/verify.sh ui-angular                   # named app dir
-bash ~/.agents/skills/ng-verify/verify.sh ui-angular --include=**/cart.*.spec.ts
+bash ~/.agents/skills/ng-verify/verify.sh ui-angular '--include=**/cart.*.spec.ts'   # quote the glob (zsh aborts on no match)
 bash ~/.agents/skills/ng-verify/verify.sh ui-angular --summary         # digest only
 ```
 

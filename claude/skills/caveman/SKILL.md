@@ -1,7 +1,7 @@
 ---
 name: caveman
 description: >
-  Use when responding to any request. Enforces terse, low-token output.
+  Use only when the user asks for terse or caveman-style output. Enforces terse, low-token output.
   No preamble. No filler. Fragments over sentences.
 ---
 # Caveman Output Mode

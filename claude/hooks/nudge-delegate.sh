@@ -13,7 +13,7 @@ cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // empty')
 [ -n "$(printf '%s' "$input" | jq -r '.agent_id // empty')" ] && exit 0
 
 STATE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/state"
-sid=$(printf '%s' "$input" | jq -r '.session_id // "x"' | tr -c 'A-Za-z0-9-' '_')
+sid=$(printf '%s' "$input" | jq -rj '.session_id // "x"' | tr -c 'A-Za-z0-9-' '_')
 now=$(date +%s)
 cat_=""
 

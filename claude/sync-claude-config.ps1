@@ -17,7 +17,7 @@ param([string]$ProfileName)
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'lib/Common.psm1') -Force
 
-$destDir = Join-Path (Get-UserHome) '.claude'
+$destDir = Get-ConfigDir   # CLAUDE_CONFIG_DIR, else ~/.claude (same dir the hooks read state from)
 $marker = Join-Path $destDir '.profile'
 if (-not $ProfileName) {
     if (Test-Path -LiteralPath $marker) { $ProfileName = ([System.IO.File]::ReadAllText($marker)).Trim() }

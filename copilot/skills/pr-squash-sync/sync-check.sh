@@ -11,7 +11,11 @@ if ! [[ "$d" =~ ^[A-Za-z0-9._/-]+$ ]]; then
   exit 2
 fi
 
-git fetch origin "$d" 2>&1 | tail -2
+if ! fetch_out=$(git fetch origin "$d" 2>&1); then
+  echo "ERROR: git fetch origin $d FAILED; the comparisons below use stale refs"
+  printf '%s\n' "$fetch_out" | tail -3
+fi
+git rev-parse --verify -q "origin/$d" >/dev/null || { echo "ERROR: origin/$d does not exist locally"; exit 1; }
 branch=$(git branch --show-current)
 
 echo "== branch: ${branch:-(detached)}"

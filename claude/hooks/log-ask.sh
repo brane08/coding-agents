@@ -17,8 +17,10 @@ mkdir -p "$STATE" 2>/dev/null || exit 0
 
 printf '%s' "$input" | jq -c '
   def redact:
-    gsub("(?<k>[A-Za-z0-9_]*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)[A-Za-z0-9_]*)=[^\\s\"'"'"';]+"; "\(.k)=<redacted>"; "i")
-    | gsub("(?<k>bearer\\s+)[^\\s\"'"'"';]+"; "\(.k)<redacted>"; "i")
+    gsub("(?<k>[A-Za-z0-9_]*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)[A-Za-z0-9_]*)=[\"'"'"']?[^\\s\"'"'"';]+"; "\(.k)=<redacted>"; "i")
+    | gsub("(?<k>bearer\\s+)[\"'"'"']?[^\\s\"'"'"';]+"; "\(.k)<redacted>"; "i")
+    | gsub("(?<k>authorization:\\s*(basic|bearer)\\s+)[\"'"'"']?[^\\s\"'"'"';]+"; "\(.k)<redacted>"; "i")
+    | gsub("(?<k>--?(password|passwd|token|secret|api-?key)\\s+)[\"'"'"']?[^\\s\"'"'"';]+"; "\(.k)<redacted>"; "i")
     | gsub("eyJ[\\w-]{10,}\\.[\\w-]{10,}\\.[\\w-]*"; "<jwt>");
   {
     ts: (now | todate),

@@ -8,8 +8,10 @@ if (-not (Get-Module AgentCommon)) { Import-Module (Join-Path (Split-Path -Paren
 
 function Protect-Secrets {
     param([string]$Text)
-    $t = [regex]::Replace($Text, '(?i)([A-Za-z0-9_]*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)[A-Za-z0-9_]*)=[^\s"'';]+', '$1=<redacted>')
-    $t = [regex]::Replace($t, '(?i)(bearer\s+)[^\s"'';]+', '$1<redacted>')
+    $t = [regex]::Replace($Text, '(?i)([A-Za-z0-9_]*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY)[A-Za-z0-9_]*)=["'']?[^\s"'';]+', '$1=<redacted>')
+    $t = [regex]::Replace($t, '(?i)(bearer\s+)["'']?[^\s"'';]+', '$1<redacted>')
+    $t = [regex]::Replace($t, '(?i)(authorization:\s*(basic|bearer)\s+)["'']?[^\s"'';]+', '$1<redacted>')
+    $t = [regex]::Replace($t, '(?i)(--?(password|passwd|token|secret|api-?key)\s+)["'']?[^\s"'';]+', '$1<redacted>')
     $t = [regex]::Replace($t, 'eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]*', '<jwt>')
     return $t
 }

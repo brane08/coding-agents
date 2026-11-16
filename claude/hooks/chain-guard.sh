@@ -12,7 +12,7 @@ input=$(cat)
 
 tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 STATE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/state"
-sid=$(printf '%s' "$input" | jq -r '.session_id // "x"' | tr -c 'A-Za-z0-9-' '_')
+sid=$(printf '%s' "$input" | jq -rj '.session_id // "x"' | tr -c 'A-Za-z0-9-' '_')
 f="$STATE/chain/$sid"
 
 case "$tool" in

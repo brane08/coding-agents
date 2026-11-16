@@ -8,7 +8,13 @@ if ($d -cnotmatch '^[A-Za-z0-9._/-]+$') {
     exit 2
 }
 
-(& git fetch origin $d 2>&1 | ForEach-Object { "$_" } | Select-Object -Last 2) | ForEach-Object { Write-Host $_ }
+$fetchOut = @(& git fetch origin $d 2>&1 | ForEach-Object { "$_" })
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: git fetch origin $d FAILED; the comparisons below use stale refs"
+    $fetchOut | Select-Object -Last 3 | ForEach-Object { Write-Host $_ }
+}
+& git rev-parse --verify -q "origin/$d" *> $null
+if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: origin/$d does not exist locally"; exit 1 }
 $branch = ((& git branch --show-current 2>$null) -join '').Trim()
 
 Write-Host ("== branch: " + $(if ($branch) { $branch } else { '(detached)' }))
