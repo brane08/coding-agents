@@ -1,0 +1,83 @@
+# Explicit list of files shared between this repo's claude/ and
+# ~/.claude/. One path per line, relative to claude/.
+#
+# This is the single source of truth for sync-claude-config.sh and
+# save-claude-config.sh — they copy exactly these paths, nothing else,
+# regardless of git state. To add a file to the shared config: add a line
+# here AND `git add` the file itself. To stop sharing a file: remove its
+# line here (the file itself is left alone on both sides).
+#
+# Blank lines and lines starting with # are ignored.
+
+# Hooks first: settings.json references them, so they must exist before it lands.
+hooks/guard-git-push.sh
+hooks/guard-merged-pr.sh
+hooks/guard-writes.sh
+hooks/chain-guard.sh
+hooks/nudge-delegate.sh
+hooks/log-ask.sh
+
+# settings.json is profile-specific (settings.admin.json / settings.sandbox.json) and is
+# handled by the sync/save scripts directly, not listed here.
+CLAUDE.md
+
+agents/boilerplate-gen.md
+agents/code-search.md
+agents/dep-inspect.md
+agents/flyway-next.md
+agents/jar-inspect.md
+agents/quick-triage.md
+agents/stack-check.md
+agents/test-aggregator.md
+agents/workflow-check.md
+
+memory/delegation-audit-log.md
+memory/libs/esbuild-esm.md
+memory/libs/javafx-21-fat-jar-packaging.md
+memory/libs/javafx-21.md
+memory/libs/keepassjava2-2.2.4.md
+memory/patterns/boundary-control-layering.md
+memory/patterns/declarative-ai-agent-quarkus.md
+memory/patterns/jmeter-load-smoke.md
+memory/patterns/deterministic-agent-platform.md
+memory/patterns/quarkus-postgres-schema-multitenancy.md
+memory/patterns/rest-assured-csv-role-matrix.md
+memory/patterns/self-contained-data-module.md
+memory/patterns/workflow-async-events.md
+memory/patterns/workflow-mybatis-layer.md
+
+skills/caveman/SKILL.md
+skills/delegation-audit/SKILL.md
+skills/delegation-audit/audit.py
+skills/delegation-audit/ctx.py
+skills/delegation-audit/permissions.py
+skills/flyway-check/flyway-check.sh
+skills/flyway-check/SKILL.md
+skills/guarded-fs/SKILL.md
+skills/guarded-fs/guarded-fs.sh
+skills/mvn-build/build.sh
+skills/mvn-build/SKILL.md
+skills/mvn-test/SKILL.md
+skills/mvn-test/test.sh
+skills/ng-verify/SKILL.md
+skills/ng-verify/verify.sh
+skills/pr-squash-sync/SKILL.md
+skills/pr-squash-sync/sync-check.sh
+skills/psql-select/select.sh
+skills/psql-select/SKILL.md
+skills/quarkus-dev/dev.sh
+skills/quarkus-dev/SKILL.md
+memory/libs/spring-cloud-gateway-server-webmvc-5.0.3.md
+memory/libs/fxtrayicon-4.2.3.md
+memory/libs/testfx-4.0.18-monocle.md
+memory/libs/copper-8.1.md
+memory/libs/jnativehook-2.2.2.md
+memory/libs/hibernate-7.4.md
+memory/libs/jmeter-maven-plugin-3.8.md
+memory/libs/quarkus-3.md
+memory/libs/ebean-19.md
+memory/patterns/jacoco-mock-unit-coverage.md
+memory/patterns/tracking-pattern.md
+memory/patterns/claude-config-repo-sync.md
+memory/libs/claude-code-permissions.md
+memory/sessions/2026-10-17-config-sync-and-permissions.md

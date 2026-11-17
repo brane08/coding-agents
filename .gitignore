@@ -1,0 +1,37 @@
+# claude/ — only these are tracked:
+#   settings.json, CLAUDE.md, skills/, agents/, memory/, hooks/
+# Everything else under claude/ is ignored.
+claude/*
+!claude/settings.json
+!claude/CLAUDE.md
+!claude/MANIFEST
+!claude/skills/
+claude/skills/*
+!claude/skills/caveman/
+!claude/skills/delegation-audit/
+!claude/skills/pr-squash-sync/
+!claude/skills/flyway-check/
+!claude/skills/guarded-fs/
+!claude/skills/mvn-build/
+!claude/skills/mvn-test/
+!claude/skills/ng-verify/
+!claude/skills/psql-select/
+!claude/skills/quarkus-dev/
+!claude/agents/
+!claude/memory/
+!claude/hooks/
+!claude/sync-claude-config.sh
+!claude/save-claude-config.sh
+
+# OS junk
+.DS_Store
+**/.DS_Store
+
+# Claude Code local/secret files (in case they ever land under claude/)
+**/settings.local.json
+**/.credentials.json
+
+.local/
+
+.idea/
+.vscode/
