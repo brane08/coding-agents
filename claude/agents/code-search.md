@@ -39,4 +39,5 @@ Shell rules (each avoids a permission prompt):
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).
 - No `cd <dir> &&`; plain `git ...` in the current repo (no `-C`); Maven from the repo root with `-pl <module> -am`.
+- Avoid `@{u}` (brace syntax prompts): use `origin/<branch>..<branch>`. Prefer the Glob tool over `find` with `( -name … -o … )` groups or `-prune`.
 - Exclude `node_modules`. Read-only SQL only via `bash ~/.claude/skills/psql-select/select.sh "<sql>"`.

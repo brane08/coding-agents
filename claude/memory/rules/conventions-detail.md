@@ -79,6 +79,9 @@ Read when the task touches the area; CLAUDE.md keeps the one-line version.
 - Skill logs (`mvn-test`, `mvn-build`, `quarkus-dev`, `ng-verify`) are in
   `<project>/.claude/logs/<skill>.log` (self-ignoring dir), never `/tmp`: Read or Grep them
   there; a `/tmp` path is outside the project and prompts.
+- Git worktrees (`git worktree add`, parallel agent sets) go under `<repo>/.claude/worktrees/<name>`,
+  never a sibling dir (e.g. `academy-wt`): the session blocks reads/writes outside the project, so
+  every grep/cat/edit there prompts. Create the parent dir first; pass subagents the in-project path.
 - Exclude `node_modules` from `find`/`grep` (`--exclude-dir`, `-not -path`) — deny rules block it.
 - `rm`/`mv`/`cp` are denied (admin profile; sandbox: mv/cp ask, `git push`/`git checkout`
   allowed): use `git rm`/`git mv` for tracked files, else
