@@ -17,13 +17,19 @@ if ($null -eq $in) { exit 0 }
 $cmd = [string](Get-Prop $in 'tool_input', 'command')
 if ($cmd -eq '') { exit 0 }
 
-$protectedStr = if ($env:CLAUDE_PROTECTED_BRANCHES) { $env:CLAUDE_PROTECTED_BRANCHES } else { 'main master' }
+$protectedStr = if ($env:CLAUDE_PROTECTED_BRANCHES) { $env:CLAUDE_PROTECTED_BRANCHES } else { 'main master release*' }
 $protected = @($protectedStr -split '\s+' | Where-Object { $_ -ne '' })
 $defaultBranch = ''
 $o = Invoke-NativeCapture 'git' @('symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD')
 if ($null -ne $o) { $defaultBranch = ($o.Trim() -replace '^origin/', '') }
 if ($defaultBranch -ne '' -and $protected -cnotcontains $defaultBranch) { $protected += $defaultBranch }
 $protectedAll = ($protected -join ' ')
+# Entries are wildcard patterns (release* also covers release/1.0), case-sensitive.
+function Test-Protected {
+    param([string]$Name)
+    foreach ($p in $protected) { if ($Name -clike $p) { return $true } }
+    return $false
+}
 
 # First non-flag word after `git` (skips -C <dir>, -c <k=v> and other global flags).
 function Get-GitSubcommand {
@@ -56,7 +62,7 @@ foreach ($seg in (Split-CommandSegments $cmd)) {
         if ($del) {
             $cur = Get-CurrentBranch
             foreach ($t in $names) {
-                if (($protected -ccontains $t) -or ($cur -ne '' -and $t -ceq $cur)) {
+                if ((Test-Protected $t) -or ($cur -ne '' -and $t -ceq $cur)) {
                     Write-Decision deny ("Refusing to delete the branch '$t' (protected or currently checked out). Protected: $protectedAll.")
                     exit 0
                 }
@@ -104,7 +110,7 @@ foreach ($seg in (Split-CommandSegments $cmd)) {
 
     foreach ($t in $targets) {
         $t = $t -replace '^refs/heads/', ''
-        if ($protected -ccontains $t) {
+        if (Test-Protected $t) {
             $what = 'push to'
             if ($force) { $what = 'force-push' }
             if ($delete) { $what = 'delete' }

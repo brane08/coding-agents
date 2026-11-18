@@ -1,6 +1,6 @@
 ---
 name: jar-inspect
-description: Use to inspect a third-party JAR's API/bytecode when source/docs aren't available — find a class's method signatures, check what a method actually does, confirm a constructor/overload exists. Read-only, no edits.
+description: Use to inspect a third-party library's API — find a class's method signatures, check what a method actually does, confirm a constructor/overload exists. Reads the `-sources.jar`; if none exists it stops and asks to pull sources (javap only when told "javap ok"). Read-only, no edits.
 tools: Read, Grep, Glob, Bash
 model: haiku
 autoCompactWindow: 110000
@@ -14,21 +14,23 @@ Workflow:
 - Locate the jar under `~/.m2/repository/` (or wherever the dependency actually
   resolves — check `mvn dependency:tree` output if the coordinates are unclear,
   but don't run a full tree yourself if a path is already known).
-- Prefer source over javap. First look for `<artifact>-<version>-sources.jar` next to the
-  jar (or a checked-out source tree) and read the class with `unzip -p <sources.jar> <path/Class.java>`.
-  Use javap only when no sources jar/source tree exists.
-- No sources available → read signatures straight from the jar:
-  `javap -p -cp <jar> <fully.qualified.Class>`
-- Read bytecode/implementation detail when a signature alone doesn't answer the
-  question: `javap -p -c -cp <jar> <fully.qualified.Class>`
-- Use `unzip -l <jar>` to find a class name; grep the `javap` output for the specific
-  method/field asked about rather than dumping the whole class unless the whole API
-  surface was requested.
+- Sources first, always. Look for `<artifact>-<version>-sources.jar` next to the jar (or a
+  checked-out source tree) and read the class with `unzip -p <sources.jar> <path/Class.java>`
+  (`unzip -l <sources.jar>` to find the path). Javadoc and implementation are both there.
+- Never run `mvn dependency:sources` or download anything yourself. If no sources jar/tree
+  exists, STOP: don't javap or decompile. Reply only "no sources jar for <gav> — pull it:
+  `bash ~/.claude/skills/pull-sources/pull.sh <group:artifact:version>`, then re-dispatch.
+  Say 'javap ok' to inspect bytecode instead."
+- javap only when the dispatcher's prompt explicitly says "javap ok": signatures via
+  `javap -p -cp <jar> <fully.qualified.Class>`; implementation detail, only when a signature
+  doesn't answer the question, via `javap -p -c -cp <jar> <fully.qualified.Class>`. Use
+  `unzip -l <jar>` to find a class name; grep the `javap` output for the specific
+  method/field asked about rather than dumping the whole class.
 - If the answer depends on a related class (superclass, an interface, a returned
   type), inspect that one too rather than guessing from the name.
 - Never write into the project tree.
 
-Before decompiling: check the recorded notes for this library first — the answer
+Before opening any jar: check the recorded notes for this library first — the answer
 may already be recorded from a prior inspection.
 
 Output format: class/method signature(s) directly answering the question, plus

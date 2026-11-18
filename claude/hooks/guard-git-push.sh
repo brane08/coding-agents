@@ -27,11 +27,19 @@ emit() {
     "$1" "$(printf '%s' "$2" | jq -Rs .)"
 }
 
-protected=${CLAUDE_PROTECTED_BRANCHES:-main master}
+protected=${CLAUDE_PROTECTED_BRANCHES:-main master release*}
 default_branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)
 default_branch=${default_branch#origin/}
+# Entries are shell globs (release* also covers release/1.0); globbing is off so they are never
+# expanded against files in the working directory.
 is_protected() {
-  for b in $protected $default_branch; do [ "$1" = "$b" ] && return 0; done
+  set -f
+  for b in $protected $default_branch; do
+    case "$1" in
+      $b) set +f; return 0 ;;
+    esac
+  done
+  set +f
   return 1
 }
 

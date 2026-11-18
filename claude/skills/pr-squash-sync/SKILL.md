@@ -20,7 +20,7 @@ Run each step as its own Bash call (no `cd`, no chains). Replace `<default>` wit
 
 4. **Squash** (one commit unless 2–3 are independently revertable)
    - Unpushed branch: `git merge-base HEAD origin/<default>` (own call), then `git reset --soft <sha>` and commit. No `$(...)` — it defeats permission matching.
-   - Your own pushed PR branch: the user's "pr"/"squash pr" go-ahead covers squashing and `git push --force-with-lease` (the permission prompt still applies; destructive git otherwise stays with the user); ask first if you didn't create the branch or others share it; never force-push `<default>`.
+   - Your own pushed PR branch: the user's "pr"/"squash pr" go-ahead covers squashing and `git push --force-with-lease` (allowed without a prompt on non-protected branches; the hook denies `main`/`master`/default/`release*`; plain `--force`/`-f` still ask); ask first if you didn't create the branch or others share it; never force-push `<default>`.
 
 5. **Commit message / PR text**: the only attribution is one `Co-Authored-By: Claude <noreply@anthropic.com>` trailer on the commit (keep exactly one when squashing/amending); no other trailers, URLs, session links or "Generated with" line; none in the PR body.
 

@@ -54,4 +54,4 @@ bash agents/check-base.sh
 ```
 
 ## Not included (intentional)
-Tool-only skills (`caveman`, `delegation-audit`), hooks, model pins and permission profiles stay in the tool trees.
+Tool-only skills (`delegation-audit`), hooks, model pins and permission profiles stay in the tool trees.

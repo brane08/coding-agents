@@ -4,6 +4,9 @@
 - Terse: no preamble, no restating the request, no summary unless asked.
 - Code blocks: complete, copy-paste-ready, no "..." truncation unless huge.
 - Skip well-known-concept explanations unless asked.
+- No post-amble ("Let me know…", "Feel free to…") and no "Note:"/"Keep in mind:" padding.
+- Status/confirmations as fragments ("Done.", "Build failed — see errors below."); errors: cause + fix only.
+- Explanations when asked: dense prose, no sub-headers for short answers; lists only for genuinely enumerable content.
 
 ## Stack defaults (assume, don't ask)
 - Java: Maven multi-module (`mono-quarkus`), Quarkus + Spring Boot mix, OpenShift target.
@@ -13,11 +16,11 @@
 - Python multi-package/uv-workspace repo: scope `pytest` to the relevant package dir(s),
   not repo root — unscoped collection breaks on sibling projects' conftests.
 
-## Helper scripts (`~/.copilot/skills/`)
-- Angular typecheck + unit tests: `bash ~/.copilot/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
-- Skill scripts: run as `bash|zsh|ksh ~/.copilot/skills/<skill>/<script>.sh` — always `~`, never `$HOME` or an absolute path (auto-approve only matches `~`).
-- Read-only SQL: `bash ~/.copilot/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
-- Maven build/test/dev and Flyway status: `~/.copilot/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
+## Helper scripts (`~/.agents/skills/`)
+- Angular typecheck + unit tests: `bash ~/.agents/skills/ng-verify/verify.sh <app-dir> --summary`, not ad hoc `tsc --noEmit` / `ng test`.
+- Skill scripts: run as `bash|zsh|ksh ~/.agents/skills/<skill>/<script>.sh` — always `~`, never `$HOME` or an absolute path (auto-approve only matches `~`).
+- Read-only SQL: `bash ~/.agents/skills/psql-select/select.sh -h/-U/-d … -c "<sql>"`. Exactly one `-c`, one statement; `-f`/`--command`/`-Atc` are blocked. Plain `psql` only for INSERT/UPDATE/DELETE/DDL. Local DB has no password — never set `PGPASSWORD`.
+- Maven build/test/dev and Flyway status: `~/.agents/skills/{mvn-build,mvn-test,quarkus-dev,flyway-check}/`.
 
 ## Model tiers
 - Fast (read-only lookups, triage, pattern-copying boilerplate): `GPT-5.6 Luna`; the custom agents pin it.
@@ -59,7 +62,7 @@ unit tests, multi-module Maven)
   messages or PR descriptions.
 - Squash to one commit before a PR; check the branch's PR isn't merged
   (`gh pr list --head <branch> --state all --json state`) before committing/pushing.
-- Full workflow: `~/.copilot/instructions/git-pr.instructions.md`, `~/.copilot/skills/pr-squash-sync/`.
+- Full workflow: `~/.copilot/instructions/git-pr.instructions.md`, `~/.agents/skills/pr-squash-sync/`.
 
 ## Don't
 - No `cd x &&` prefixes in terminal commands — the cwd persists; run plain `git …` (works from
@@ -67,12 +70,13 @@ unit tests, multi-module Maven)
   from the repo root, never `cd <module> && mvn`. Same for `npm --prefix`, `ng`, `pytest <pkg dir>`.
 - One command per terminal call — avoid `;`/`&&`/`|` chains and `cmd; rm …` tails.
 - No heredoc/`sed -i`/`cat > f` file writes — use the editor tools. No inline `python3` heredocs:
-  write a script file and run `python3 -I <script>`, or use `jq`.
+  Line-range cuts/edits → the editor tools, not a script. Other helper script: write it to
+  `<project>/.copilot/scratch/<name>.py` (never `/tmp`; first create `.copilot/scratch/.gitignore` containing `*`, add `!<file>` to keep one in git) and run `python3 -I <script>`, or use `jq`.
 - No secrets inline in commands (`TOKEN="..."`, `Bearer ...`, raw JWTs) — read from an env var or file.
 - Exclude `node_modules` from `find`/`grep`.
 - Don't add comments restating what code obviously does.
 - Don't add unrequested README/docs files.
-- `rm`/`mv`/`cp` are not auto-approved: use `git rm`/`git mv` for tracked files, else `bash ~/.copilot/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).
+- `rm`/`mv`/`cp` are not auto-approved: use `git rm`/`git mv` for tracked files, else `bash ~/.agents/skills/guarded-fs/guarded-fs.sh rm|mv|cp …` (cwd-confined).
 - Don't suggest `sudo`, `rm -rf`, `curl`/`wget`, or destructive git ops without explicit ask.
 - Don't resolve an npm peer-dependency conflict with `--legacy-peer-deps` on a
   security-relevant package (auth, crypto, http-client) — pin a compatible version instead.

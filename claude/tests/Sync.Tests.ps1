@@ -150,7 +150,7 @@ foreach ($t in @(@('agents', '.agents'), @('copilot', '.copilot'))) {
             }
         })
     Assert-Equal '' ($missing -join ',') "$name install: every skill has its .ps1 runner"
-    Assert-True (Test-Path -LiteralPath (Join-Path $dest 'skills/mvn-test/SKILL.md')) "$name install: SKILL.md copied"
+    if ($name -eq 'agents') { Assert-True (Test-Path -LiteralPath (Join-Path $dest 'skills/mvn-test/SKILL.md')) "$name install: SKILL.md copied" }
 }
 Assert-Equal '.claude' (Get-ToolDirName) 'tool dir name: repo scripts log under .claude'
 $agentsDest = Join-Path (New-TempDir) '.agents'

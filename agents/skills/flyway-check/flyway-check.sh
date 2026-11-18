@@ -1,15 +1,16 @@
 #!/bin/bash
 [ -z "$BASH_VERSION" ] && exec bash "$0" "$@"
 # Usage: flyway-check.sh [database]
-# Database precedence: argument > $DB_NAME > "dev". $DB_URL, if set, is used as-is
+# Database precedence: argument > $DB_NAME > "prore". User: $DB_USER > "postgres".
+# $DB_URL, if set, is used as-is
 # and the database argument is ignored. Local DBs use trust auth: no password handling.
 # Maven runs from the project root ($AGENT_PROJECT_DIR, else the current directory);
-# set FLYWAY_MODULE to a module path to pass -pl <module> -am.
+# set FLYWAY_MODULE to a module path to pass -pl <module> -am; otherwise -N (root only).
 set -euo pipefail
 
 cd "${AGENT_PROJECT_DIR:-.}"
 
-DB_NAME="${1:-${DB_NAME:-dev}}"
+DB_NAME="${1:-${DB_NAME:-prore}}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 if [ -n "${1:-}" ]; then
@@ -17,7 +18,7 @@ if [ -n "${1:-}" ]; then
 else
   DB_URL="${DB_URL:-jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}}"
 fi
-DB_USER="${DB_USER:-dev}"
+DB_USER="${DB_USER:-postgres}"
 
 mod_args=()
 if [ -n "${FLYWAY_MODULE:-}" ]; then
@@ -26,6 +27,8 @@ if [ -n "${FLYWAY_MODULE:-}" ]; then
     exit 2
   fi
   mod_args=(-pl "$FLYWAY_MODULE" -am)
+else
+  mod_args=(-N)
 fi
 
 LOGDIR="$(pwd)/.agents/logs"

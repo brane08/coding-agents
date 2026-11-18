@@ -24,7 +24,7 @@ long-form rules. Full delegation/stack/psql/don't detail: `rules/conventions-det
   on failure → `test-aggregator`. Exception: one single-class rerun after a fix just made.
   Other build/log triage → `quick-triage` first.
 - Boilerplate mirroring an existing pattern → `boilerplate-gen` (never design decisions).
-  Maven dep-tree → `dep-inspect`. Jar API → `jar-inspect` (prefer `-sources.jar`).
+  Maven dep-tree → `dep-inspect`. Jar API → `jar-inspect` (`-sources.jar` first; decompile last resort).
 - Flyway status → `quick-triage` + `flyway-check.sh`; next version/pending/listing →
   `flyway-next`. Local dev DB only; never prod; `flyway:baseline` only per a written runbook.
 - Entity wiring (DTO→Entity→Mapper→Producers→Resource) → `stack-check`. Workflow wiring
@@ -72,7 +72,11 @@ long-form rules. Full delegation/stack/psql/don't detail: `rules/conventions-det
 
 ## Memory
 Before analyzing a library/JAR/framework/internal detail: check `~/.claude/memory/libs/`,
-then repo `.claude/memory/`, then decompile/fetch docs only if neither answers it.
+then repo `.claude/memory/`, then the library's `-sources.jar` (`~/.m2/repository`; if absent,
+pull-sources) via `jar-inspect`. No sources jar → jar-inspect stops; run
+`bash ~/.claude/skills/pull-sources/pull.sh <group:artifact:version>` (logs attempts; exit 3
+after 2 failures → ask the user) and re-dispatch. Decompile/`javap` only if pulling fails or the
+user says so — never decompile first.
 `memory/INDEX.md` lists every note; open only what matches. File new learnings by reuse:
 - Library/framework/version quirk → `~/.claude/memory/libs/<lib-version>.md`
 - Reusable design pattern → `~/.claude/memory/patterns/<name>.md`
@@ -110,7 +114,10 @@ Rules (read before the task): config sync → `rules/config-sync.md` · audits/p
 - One command per Bash call — no `;`/`&&`/`|` chains; parallel calls when independent. Put "one
   command per call, no chaining, Read not `sed -n`" in every ad hoc agent prompt.
 - No `sed -i` / `cat > f` / heredoc writes — use `Edit`/`Write`. No inline `python3` heredocs:
-  script in scratchpad + `python3 -I`, or `jq`.
+  line-range cuts/edits → `Edit` (Read offset/limit first), never a helper script. Other helper
+  script: `<project>/.claude/scratch/<name>.py` + `python3 -I` (never `/tmp` or the session
+  scratchpad — outside-dir prompt), or `jq`. First use: `Write` `.claude/scratch/.gitignore`
+  containing `*` (self-ignoring like `logs/`); keep a file in git only by adding `!<file>` to it.
 - Skill scripts: `bash ~/.claude/skills/<skill>/<script>.sh` — always `~/.claude/…`, never
   `$HOME` or `/home/…`. `test.sh` takes only `[<module> [Class]]`; `--summary` is `verify.sh` only.
 - Skill logs live in `<project>/.claude/logs/<skill>.log`, never `/tmp`. Exclude `node_modules`

@@ -63,8 +63,12 @@ Read when the task touches the area; CLAUDE.md keeps the one-line version.
   `Grep`/`Glob` when the session has them, else one in-project Bash `grep`/`find` (no pipes, no
   chains). Put "one command per call, no chaining, Read not `sed -n`" in every ad hoc agent prompt.
 - No `sed -i` / `cat > f` / `printf … >> f` / heredoc writes — use `Edit`/`Write` (append =
-  Edit anchored on the file's last line). No inline `python3` heredocs: write the script to the
-  scratchpad and run `python3 -I <script>`, or use `jq`.
+  Edit anchored on the file's last line). No inline `python3` heredocs. Line-range cuts/edits →
+  `Edit` (Read offset/limit first), never a helper script. Other helper script: write it to
+  `<project>/.claude/scratch/<name>.py` and run `python3 -I <script>`, or use `jq`. Never `/tmp`
+  or the session scratchpad: running a script from outside the project prompts. First use:
+  `Write` `.claude/scratch/.gitignore` containing `*` (self-ignoring like `logs/`); to keep a
+  file in git, add `!<file>` to it.
 - `.claude/memory/**` tracking edits: one row or block per `Edit`; multi-row edits trip the
   auto-mode classifier. If one is denied, don't retry: mark the item BLOCKED (reason) and
   continue; list it in the final status.

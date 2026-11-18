@@ -233,6 +233,8 @@
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/psql-select/select.ps1 *)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-build/build.ps1*)",
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-build/build.ps1*)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/pull-sources/pull.ps1*)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/pull-sources/pull.ps1*)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-test/test.ps1*)",
       "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/mvn-test/test.ps1*)",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/quarkus-dev/dev.ps1*)",
@@ -361,8 +363,14 @@
       "Bash(git reset --merge*)",
       "Bash(docker *)",
       "Bash(git push --tags*)",
-      "Bash(git push --force*)",
+      "Bash(git push --force)",
+      "Bash(git push --force *)",
+      "Bash(git push --force-if-includes*)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
       "Bash(git push -f*)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
       "Bash(git remote *)",
       "Bash(git tag *)",
       "Bash(gradle dependencies*)",
@@ -519,9 +527,6 @@
       "Read(**/build/**)",
       "Edit(**/build/**)"
     ]
-  },
-  "skillOverrides": {
-    "caveman": "off"
   },
   "syncClaudeAiSkills": false,
   "theme": "light"

@@ -48,6 +48,25 @@ $status = if ($r.Code -eq 0) { 'OK' } else { 'FAILED' }
 Write-Host ''
 Write-Host "--- BUILD $status in ${dur}s ---"
 
+# Best effort, once per pom change: pull -sources.jar for dependencies so library inspection reads
+# sources instead of decompiling. Never affects the build result. PULL_SOURCES=0 skips it.
+if ($r.Code -eq 0 -and $env:PULL_SOURCES -ne '0') {
+    $stamp = Join-Path (Split-Path -Parent $log) '.sources-stamp'
+    $need = -not (Test-Path -LiteralPath $stamp)
+    if (-not $need) {
+        $t = (Get-Item -LiteralPath $stamp).LastWriteTimeUtc
+        $need = $null -ne (Get-ChildItem -Recurse -File -Filter 'pom.xml' | Where-Object { $_.FullName -notmatch '[\\/](node_modules|target)[\\/]' -and $_.LastWriteTimeUtc -gt $t } | Select-Object -First 1)
+    }
+    if ($need) {
+        Write-Host 'Pulling dependency sources (once per pom change; PULL_SOURCES=0 to skip)...'
+        $srcArgs = @('-B', '-q', 'dependency:sources', '-Dmdep.failOnMissingClassifierArtifact=false')
+        if (-not $full -and $module -ne '') { $srcArgs += @('-pl', $module, '-am') }
+        $s = Invoke-Logged 'mvn' $srcArgs
+        Add-Utf8Line -File $log -Line ($s.Lines -join "`n")
+        if ($s.Code -eq 0) { [System.IO.File]::WriteAllText($stamp, '') } else { Write-Host "(sources pull failed; see $log)" }
+    }
+}
+
 if ($r.Code -ne 0) {
     Write-Host ''
     Write-Host 'Errors:'

@@ -20,7 +20,7 @@ Config source: `settings.<profile>.json` in the repo (`patterns/claude-config-re
 - Deny beats allow; keep the secret/credential denies (`.env`, `*.key`, `*.pem`, `~/.ssh`, `~/.aws`).
 
 ## Hooks
-- `guard-writes.sh` (PreToolUse on file tools): project and scratchpad pass, `~/.claude` passes through
+- `guard-writes.sh` (PreToolUse on file tools): project and scratchpad pass the hook (but `python3 -I <scratchpad script>` still prompts: outside-dir; use `<project>/.claude/scratch/`), `~/.claude` passes through
   to normal rules (was `ask` before 2026-10-17), everything else denied.
 - `chain-guard.sh` (wired in admin and sandbox): counts consecutive lookups (`grep rg find cat ls tail head wc sed awk tree fd`,
   `git log|diff|show|blame`); Edit/Write/Agent resets. It never inspects `;`/`&&`/`|`; it judges the first word.

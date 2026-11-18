@@ -8,4 +8,5 @@ if (-not $Dest) { $Dest = Join-Path (Get-UserHome) '.copilot' }
 $n = Install-SkillTree -TreeDir $PSScriptRoot -Dest $Dest
 Write-Host "Installed $n file(s) to $Dest"
 foreach ($m in (Install-AgentCommon)) { Write-Host "Registered module AgentCommon -> $m" }
+Write-Host 'Skills are shared: also run agents/install.ps1 (installs ~/.agents/skills, which Copilot reads).'
 Write-Host 'VS Code: merge copilot/vscode-settings.windows.snippet.json into your settings.'
