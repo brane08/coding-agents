@@ -26,3 +26,4 @@ Shell rules (each avoids a permission prompt):
 - Use the Grep/Glob tools when available; if missing, one single in-project Bash `grep`/`find`, no pipes; never search outside the project via Bash.
 - Never write files from the shell (`>`, `>>`, `printf`, `tee`).
 - Run skill/hook scripts as `bash|zsh|ksh ~/.claude/...` — always `~`, never `$HOME` or an absolute path (blocked).
+- No `cd <dir> &&`; plain `git ...` in the current repo (no `-C`).

@@ -80,3 +80,20 @@ future audits don't re-flag the same already-fixed gaps.
 - Main `autoCompactWindow` 350000 -> 250000 and `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 85 -> 80 (user choice, all 4 settings files). Targets the 10-18 `ctx.py` numbers
   (peak p90 341k, compaction median 157k): trigger pct x window = ~200k vs ~297k, matching the earlier ~200k cap target. Not measured: quality after compaction,
   how often autonomous loops now compact. Re-run `ctx.py` to compare.
+
+## 2026-11-18
+- `audit.py --since 2026-11-03` (29 transcripts): 318 violations / 1,625 calls = 20% (vs 26% on 10-14, 10% on 10-18 window; windows differ), 79 runs of 3+, raw legacy 604.
+  grep 241 (grocery-shop 188 of 318 total), test-run 35 (`uv run pytest -q` 13, `test.sh htmx-quarkus` 6 inline), git-diff 10, rest <10 each.
+- `ctx.py` (22 sessions, all-time): peak median 184k, p90 428k, max 541k; 21 compactions in 6 sessions, compaction ctx 174-184k (matches 250k x 80% ~200k trigger).
+  Top-8 peaks (academy 541k, grocery-shop 506k, disk-analyzer-fx 428k) show 0 compactions: sessions run past the cap. Main sonnet cache-read 485M. No settings changed.
+- `permissions.py --since 2026-11-03` (report only): 238 events, 71 groups, 1 classifier denial (mvn-test.sh). Top: `git push *` 52 (allowed yet prompted, a hook asks),
+  subagent `cd * + …` compounds 25, `env *` 12, outside-cwd `grep` 12 (academy-wt worktrees) + `cat` 6, `jq -n -f /tmp/...` path-form 12, `git log *` 12 / `find *` 11 allowed yet prompted,
+  `git checkout *` ask-override 8, scratchpad `python3 /tmp/...` 5. Dry run proposes 0 allow, 1 env. Open: find the hook asking on push/log/find; `academy-wt` as additionalDirectories?
+- grocery-shop grep shapes (code-search, 4 transcripts since 2026-11-03, hand tallies so approximate): 327 main-thread greps, 32 runs of 3+ holding 110 (~34%), longest 5.
+  Targets: Java main ~45%, `.claude/memory/tracking/*` ~28% (bugs.md, findings/design.md), Java tests ~15%, logs/tool-output ~8%, SQL/config ~4% each. ~90 use the absolute repo path.
+  Top shapes: BG-id lookups in tracking ~35, symbol alternation over htmx-quarkus/src/main ~30, single-file member lookups ~25, test-output triage `grep "Tests run:|BUILD|FAIL"` ~25,
+  `grep -rln` test discovery ~20. Suggested, not applied: Grep tool for repo-wide symbol searches; batch multi-symbol and tracking lookups into one `code-search`; test triage via `test.sh`/`quick-triage`.
+- Resolved (11-18): `academy-wt` was an assistant-created sibling worktree dir (academy session 5c4e8970, 2026-11-16 22:24Z), moved to `academy/.claude/worktrees/set-{a..d}` 3 min later;
+  stale subagent paths caused the outside-cwd prompts. No additionalDirectories change; rule added to `rules/conventions-detail.md` (worktrees under `<repo>/.claude/worktrees/`).
+  The `git push` (52, main, mode auto), `git log @{u}` (12) and `find` group (12) prompts are not hook-driven (no hook emits ask with jq present); added `@{u}`/find-group avoidance to `agents/code-search.md`,
+  no-`cd` line to flyway-next/stack-check/workflow-check agents.
