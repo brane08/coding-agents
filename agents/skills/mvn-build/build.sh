@@ -66,6 +66,22 @@ DURATION=$((END - START))
 echo ""
 echo "--- BUILD $([ $EXIT -eq 0 ] && echo 'OK' || echo 'FAILED') in ${DURATION}s ---"
 
+# Best effort, once per pom change: pull -sources.jar for dependencies so library inspection reads
+# sources instead of decompiling. Never affects the build result. PULL_SOURCES=0 skips it.
+if [ $EXIT -eq 0 ] && [ "${PULL_SOURCES:-1}" != "0" ]; then
+  STAMP="$LOGDIR/.sources-stamp"
+  if [ ! -f "$STAMP" ] || [ -n "$(find . -name pom.xml -newer "$STAMP" -not -path '*/node_modules/*' -not -path '*/target/*' -print -quit)" ]; then
+    echo "Pulling dependency sources (once per pom change; PULL_SOURCES=0 to skip)..."
+    SRC_ARGS=()
+    if [ "$FULL_REACTOR" != true ] && [ -n "$MODULE" ]; then SRC_ARGS=(-pl "$MODULE" -am); fi
+    if mvn -B -q dependency:sources -Dmdep.failOnMissingClassifierArtifact=false ${SRC_ARGS[@]+"${SRC_ARGS[@]}"} >> "$LOG" 2>&1; then
+      touch "$STAMP"
+    else
+      echo "(sources pull failed; see $LOG)"
+    fi
+  fi
+fi
+
 if [ $EXIT -ne 0 ]; then
   echo ""
   echo "Errors:"

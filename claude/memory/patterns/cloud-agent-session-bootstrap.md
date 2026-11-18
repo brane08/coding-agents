@@ -3,7 +3,7 @@
 Covers: setup checklist and gotchas for a fresh remote agent session with no Docker and offline or limited network. Repo-specific commands/ports belong in the repo memory.
 
 ## Toolchain
-- Container may ship an older JDK: install/point `JAVA_HOME` at the required JDK and prepend its `bin` to `PATH` on every `mvn` call (shell state does not persist between Bash calls). Download tarballs into the scratchpad.
+- Container may ship an older JDK: install/point `JAVA_HOME` at the required JDK and prepend its `bin` to `PATH` on every `mvn` call (shell state does not persist between Bash calls). Download tarballs into `<project>/.claude/scratch/` (not `/tmp`).
 - Maven 3 and Node are usually preinstalled; Chromium/Playwright browsers too: use the existing binary as `CHROME_BIN` for Karma, do not reinstall.
 - Offline build: `mvn -q -o install -DskipTests`; full rebuild after any shared-module change (stale jars give `NoSuchMethodError`).
 
@@ -28,6 +28,6 @@ Covers: setup checklist and gotchas for a fresh remote agent session with no Doc
 
 ## Shell and git
 - `pkill -f <pattern>` can match the calling shell: use `pgrep -f '[p]attern'` and kill by pid.
-- Scratch files go in the session scratchpad, not the repo.
+- Scratch files go in `<project>/.claude/scratch/` (self-ignoring; never `/tmp` or the session scratchpad, which prompt for scripts).
 - Squash to one commit before the PR (a 'pr' request is the go-ahead), then `--force-with-lease` on your own branch.
 - After a squash-merge of the PR the old branch cannot be pushed: branch fresh from `origin/<default>` and apply the diff (force-push/`reset --hard` may be blocked by the classifier).

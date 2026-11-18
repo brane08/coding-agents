@@ -23,6 +23,9 @@ If a separate `quarkus:dev` needs the new jars in `~/.m2`: `mvn install -DskipTe
 Extra `-flags` are passed to `mvn` as separate arguments (never evaluated by a shell). The full output is in
 `<project>/.agents/logs/mvn-build.log` (self-ignoring dir); read it there, not from `/tmp`.
 
+After a successful build it also runs `mvn dependency:sources` (best effort, once per pom change; never affects the
+build result; `PULL_SOURCES=0` skips it), so `-sources.jar` files are in `~/.m2` for library inspection.
+
 Report:
 - Exit status (OK / FAILED)
 - Build duration

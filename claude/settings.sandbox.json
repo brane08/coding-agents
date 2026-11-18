@@ -135,7 +135,9 @@
   "permissions": {
     "additionalDirectories": [
       "~/.claude",
-      "~/.m2/repository"
+      "~/.m2/repository",
+      "~/.cache/puppeteer",
+      "~/.cache/ms-playwright"
     ],
     "allow": [
       "Bash(git push *)",
@@ -242,6 +244,9 @@
       "Bash(bash ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(zsh ~/.claude/skills/mvn-build/build.sh*)",
       "Bash(ksh ~/.claude/skills/mvn-build/build.sh*)",
+      "Bash(bash ~/.claude/skills/pull-sources/pull.sh*)",
+      "Bash(zsh ~/.claude/skills/pull-sources/pull.sh*)",
+      "Bash(ksh ~/.claude/skills/pull-sources/pull.sh*)",
       "Bash(bash ~/.claude/skills/mvn-test/test.sh*)",
       "Bash(zsh ~/.claude/skills/mvn-test/test.sh*)",
       "Bash(ksh ~/.claude/skills/mvn-test/test.sh*)",
@@ -276,6 +281,8 @@
       "Bash(diff *)",
       "Read(~/.claude/**)",
       "Read(~/.m2/repository/**)",
+      "Read(~/.cache/puppeteer/**)",
+      "Read(~/.cache/ms-playwright/**)",
       "Bash(git add *)",
       "Bash(git add:*)",
       "Bash(git fetch*)",
@@ -395,8 +402,14 @@
       "Bash(git reset --merge*)",
       "Bash(docker *)",
       "Bash(git push --tags*)",
-      "Bash(git push --force*)",
+      "Bash(git push --force)",
+      "Bash(git push --force *)",
+      "Bash(git push --force-if-includes*)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
       "Bash(git push -f*)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
       "Bash(git remote *)",
       "Bash(git tag *)",
       "Bash(gradle dependencies*)",
@@ -553,9 +566,6 @@
       "Read(**/build/**)",
       "Edit(**/build/**)"
     ]
-  },
-  "skillOverrides": {
-    "caveman": "off"
   },
   "syncClaudeAiSkills": false,
   "theme": "light"

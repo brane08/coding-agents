@@ -486,7 +486,9 @@ function Get-SkillTreeFiles {
         $rel = ($f.FullName.Substring($root.Length).TrimStart('\', '/')) -replace '\\', '/'
         $out.Add([pscustomobject]@{ Rel = $rel; Source = $f.FullName; Rewrite = ($f.Extension -eq '.md') })
     }
-    foreach ($skill in @(Get-ChildItem -LiteralPath (Join-Path $TreeDir 'skills') -Directory)) {
+    $skillsDir = Join-Path $TreeDir 'skills'
+    $skillDirs = if (Test-Path -LiteralPath $skillsDir -PathType Container) { @(Get-ChildItem -LiteralPath $skillsDir -Directory) } else { @() }
+    foreach ($skill in $skillDirs) {
         $runners = Join-Path $claudeDir ('skills/' + $skill.Name)
         if (Test-Path -LiteralPath $runners) {
             foreach ($r in @(Get-ChildItem -LiteralPath $runners -File -Filter '*.ps1')) {

@@ -13,7 +13,7 @@ Covers: keeping a pre-production schema as a baseline plus a capped number of in
 ## Fold procedure
 1. Move each new column into its owning `CREATE TABLE`, each constraint inline; never leave an `ALTER TABLE` in the baseline for a table the baseline creates.
 2. Drop data-only statements (backfills, one-off `UPDATE`s): no-ops on a fresh DB.
-3. Verify a no-op: apply the old chain and the new baseline to two scratch DBs, `pg_dump --schema-only` (and data for seeds) diff them before committing.
+3. Verify a no-op before touching the dev DB: `pg_dump -n <dev>` backup first, then build the new baseline into a scratch schema in the same DB (`CREATE SCHEMA fold_check; mvn -N flyway:migrate -Ddb.schema=fold_check`) and diff it against the already-migrated dev schema in one SQL: `information_schema.columns`, `pg_get_constraintdef` per constraint name, `pg_indexes.indexdef`, `pg_views`, `pg_get_functiondef` (strip the schema prefix, ignore ordinal position), plus seed rows of the touched tables; expect zero rows except local dev data. Drop the scratch schema afterwards. Style: named column-level `CONSTRAINT x CHECK (...)` inline; create a table before any table that FKs it inline; append new tables/views/functions/indexes/seeds as end-of-file sections. A scripted pass (`<project>/.claude/scratch/` + `python3 -I`, assert the count) converts bulk type changes such as naive `TIMESTAMP` to `TIMESTAMPTZ`; the baseline must hold no naive timestamps.
 4. Delete the folded files; list what was folded in the baseline header; do not reintroduce old versions.
 5. Grep for old paths after any move (pom properties feeding Flyway `locations` and resource copies fail silently when stale).
 

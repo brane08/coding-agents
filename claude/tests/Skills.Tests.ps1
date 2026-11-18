@@ -41,10 +41,10 @@ Write-Host 'psql-select'
 $sel = Join-Path $skills 'psql-select/select.ps1'
 $r = Invoke-Script $sel '' (Env-With @{}) @('select 1') $proj
 Assert-Equal 0 $r.Code 'select short form exits 0'
-Assert-Equal '-h localhost -U postgres -d prore -A -t -c select 1' (Last-Argv) 'short form builds psql args'
+Assert-Equal '-X -h localhost -U postgres -d prore -A -t -c select 1' (Last-Argv) 'short form builds psql args'
 Assert-Match 'PGOPTIONS=.*default_transaction_read_only=on' ([System.IO.File]::ReadAllText($argsFile)) 'read-only forced via PGOPTIONS'
 $r = Invoke-Script $sel '' (Env-With @{}) @('pagila', 'show server_version') $proj
-Assert-Equal '-h localhost -U postgres -d pagila -A -t -c show server_version' (Last-Argv) 'db + sql form'
+Assert-Equal '-X -h localhost -U postgres -d pagila -A -t -c show server_version' (Last-Argv) 'db + sql form'
 foreach ($bad in @('drop table x', 'select 1; select 2', 'delete from t')) {
     $r = Invoke-Script $sel '' (Env-With @{}) @($bad) $proj
     Assert-True ($r.Code -eq 1 -and $r.Err -match 'blocked') "blocked: $bad"
@@ -61,7 +61,7 @@ $tst = Join-Path $skills 'mvn-test/test.ps1'
 $e = Env-With @{ CLAUDE_PROJECT_DIR = $proj }
 $r = Invoke-Script $tst '' $e @('mod-a', 'FooTest') $proj
 Assert-Equal 0 $r.Code 'test.ps1 exits 0'
-Assert-Equal 'verify -pl mod-a -am -Dtest=FooTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false' (Last-Argv) 'module+class args'
+Assert-Equal 'verify -pl mod-a -am -Dtest=FooTest -Dit.test=FooTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dfailsafe.failIfNoSpecifiedTests=false' (Last-Argv) 'module+class args'
 Assert-Match '--- TESTS PASSED in \d+s ---' $r.Out 'passed banner'
 Assert-True (Test-Path (Join-Path $proj '.claude/logs/mvn-test.log')) 'log written under project .claude/logs'
 Assert-Equal '*' (([System.IO.File]::ReadAllText((Join-Path $proj '.claude/logs/.gitignore'))).Trim()) 'log dir self-ignoring'
@@ -79,20 +79,53 @@ Assert-True ($r.Code -eq 1 -and $r.Out -match 'At reactor root') 'reactor root r
 
 Write-Host 'mvn-build'
 $bld = Join-Path $skills 'mvn-build/build.ps1'
-$r = Invoke-Script $bld '' $e @('-pl', 'mod-a', '-Dfoo.bar=1') $proj
+$eb = Env-With @{ CLAUDE_PROJECT_DIR = $proj; PULL_SOURCES = '0' }
+$r = Invoke-Script $bld '' $eb @('-pl', 'mod-a', '-Dfoo.bar=1') $proj
 Assert-Equal 'clean package -pl mod-a -am -DskipTests -Dfoo.bar=1' (Last-Argv) 'dotted -D arg passes intact'
-$r = Invoke-Script $bld '' $e @('--reactor') $proj
+$r = Invoke-Script $bld '' $eb @('--reactor') $proj
 Assert-Equal 'clean package -DskipTests -T1C' (Last-Argv) 'reactor build args'
 $r = Invoke-Script $bld '' (Env-With @{ CLAUDE_PROJECT_DIR = $proj; STUB_EXIT = '1' }) @('mod-a') $proj
 Assert-True ($r.Code -eq 1 -and $r.Out -match '--- BUILD FAILED' -and $r.Out -match '\[ERROR\] boom') 'build failure lists [ERROR] lines'
 
+$bp = Join-Path $root 'buildproj'
+New-Item -ItemType Directory -Path $bp | Out-Null
+$ebp = Env-With @{ CLAUDE_PROJECT_DIR = $bp }
+$r = Invoke-Script $bld '' $ebp @('-pl', 'mod-a') $bp
+Assert-Equal '-B -q dependency:sources -Dmdep.failOnMissingClassifierArtifact=false -pl mod-a -am' (Last-Argv) 'build pulls dependency sources after success'
+Assert-True (Test-Path (Join-Path $bp '.claude/logs/.sources-stamp')) 'sources stamp written'
+$r = Invoke-Script $bld '' $ebp @('-pl', 'mod-a') $bp
+Assert-Equal 'clean package -pl mod-a -am -DskipTests' (Last-Argv) 'sources not re-pulled while poms unchanged'
+
+Write-Host 'pull-sources'
+$pull = Join-Path $skills 'pull-sources/pull.ps1'
+$fakeHome = Join-Path $root 'home'
+New-Item -ItemType Directory -Path $fakeHome | Out-Null
+$pp = Join-Path $root 'pullproj'
+New-Item -ItemType Directory -Path $pp | Out-Null
+$pe = Env-With @{ CLAUDE_PROJECT_DIR = $pp; HOME = $fakeHome; USERPROFILE = $fakeHome }
+$r = Invoke-Script $pull '' $pe @('bad gav') $pp
+Assert-Equal 2 $r.Code 'invalid GAV rejected'
+$r = Invoke-Script $pull '' $pe @('g.a:b:1.0') $pp
+Assert-Equal '-B -q dependency:get -Dartifact=g.a:b:1.0:jar:sources -Dtransitive=false' (Last-Argv) 'dependency:get args'
+Assert-True ($r.Code -eq 1 -and $r.Out -match 'attempt 1/2 failed') 'no jar after mvn -> attempt 1 failed'
+$r = Invoke-Script $pull '' $pe @('g.a:b:1.0') $pp
+Assert-True ($r.Code -eq 1 -and $r.Out -match 'attempt 2/2 failed') 'attempt 2 failed'
+$r = Invoke-Script $pull '' $pe @('g.a:b:1.0') $pp
+Assert-True ($r.Code -eq 3 -and $r.Out -match 'limit 2') 'third attempt refused'
+Assert-Equal 2 (@(Get-Content -LiteralPath (Join-Path $pp '.claude/logs/pull-sources.log') | Where-Object { $_ -match ' g\.a:b:1\.0 FAIL$' }).Count) 'two FAIL lines logged'
+$jarDir = Join-Path $fakeHome '.m2/repository/g/a/c/2.0'
+New-Item -ItemType Directory -Path $jarDir -Force | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $jarDir 'c-2.0-sources.jar'), 'x')
+$r = Invoke-Script $pull '' $pe @('g.a:c:2.0') $pp
+Assert-True ($r.Code -eq 0 -and $r.Out -match 'already present') 'existing sources jar short-circuits'
+
 Write-Host 'flyway-check'
 $fw = Join-Path $skills 'flyway-check/flyway-check.ps1'
 $r = Invoke-Script $fw '' $e @() $proj
-Assert-Equal 'flyway:info -Dflyway.url=jdbc:postgresql://localhost:5432/dev -Dflyway.user=dev' (Last-Argv) 'default flyway args'
+Assert-Equal 'flyway:info -N -Dflyway.url=jdbc:postgresql://localhost:5432/prore -Dflyway.user=postgres' (Last-Argv) 'default flyway args'
 Assert-True ($r.Out -match 'Version' -and $r.Out -notmatch '---' -and $r.Out -notmatch 'boom') 'output filtered'
 $r = Invoke-Script $fw '' (Env-With @{ CLAUDE_PROJECT_DIR = $proj; FLYWAY_MODULE = 'm/x' }) @('other') $proj
-Assert-Equal 'flyway:info -pl m/x -am -Dflyway.url=jdbc:postgresql://localhost:5432/other -Dflyway.user=dev' (Last-Argv) 'module + db argument'
+Assert-Equal 'flyway:info -pl m/x -am -Dflyway.url=jdbc:postgresql://localhost:5432/other -Dflyway.user=postgres' (Last-Argv) 'module + db argument'
 
 Write-Host 'ng-verify'
 $ng = Join-Path $skills 'ng-verify/verify.ps1'

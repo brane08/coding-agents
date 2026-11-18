@@ -7,8 +7,11 @@ Read when a call is denied/prompted and you need to know why, or before editing 
   between → use one `code-search`.
 - Reminders (not denies): read-only psql, `git -C`, inline secrets.
 - `git push` / `gh pr create` from a merged-PR branch is blocked → `pr-squash-sync` skill.
-- Force-push/delete of main/master is denied.
-- Writes outside the project/scratchpad are denied. `~/.claude` is an additional directory:
+- Push, delete or force-push to `main`/`master`/the default branch/`release*` is denied by hook
+  (`CLAUDE_PROTECTED_BRANCHES`, globs). Elsewhere `git push` and `--force-with-lease` need no
+  prompt; plain `--force`/`-f`/`--force-if-includes`/`--tags` still ask. Amend (`git commit --amend`) is allowed.
+- Writes outside the project are denied by hook (the session scratchpad passes the hook, but running
+  a script from it prompts — use `<project>/.claude/scratch/`). `~/.claude` is an additional directory:
   reads, greps and writes need no prompt, except edits to `settings*.json` and `hooks/**`,
   which ask → use the sync script.
 - Unreadable (Read tool and Bash cat/head/tail/grep): `.env`, `*.key`, `*.pem`,

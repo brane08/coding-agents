@@ -104,7 +104,11 @@ foreach ($c in @('git.exe push -f origin main', 'GIT push -f origin main', '"git
     $r = Invoke-Script $gp (Bash $c) $env1
     Assert-Match '"permissionDecision":"deny"' $r.Out "deny (spelling variant): $c"
 }
-foreach ($c in @('git push origin feature --force', 'git status', 'git push -u origin feat/x')) {
+foreach ($c in @('git push --force-with-lease origin release/1.0', 'git push origin release-2 --force-with-lease', 'git push --force-with-lease origin HEAD:release/3')) {
+    $r = Invoke-Script $gp (Bash $c) $env1
+    Assert-Match '"permissionDecision":"deny"' $r.Out "deny (release*): $c"
+}
+foreach ($c in @('git push origin feature --force', 'git status', 'git push -u origin feat/x', 'git push --force-with-lease origin feat/x', 'git push --force-with-lease origin prerelease-x', 'git push -u origin feat/release-notes')) {
     $r = Invoke-Script $gp (Bash $c) $env1
     Assert-Equal '' $r.Out "pass: $c"
 }

@@ -7,13 +7,13 @@ claude/*
 !claude/MANIFEST
 !claude/skills/
 claude/skills/*
-!claude/skills/caveman/
 !claude/skills/delegation-audit/
 !claude/skills/pr-squash-sync/
 !claude/skills/flyway-check/
 !claude/skills/guarded-fs/
 !claude/skills/mvn-build/
 !claude/skills/mvn-test/
+!claude/skills/pull-sources/
 !claude/skills/ng-verify/
 !claude/skills/psql-select/
 !claude/skills/token-report/

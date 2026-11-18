@@ -57,7 +57,6 @@ memory/patterns/self-contained-data-module.md
 memory/patterns/workflow-async-events.md
 memory/patterns/workflow-mybatis-layer.md
 
-skills/caveman/SKILL.md
 skills/delegation-audit/SKILL.md
 skills/delegation-audit/audit.py
 skills/delegation-audit/ctx.py
@@ -68,6 +67,8 @@ skills/guarded-fs/SKILL.md
 skills/guarded-fs/guarded-fs.sh
 skills/mvn-build/build.sh
 skills/mvn-build/SKILL.md
+skills/pull-sources/pull.sh
+skills/pull-sources/SKILL.md
 skills/mvn-test/SKILL.md
 skills/mvn-test/test.sh
 skills/ng-verify/SKILL.md
@@ -86,6 +87,7 @@ skills/quarkus-dev/SKILL.md
 skills/flyway-check/flyway-check.ps1
 skills/guarded-fs/guarded-fs.ps1
 skills/mvn-build/build.ps1
+skills/pull-sources/pull.ps1
 skills/mvn-test/test.ps1
 skills/ng-verify/verify.ps1
 skills/pr-squash-sync/sync-check.ps1

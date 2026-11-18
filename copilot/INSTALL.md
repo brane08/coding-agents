@@ -3,8 +3,8 @@
 Derived from `claude/`. Per-repo is the reliable path.
 
 ## Layout
-`copilot/` mirrors `~/.copilot/`: `copilot-instructions.md`, `instructions/*.instructions.md`, `skills/`, `agents/*.agent.md`, `memory/`.
-Skill scripts are referenced as `~/.copilot/skills/<n>/<f>`; keep exec bits (`chmod +x ~/.copilot/skills/*/*.sh`).
+`copilot/` mirrors `~/.copilot/`: `copilot-instructions.md`, `instructions/*.instructions.md`, `agents/*.agent.md`, `memory/`.
+Skills are not duplicated here: Copilot reads the shared `~/.agents/skills/` (Copilot CLI and VS Code local sessions). Install them from `agents/` (see `agents/INSTALL.md`). Skill scripts are referenced as `~/.agents/skills/<n>/<f>`; keep exec bits (`chmod +x ~/.agents/skills/*/*.sh`).
 
 ## Per repo (project-specific rules only)
 Copy the needed pieces into `<repo>/.github/` (merge with any existing `.github/`). Paths in the text point at `~/.copilot/...`; rewrite them to `.github/...` if the repo copy must be self-contained, and adjust the auto-approve regex accordingly.
@@ -14,20 +14,20 @@ No single global location is read by every Copilot IDE plugin.
 
 | Tool | User-level location |
 |---|---|
-| VS Code | Profile `prompts/` folder (macOS: `~/Library/Application Support/Code/User/prompts/`) for `*.instructions.md`, `*.prompt.md`, `*.agent.md`. Settings that accept any folder: `chat.instructionsFilesLocations`, `chat.promptFilesLocations`, `chat.agentFilesLocations`, `chat.agentSkillsLocations` |
+| VS Code | Profile `prompts/` folder (macOS: `~/Library/Application Support/Code/User/prompts/`) for `*.instructions.md`, `*.prompt.md`, `*.agent.md`. Settings that accept any folder: `chat.instructionsFilesLocations`, `chat.promptFilesLocations`, `chat.agentFilesLocations`. Skills need no setting: `~/.agents/skills/` is read by local sessions (`chat.agentSkillsLocations` is deprecated) |
 | JetBrains | `~/.config/github-copilot/intellij/global-copilot-instructions.md` or the Copilot settings UI. Instructions and prompts only |
-| Copilot CLI | `~/.copilot/` (instructions, agents, skills) |
+| Copilot CLI | `~/.copilot/` (instructions, agents) and `~/.agents/skills/` or `~/.copilot/skills/` (skills) |
 | Per repo (all IDEs) | `.github/copilot-instructions.md`, `AGENTS.md` |
 
 Recommended setup: keep one canonical dir, `~/.copilot/`, as a copy of `copilot/` contents.
-1. VS Code: point the four `chat.*FilesLocations` / `chat.agentSkillsLocations` settings at `~/.copilot/{instructions,prompts,agents,skills}`.
+1. VS Code: point the three `chat.*FilesLocations` settings at `~/.copilot/{instructions,prompts,agents}`. Install skills separately from `agents/` into `~/.agents/skills/`.
 2. JetBrains: symlink `global-copilot-instructions.md` to `~/.copilot/copilot-instructions.md`.
 3. Copy into a repo's `.github/` only for project-specific rules.
 
-The terminal auto-approve regex in `vscode-settings.snippet.json` matches `bash ~/.copilot/skills/...`; widen it for repo-relative `.github/skills/...` copies. **Windows (PowerShell 5.1+):** `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\install.ps1 [dest]` installs to `~\.copilot` with markdown rewritten to the `.ps1` commands and runners taken from `claude/skills`, and registers the shared user module `AgentCommon` (see `agents/INSTALL.md`); merge `vscode-settings.windows.snippet.json` instead of the Unix snippet. Installed docs use `$HOME/.copilot/...` (a bare `~` is not expanded for native `-File` arguments on 5.1) and `$env:VAR='x'; powershell ...` instead of `VAR=x bash ...`; the Windows snippet's auto-approve regex allows that `$env:` prefix. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
+The terminal auto-approve regex in `vscode-settings.snippet.json` matches `bash ~/.agents/skills/...`; widen it for repo-relative `.agents/skills/...` copies. **Windows (PowerShell 5.1+):** `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\install.ps1 [dest]` installs to `~\.copilot` with markdown rewritten to the `.ps1` commands and runners taken from `claude/skills`, and registers the shared user module `AgentCommon` (see `agents/INSTALL.md`); merge `vscode-settings.windows.snippet.json` instead of the Unix snippet. Installed docs use `$HOME/.copilot/...` (a bare `~` is not expanded for native `-File` arguments on 5.1) and `$env:VAR='x'; powershell ...` instead of `VAR=x bash ...`; the Windows snippet's auto-approve regex allows that `$env:` prefix. No `prompts/` directory is shipped (VS Code's `prompts/` folder is only for your own prompt files).
 
 ## Uninstall (rollback)
-Removes exactly the files copied into `~/.copilot` (instructions, skills, agents, memory), then empty directories; files you added are kept. `-DryRun` / `--dry-run` lists without deleting. Remove the merged `chat.tools.terminal.autoApprove` entries from VS Code `settings.json` by hand, and delete any `<repo>/.github/` copies you made.
+Removes exactly the files copied into `~/.copilot` (instructions, agents, memory), then empty directories (skills under `~/.agents` are removed by `agents/uninstall.*`); files you added are kept. `-DryRun` / `--dry-run` lists without deleting. Remove the merged `chat.tools.terminal.autoApprove` entries from VS Code `settings.json` by hand, and delete any `<repo>/.github/` copies you made.
 - Unix: `bash copilot/uninstall.sh [dest] [--dry-run]`
 - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File copilot\uninstall.ps1 [dest] [-DryRun]`
 

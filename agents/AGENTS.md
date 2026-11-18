@@ -27,6 +27,7 @@ run their scripts as `bash ~/.agents/skills/<name>/<script>.sh` (any of bash, zs
 | `flyway-check` | migration status (read-only) | `flyway-check.sh [db]` |
 | `guarded-fs` | rm/mv/cp confined to the working directory | `guarded-fs.sh rm\|mv\|cp ...` |
 | `pr-squash-sync` | sync, squash, push or open a PR | `sync-check.sh <default-branch>` |
+| `pull-sources` | fetch a library's `-sources.jar` (read sources, don't decompile) | `pull.sh <group:artifact:version>` |
 
 Skill logs are written to `<project>/.agents/logs/<skill>.log` (self-ignoring dir). Read them there; `/tmp` is outside the project.
 
