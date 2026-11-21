@@ -3,7 +3,7 @@ name: quick-triage
 description: Runs a test/build/flyway script or scans logs and returns a terse pass/fail digest plus a complexity verdict.
 tools: Read, Grep, Bash
 model: haiku
-autoCompactWindow: 110000
+autoCompactWindow: 120000
 omitClaudeMd: true
 ---
 

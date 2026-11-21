@@ -5,7 +5,7 @@ Covers: what drove cost in long Claude Code sessions (cost = turns x context siz
 ## Rules
 - Do not edit `CLAUDE.md`, settings or tool setup mid-session: it breaks the cached prefix and every later turn pays uncached.
 - Keep `CLAUDE.md` small (it is re-read every turn; trimming 22.8 KB to ~11.7 KB moved recipes to on-demand memory files). Put long rules, recipes and runbooks in notes read only when needed.
-- Context sat at 200-350k with autocompact ~350k: target a lower threshold (~150-200k). State the measured number before changing a threshold.
+- Models have a 1M window, so the percent override alone triggers at ~800k and never fires in practice. Pin `CLAUDE_CODE_AUTO_COMPACT_WINDOW=250000` with `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=80` (trigger ~200k; earlier logs showed compaction at 174-184k). State the measured number before changing a threshold.
 - One feature batch per session; `/clear` between batches (state lives in tracking and memory files).
 - Idle turns (Stop-hook replies, agent hand-backs, "still waiting") each re-read full context: commit locally as WIP so the hook passes, or avoid ending turns while agents run.
 - Filter command output before it reaches context; push bulky reads into subagents with narrow, self-contained prompts that return short summaries. Subagents over ~100k need split prompts.

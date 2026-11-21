@@ -3,7 +3,7 @@ name: stack-check
 description: Use when asked if a domain entity is fully wired — checks DTO, Entity, Mapper, ServiceImpl, JAX-RS Resource, and CDI producer registrations across core-api, data-ebean/data-hibernate, and mono-quarkus. Read-only.
 tools: Read, Grep, Glob, Bash
 model: haiku
-autoCompactWindow: 110000
+autoCompactWindow: 120000
 omitClaudeMd: true
 ---
 
