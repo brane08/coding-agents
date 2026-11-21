@@ -3,7 +3,7 @@ name: boilerplate-gen
 description: Use for generating boilerplate that follows an existing pattern exactly — DTOs, mappers, simple CRUD repository interfaces, Angular service/component stubs. Only when an existing example in the codebase fully determines the shape; never for design decisions.
 tools: Read, Grep, Glob, Write, Edit
 model: haiku
-autoCompactWindow: 110000
+autoCompactWindow: 120000
 omitClaudeMd: true
 permissionMode: acceptEdits
 ---

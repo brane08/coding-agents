@@ -97,3 +97,12 @@ future audits don't re-flag the same already-fixed gaps.
   stale subagent paths caused the outside-cwd prompts. No additionalDirectories change; rule added to `rules/conventions-detail.md` (worktrees under `<repo>/.claude/worktrees/`).
   The `git push` (52, main, mode auto), `git log @{u}` (12) and `find` group (12) prompts are not hook-driven (no hook emits ask with jq present); added `@{u}`/find-group avoidance to `agents/code-search.md`,
   no-`cd` line to flyway-next/stack-check/workflow-check agents.
+
+## 2026-11-21
+- Why no compaction in the 11-18 top-peak sessions: commit 65073b7 dropped `autoCompactWindow`, and models have a 1M window (docs), so the 80% override alone triggers at ~800k.
+  Peaks of 428-541k never reached it. Fix (user choice): `CLAUDE_CODE_AUTO_COMPACT_WINDOW=250000` in `~/.claude/settings.json` env, pct stays 80, trigger ~200k. Needs a new session. Not verified with `/context`.
+- Haiku subagent windows `autoCompactWindow` 110000 -> 120000 in all 9 `agents/*.md` (user choice). Global pct 80 applies (no per-agent pct key found), trigger ~96k: under the Haiku 5.5 100k price tier
+  (prompts over 100k cost 5x, cache reads count). Not measured: haiku subagent peak context (re-run `ctx.py`).
+- Cache-read price per MTok (pricing page): Sonnet 5 $0.20 -> 5.5 $0.10; Opus 5 $0.50 -> 5.5 $0.20; Fable 5 $1.00 -> 5.2 $0.20. Sonnet 5/Opus 5 already use the newer tokenizer, so no 30% penalty between 5 and 5.5.
+  Estimate, 400k session (100 turns, ~4k/turn, 5m writes, 1.5k output/turn, no subagents): Sonnet $6.46 -> $4.48, Opus $16.15 -> $8.96; compacting at ~200k trims Sonnet 5.5 to ~$3.85. Assumed, not measured.
+- Memory note `patterns/agent-context-cost.md` autocompact line corrected (was "~350k"). Merged branches `audit-2026-11-18-prompt-fixes`, `pull-sources-skill-agents-skills` deleted locally; remote heads were already auto-deleted (`git fetch --prune` cleared the stale refs; `push --delete` is hook-blocked).

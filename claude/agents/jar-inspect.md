@@ -3,7 +3,7 @@ name: jar-inspect
 description: Use to inspect a third-party library's API — find a class's method signatures, check what a method actually does, confirm a constructor/overload exists. Reads the `-sources.jar`; if none exists it stops and asks to pull sources (javap only when told "javap ok"). Read-only, no edits.
 tools: Read, Grep, Glob, Bash
 model: haiku
-autoCompactWindow: 110000
+autoCompactWindow: 120000
 omitClaudeMd: true
 ---
 
