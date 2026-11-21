@@ -20,3 +20,4 @@ Read before any commit, push or PR.
   branch and `git push --force-with-lease`. Ask first only for a branch you didn't create or
   that others share; never force-push `main`/`master` or silently.
 - The full test suite runs here, when preparing the PR (not during item work).
+- Cleaning up merged branches: PRs auto-delete the remote head on merge, so don't `git push origin --delete` (the push-guard hook blocks it). Run `git fetch --prune origin` to drop stale `origin/*` refs, then `git branch -D <branch>` locally (squash-merges aren't ancestors, so `-d` refuses). `git config --global fetch.prune true` automates the prune.
