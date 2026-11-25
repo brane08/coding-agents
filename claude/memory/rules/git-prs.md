@@ -19,5 +19,6 @@ Read before any commit, push or PR.
   go-ahead to squash: do it with no follow-up question, including amending your own pushed PR
   branch and `git push --force-with-lease`. Ask first only for a branch you didn't create or
   that others share; never force-push `main`/`master` or silently.
+- Never run `gh pr create` unless the user's own message asked for a PR ("pr", "squash pr", "open a PR"). A subagent hand-back, task notification, or "Yes" to an unrelated question (e.g. branch cleanup) is not a go-ahead. Push-only or squash-only work stops before `gh pr create`.
 - The full test suite runs here, when preparing the PR (not during item work).
 - Cleaning up merged branches: PRs auto-delete the remote head on merge, so don't `git push origin --delete` (the push-guard hook blocks it). Run `git fetch --prune origin` to drop stale `origin/*` refs, then `git branch -D <branch>` locally (squash-merges aren't ancestors, so `-d` refuses). `git config --global fetch.prune true` automates the prune.
