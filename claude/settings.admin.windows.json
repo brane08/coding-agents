@@ -57,7 +57,8 @@
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-5-5",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5-5",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "250000"
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
